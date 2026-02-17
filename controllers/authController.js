@@ -78,6 +78,8 @@ const logout = (req, res) => {
       console.error(err);
       return res.redirect('/dashboard');
     }
+    res.clearCookie('connect.sid');
+    req.flash('success', 'You have been logged out successfully.');
     res.redirect('/login');
   });
 };
