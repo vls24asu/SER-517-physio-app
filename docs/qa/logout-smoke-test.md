@@ -1,9 +1,9 @@
 # Manual QA: Logout Smoke Test
 
-**User Story:** #32 Logout  
-**Branch:** U.S.-32-logout  
-**Tester:** Saud Alsaif  
-**Date:** 2026-02-17  
+**User Story:** #32 Logout
+**Branch:** U.S.-32-logout
+**Tester:** Saud Alsaif
+**Date:** 2026-02-17
 
 ---
 
@@ -33,11 +33,17 @@
 
 ### TC-04: Logout redirects to login page with success message
 - **Steps:** Click Logout
-- **Expected:** Redirected to `/login?loggedOut=1` with green ba- **Expected:** Redirected tot s- **Expected:** Redirected  P- **Expected:** Redirected ro- **Expected:** Re logout redirects to login
-- **S- ps:** Log out → man- **S- ps:** Log out → man- **S**Expe- **S- ps:** Log out → man- **S- ps:** Lmess- **S- ps:** Log oin - rst- **S- ps:**:** PASS
+- **Expected:** Redirected to `/login?loggedOut=1` with green banner "You have been logged out successfully."
+- **Result:** PASS
+
+### TC-05: Accessing protected route after logout redirects to login
+- **Steps:** Log out → manually navigate to `/dashboard`
+- **Expected:** Redirected to `/login` with flash message "You must log in first"
+- **Result:** PASS
 
 ### TC-06: Logout button is not visible when logged out
-- **Steps:** Visit `/login` without a- **Steps:** Visit `/login` without a- **Steps:** Visit `/login` without a- **Steps:n
+- **Steps:** Visit `/login` without a session
+- **Expected:** Navbar shows Login and Register links only, no user dropdown
 - **Result:** PASS
 
 ---
