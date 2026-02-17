@@ -34,7 +34,8 @@ const postRegister = async (req, res) => {
 };
 
 const getLogin = (req, res) => {
-  res.render('auth/login', { errors: [] });
+  const loggedOut = req.query.loggedOut === '1';
+  res.render('auth/login', { errors: [], loggedOut });
 };
 
 const postLogin = async (req, res) => {
@@ -79,8 +80,7 @@ const logout = (req, res) => {
       return res.redirect('/dashboard');
     }
     res.clearCookie('connect.sid');
-    req.flash('success', 'You have been logged out successfully.');
-    res.redirect('/login');
+    res.redirect('/login?loggedOut=1');
   });
 };
 

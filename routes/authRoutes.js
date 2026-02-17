@@ -13,6 +13,6 @@ router.get('/login', authController.getLogin);
 router.post('/login', validateLogin, authController.postLogin);
 
 // Logout
-router.get('/logout', isAuthenticated, authController.logout);
+router.post('/logout', isAuthenticated, authController.logout);
 
 module.exports = router;
