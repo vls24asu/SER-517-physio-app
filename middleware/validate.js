@@ -1,19 +1,13 @@
 const { body, validationResult } = require('express-validator');
 
 const validateRegistration = [
-  body('username').trim().notEmpty().withMessage('Username is required'),
+  body('fullName').trim().notEmpty().withMessage('Full name is required'),
   body('email').trim().isEmail().withMessage('Valid email is required'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('confirmPassword').custom((value, { req }) => {
-    if (value !== req.body.password) {
-      throw new Error('Passwords do not match');
-    }
-    return true;
-  })
+  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
 ];
 
 const validateLogin = [
-  body('username').trim().notEmpty().withMessage('Username is required'),
+  body('email').trim().isEmail().withMessage('Valid email is required'),
   body('password').notEmpty().withMessage('Password is required')
 ];
 

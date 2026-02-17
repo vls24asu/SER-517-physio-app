@@ -30,7 +30,7 @@ CREATE TABLE `Exercise` (
 
 CREATE TABLE `User` (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(45) UNIQUE NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     role ENUM('patient', 'physio') NOT NULL DEFAULT 'patient',
