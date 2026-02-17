@@ -13,13 +13,6 @@
     <h2 class="fw-bold mb-1">Welcome back</h2>
     <p class="text-muted mb-3">Log in to continue</p>
 
-    <% if (loggedOut) { %>
-      <div class="alert alert-success alert-dismissible fade show" role="alert">
-        You have been logged out successfully.
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-      </div>
-    <% } %>
-
     <% if (errors && errors.length > 0) { %>
       <div class="alert alert-danger">
         <% errors.forEach(err => { %>
