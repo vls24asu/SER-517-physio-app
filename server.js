@@ -7,8 +7,15 @@ const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
 const sessionConfig = require('./config/session');
 const routes = require('./routes');
+const db = require('./config/db');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
+if (!process.env.SESSION_SECRET) {
+  console.error('Missing SESSION_SECRET in .env. Copy .env.example to .env and set all values.');
+  process.exit(1);
+}
 
 // Parse form data and JSON
 app.use(express.urlencoded({ extended: true }));
@@ -47,8 +54,18 @@ app.get('/', (req, res) => {
   res.redirect('/login');
 });
 
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+// Start server after confirming DB connectivity
+const start = async () => {
+  try {
+    await db.query('SELECT 1');
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error('Database connection failed. Check DB_* values in .env and ensure MySQL is running.');
+    console.error(err.message);
+    process.exit(1);
+  }
+};
+
+start();
