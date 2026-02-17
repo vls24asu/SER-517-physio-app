@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 // Mount sub-routers here as they are built:
-// const authRoutes = require('./authRoutes');
+const authRoutes = require('./authRoutes');
 // const dashboardRoutes = require('./dashboardRoutes');
 // const exerciseRoutes = require('./exerciseRoutes');
 // const routineRoutes = require('./routineRoutes');
@@ -10,7 +10,7 @@ const router = express.Router();
 // const profileRoutes = require('./profileRoutes');
 // const physioRoutes = require('./physioRoutes');
 
-// router.use('/', authRoutes);
+router.use('/', authRoutes);
 // router.use('/dashboard', dashboardRoutes);
 // router.use('/exercises', exerciseRoutes);
 // router.use('/routines', routineRoutes);
