@@ -21,7 +21,7 @@ CREATE TABLE `Exercise` (
     equipment_needed TEXT NULL,
     skill_level ENUM('Beginner', 'Intermediate', 'Advanced') NULL,
     tempo VARCHAR(100) NULL,
-    sets INT NULL,
+    `sets` INT NULL,
     reps VARCHAR(45) NULL,
     hold_time_sec INT NULL,
     rest_time_sec INT NULL,
