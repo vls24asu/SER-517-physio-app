@@ -1,0 +1,49 @@
+<div class="dashboard-container">
+  <div class="greeting-section mb-4">
+    <h1 class="greeting-text"><%= greeting %>, <%= user.fullName %></h1>
+    <p class="greeting-subtitle">What do you want to do today?</p>
+  </div>
+
+  <div class="start-session-btn-wrapper mb-4">
+    <a href="/routines" class="btn btn-start-session">
+      Start a session
+    </a>
+  </div>
+
+  <div class="activity-cards">
+    <div class="activity-card">
+      <div class="activity-icon">💪</div>
+      <div class="activity-content">
+        <h3 class="activity-title">Build strength</h3>
+        <p class="activity-description">Controlled strength work that respects your limits.</p>
+      </div>
+    </div>
+
+    <div class="activity-card">
+      <div class="activity-icon">⚡</div>
+      <div class="activity-content">
+        <h3 class="activity-title">Work around pain</h3>
+        <p class="activity-description">Exercises designed to help you move better despite discomfort.</p>
+      </div>
+    </div>
+
+    <div class="activity-card">
+      <div class="activity-icon">🏃</div>
+      <div class="activity-content">
+        <h3 class="activity-title">Improve mobility</h3>
+        <p class="activity-description">Gentle stretches and movements to increase your range of motion.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-summary-card">
+    <div class="progress-content">
+      <p class="progress-text">
+        This week: <strong><%= stats.sessionsThisWeek %> sessions</strong> • <strong><%= stats.minutesThisWeek %> minutes</strong>
+      </p>
+    </div>
+    <a href="/progress" class="progress-link">See progress →</a>
+  </div>
+</div>
+
+<%- include('../partials/bottomNav') %>
