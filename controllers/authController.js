@@ -73,6 +73,11 @@ const postLogin = async (req, res) => {
 };
 
 const logout = (req, res) => {
+  // Set no-cache headers before destroying session
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  
   req.flash('success', 'You have been logged out successfully.');
   req.session.destroy((err) => {
     if (err) {
@@ -80,8 +85,21 @@ const logout = (req, res) => {
       return res.redirect('/dashboard');
     }
     res.clearCookie('connect.sid');
+    // Redirect with no-cache headers and replace history
     res.redirect('/login');
   });
 };
 
-module.exports = { getRegister, postRegister, getLogin, postLogin, logout };
+const sessionStatus = (req, res) => {
+  // Explicitly prevent caching of this check.
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+
+  if (req.session.user && req.session.user.id) {
+    return res.status(200).json({ authenticated: true });
+  }
+  return res.status(401).json({ authenticated: false });
+};
+
+module.exports = { getRegister, postRegister, getLogin, postLogin, logout, sessionStatus };
