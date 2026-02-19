@@ -33,7 +33,10 @@ const postRegister = async (req, res) => {
   }
 };
 
-const getLogin = (_req, res) => {
+const getLogin = (req, res) => {
+  if (req.query.loggedOut === '1') {
+    req.flash('success', 'You have been logged out successfully.');
+  }
   res.render('auth/login', { errors: [] });
 };
 
@@ -77,16 +80,15 @@ const logout = (req, res) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
-  
-  req.flash('success', 'You have been logged out successfully.');
+
   req.session.destroy((err) => {
     if (err) {
       console.error(err);
       return res.redirect('/dashboard');
     }
     res.clearCookie('connect.sid');
-    // Redirect with no-cache headers and replace history
-    res.redirect('/login');
+    // Use query param since flash is lost with session destroy
+    res.redirect('/login?loggedOut=1');
   });
 };
 
