@@ -1,165 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PhysioApp</title>
+<div class="row justify-content-center flex-grow-1">
+  <div class="col-md-5 col-lg-4 d-flex flex-column align-items-center text-center">
 
-  <style>
-    :root{
-      --pageBg: #F4EFE6;
-      --cardBg: #EFE7DC;
-      --text: #3A3A3A;
-      --muted: #7A746A;
-      --btn: #E2B24A;
-    }
-
-    *{
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;
-    }
-
-    body{
-      min-height: 100vh;
-      background: var(--pageBg);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 28px;
-    }
-
-    .card{
-      width: min(420px, 92vw);
-      height: min(900px, 92vh);
-      background: var(--cardBg);
-      border-radius: 36px;
-      padding: 40px 28px 30px;
-      display:flex;
-      flex-direction:column;
-      justify-content: space-between;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.08);
-    }
-
-    /* 🔹 Bigger Logo */
-    .logoRow{
-      display:flex;
-      align-items:center;
-    }
-
-    .logoRow img{
-      width: 90px;
-      height: 90px;
-      object-fit: contain;
-    }
-
-    /* 🔹 Slightly smaller + cleaner tagline */
-    .tagline{
-      margin-top: 20px;
-      font-size: 34px;
-      line-height: 1.15;
-      font-weight: 800;
-      color: var(--text);
-    }
-
-    /* 🔹 Move image slightly upward */
-    .hero{
-      flex: 1;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin-top: -10px;  /* moves image upward */
-    }
-
-    .hero img{
-      width: 100%;
-      height: auto;
-      max-height: 420px;
-      border-radius: 28px;
-      object-fit: cover;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.10);
-    }
-
-    .bottom{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap: 14px;
-      margin-top: -10px;
-    }
-
-    .btn{
-      width: 100%;
-      height: 60px;
-      border-radius: 999px;
-      background: var(--btn);
-      font-weight: 800;
-      font-size: 19px;
-      color:#2A2417;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-decoration:none;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-      transition: 0.25s ease;
-    }
-
-    .btn:hover{
-      transform: translateY(-2px);
-      box-shadow: 0 18px 35px rgba(0,0,0,0.18);
-    }
-
-    .loginLink{
-      font-size: 15px;
-      color: var(--muted);
-      text-decoration:none;
-      font-weight: 600;
-    }
-
-    .loginLink:hover{
-      text-decoration: underline;
-    }
-
-    @media (max-width:420px){
-      .tagline{
-        font-size: 28px;
-      }
-
-      .logoRow img{
-        width: 60px;
-        height: 60px;
-      }
-    }
-
-  </style>
-</head>
-
-<body>
-  <main class="card">
-
-    <!-- Bigger Logo -->
-    <div class="logoRow">
-      <img src="/images/logo.png" alt="PhysioApp Logo">
+    <!-- Logo -->
+    <div class="mt-4 mb-4">
+      <img src="/images/logo.png" alt="PhysioApp Logo" class="landing-logo">
     </div>
 
-    <!-- Adjusted Tagline -->
-    <div class="tagline">
-      Built for<br>
-      bodies that<br>
-      don’t quit
+    <!-- Tagline -->
+    <h1 class="fw-bold mb-1">Built for bodies that don't quit</h1>
+    <p class="text-muted mb-4">Your personal physiotherapy companion</p>
+
+    <!-- Hero Image -->
+    <div class="mb-4 w-100">
+      <img src="/images/Homepage.jpg" alt="Physio Graphic" class="landing-hero">
     </div>
 
-    <!-- Moved Upward -->
-    <div class="hero">
-      <img src="/images/Homepage.jpg" alt="Physio Graphic">
-    </div>
+    <!-- Spacer -->
+    <div class="flex-grow-1"></div>
 
-    <div class="bottom">
-      <a class="btn" href="/register">Get Started</a>
-      <a class="loginLink" href="/login">I already have an account</a>
-    </div>
+    <!-- Get Started -->
+    <a href="/register" class="btn w-100 fw-semibold py-2 rounded-pill mb-2" style="background-color: #F5A623; color: #000;">
+      Get Started
+    </a>
 
-  </main>
-</body>
-</html>
+    <p class="mt-2 mb-4">
+      <a href="/login" class="text-warning text-decoration-none">I already have an account</a>
+    </p>
+
+  </div>
+</div>
