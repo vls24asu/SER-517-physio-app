@@ -8,13 +8,13 @@ body {
 
 main {
   flex: 1;
-  padding-bottom: 80px;
 }
 
 .dashboard-container {
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
+  padding-bottom: 100px;
 }
 
 .greeting-section {
@@ -401,12 +401,28 @@ main {
   text-decoration: none;
 }
 
+/* Landing Page */
+.landing-logo {
+  max-width: 150px;
+  height: auto;
+}
+
+.landing-hero {
+  width: 100%;
+  height: auto;
+  max-height: 350px;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .dashboard-container,
   .profile-container,
   .profile-edit-container {
     padding: 16px;
+    padding-bottom: 100px;
   }
 
   .greeting-text {

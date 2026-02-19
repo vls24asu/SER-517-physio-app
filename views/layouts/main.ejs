@@ -17,7 +17,7 @@
     <%- body %>
   </main>
 
-  <% if (currentPath !== '/dashboard' && currentPath !== '/profile' && !currentPath.startsWith('/profile/')) { %>
+  <% if (currentPath !== '/' && currentPath !== '/login' && currentPath !== '/register' && currentPath !== '/dashboard' && currentPath !== '/profile' && !currentPath.startsWith('/profile/')) { %>
     <%- include('../partials/footer') %>
   <% } %>
 

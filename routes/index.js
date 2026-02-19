@@ -3,7 +3,7 @@ const router = express.Router();
 
 // Landing Page Route
 router.get('/', (req, res) => {
-    res.render('landing',{layout: false});
+    res.render('landing');
 });
 
 // Mount sub-routers here as they are built:
