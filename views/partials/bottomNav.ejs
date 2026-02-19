@@ -1,0 +1,20 @@
+<% if (currentUser) { %>
+<nav class="bottom-nav">
+  <a href="/dashboard" class="nav-item <%= currentPath === '/dashboard' ? 'active' : '' %>">
+    <i class="bi bi-house<%= currentPath === '/dashboard' ? '-fill' : '' %>"></i>
+    <span>Today</span>
+  </a>
+  <a href="/library" class="nav-item <%= currentPath === '/library' ? 'active' : '' %>">
+    <i class="bi bi-book<%= currentPath === '/library' ? '-fill' : '' %>"></i>
+    <span>Library</span>
+  </a>
+  <a href="/progress" class="nav-item <%= currentPath === '/progress' ? 'active' : '' %>">
+    <i class="bi bi-bar-chart<%= currentPath === '/progress' ? '-fill' : '' %>"></i>
+    <span>Progress</span>
+  </a>
+  <a href="/profile" class="nav-item <%= currentPath === '/profile' ? 'active' : '' %>">
+    <i class="bi bi-person<%= currentPath === '/profile' ? '-fill' : '' %>"></i>
+    <span>Profile</span>
+  </a>
+</nav>
+<% } %>
