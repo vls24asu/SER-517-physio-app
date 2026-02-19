@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
+// Landing Page Route
+router.get('/', (req, res) => {
+    res.render('landing',{layout: false});
+});
+
 // Mount sub-routers here as they are built:
 const authRoutes = require('./authRoutes');
 // const dashboardRoutes = require('./dashboardRoutes');
