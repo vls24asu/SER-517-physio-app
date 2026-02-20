@@ -1,10 +1,11 @@
 class UserDTO {
-  constructor({ id, fullName, email, role, twofaEnabled }) {
+  constructor({ id, fullName, email, role, twofaEnabled, twofaSecret }) {
     this.id = id;
     this.fullName = fullName;
     this.email = email;
     this.role = role;
     this.twofaEnabled = twofaEnabled;
+    this.twofaSecret = twofaSecret;
   }
 }
 

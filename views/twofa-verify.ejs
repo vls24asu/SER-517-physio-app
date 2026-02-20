@@ -1,40 +1,40 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Verify Two‑Factor Authentication</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-  <link rel="stylesheet" href="/css/verify2fa.css">
-</head>
-<body>
-  <div class="overlay">
-    <form class="form-card animate__animated animate__fadeInDown" action="/twofa/verify" method="POST">
-      <h1>Enter Two‑Factor Code</h1>
+<div class="row justify-content-center flex-grow-1">
+  <div class="col-md-5 col-lg-4 d-flex flex-column align-items-center text-center">
 
-      <% if (typeof error !== 'undefined' && error) { %>
-        <div class="error-msg"><%= error %></div>
-      <% } %>
+    <h2 class="fw-bold mb-1 mt-4">Enter Two-Factor Code</h2>
+    <p class="text-muted mb-4">Open your authenticator app and enter the 6-digit code</p>
 
-      <label for="token" class="sr-only">6‑digit code</label>
-      <input
-        type="text"
-        id="token"
-        name="token"
-        class="form-control"
-        placeholder="123456"
-        pattern="[0-9]{6}"
-        maxlength="6"
-        inputmode="numeric"
-        required
-        autofocus
-      >
+    <% if (typeof error !== 'undefined' && error) { %>
+      <div class="alert alert-danger w-100"><%= error %></div>
+    <% } %>
 
-      <button type="submit">Verify</button>
+    <form action="/twofa/verify" method="POST" class="w-100 d-flex flex-column flex-grow-1">
+      <div class="mb-3 text-start">
+        <label for="token" class="form-label">6-digit code</label>
+        <input
+          type="text"
+          id="token"
+          name="token"
+          class="form-control"
+          placeholder="123456"
+          pattern="[0-9]{6}"
+          maxlength="6"
+          inputmode="numeric"
+          required
+          autofocus
+        >
+      </div>
 
+      <div class="flex-grow-1"></div>
+
+      <button type="submit" class="btn w-100 fw-semibold py-2 rounded-pill mb-2" style="background-color: #F5A623; color: #000;">
+        Verify
+      </button>
+
+      <p class="text-center mt-2 mb-4">
+        <a href="/login" class="text-warning text-decoration-none">Back to login</a>
+      </p>
     </form>
+
   </div>
-</body>
-</html>
+</div>
