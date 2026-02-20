@@ -37,7 +37,7 @@ class UserDAO {
         email: row.email,
         role: row.role,
         twofaEnabled: row.twofa_enabled,
-        twofaSwcret: row.twofa_secret
+        twofaSecret: row.twofa_secret
       });
     } finally {
       conn.release();
