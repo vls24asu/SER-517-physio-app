@@ -1,7 +1,5 @@
 /**
  * routes/userRoutes.js
- * routes for login view, regsiter view, 
- * @author Luke Johnson,El Mehdi Chaouni Ben Abdellah
  */
 
 const express       = require('express'); //import express module
