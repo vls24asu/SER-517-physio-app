@@ -1,6 +1,7 @@
 const speakeasy = require('speakeasy');
 const qrcode    = require('qrcode');
-const userModel = require('../models/userModel');
+const UserDAO   = require('../dao/UserDAO');
+const userDAO   = new UserDAO();
 
 /**
  * GET /twofa/setup
@@ -37,7 +38,7 @@ exports.postTwofaSetup = async (req, res) => {
   });
 
   if (verified) {
-    await userModel.enableTwoFactor(userId, secret);
+    await userDAO.updateTwoFaSecret(userId, secret);
     delete req.session.twofa_temp_secret;
     return res.redirect('/dashboard');
   }
@@ -62,7 +63,7 @@ exports.getTwofaVerify = (req, res) => {
   if (!req.session.temp_twofa_user) {
     return res.redirect('/login');
   }
-  res.render('twofa-verify');
+  res.render('twofa-verify', { error: null });
 };
 
 /**
@@ -73,9 +74,9 @@ exports.postTwofaVerify = async (req, res) => {
   const userId = req.session.temp_twofa_user.id;
   const token  = req.body.token;
 
-  const user = await userModel.getUserById(userId);
+  const user = await userDAO.findById(userId);
   const verified = speakeasy.totp.verify({
-    secret: user.twofa_secret,
+    secret: user.twofaSecret,
     encoding: 'base32',
     token,
     window: 1
@@ -86,7 +87,7 @@ exports.postTwofaVerify = async (req, res) => {
   }
 
   delete req.session.temp_twofa_user;
-  req.session.user = { id: user.id, username: user.username };
+  req.session.user = { id: user.id, fullName: user.fullName, email: user.email, role: user.role };
   res.redirect('/dashboard');
 };
 
@@ -95,7 +96,7 @@ exports.postTwofaVerify = async (req, res) => {
  * Disable two-factor authentication and redirect to dashboard
  */
 exports.disableTwofa = async (req, res) => {
-  await userModel.disableTwoFactor(req.user.id);
-  delete req.session.user.twofa_enabled; 
+  await userDAO.clearTwoFaSecret(req.session.user.id);
+  delete req.session.user.twofaEnabled;
   res.redirect('/dashboard');
 };

@@ -14,7 +14,8 @@ const getProfile = async (req, res) => {
       user: {
         id: user.id,
         fullName: user.fullName,
-        email: user.email
+        email: user.email,
+        twofaEnabled: user.twofaEnabled
       },
       stats
     });

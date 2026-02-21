@@ -14,11 +14,10 @@ const dashboardRoutes = require('./dashboardRoutes');
 // const favouritesRoutes = require('./favouritesRoutes');
 const profileRoutes = require('./profileRoutes');
 // const physioRoutes = require('./physioRoutes');
-const userRoutes = require("./userRoutes");       // your big file
-// or split further: const authRoutes = require("./authRoutes");
-router.use('/', authRoutes);
+const userRoutes = require('./userRoutes');
 
-router.use("/", userRoutes);
+router.use('/', authRoutes);
+router.use('/', userRoutes);
 
 router.use('/dashboard', dashboardRoutes);
 // router.use('/exercises', exerciseRoutes);
