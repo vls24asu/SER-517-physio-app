@@ -16,6 +16,7 @@ const profileRoutes = require('./profileRoutes');
 // const physioRoutes = require('./physioRoutes');
 const userRoutes = require('./userRoutes');
 const settingsRoutes = require('./settingsRoutes');
+const achievementsRoutes = require('./achievementsRoutes');
 
 router.use('/', authRoutes);
 router.use('/', userRoutes);
@@ -26,6 +27,7 @@ router.use('/dashboard', dashboardRoutes);
 // router.use('/favourites', favouritesRoutes);
 router.use('/profile', profileRoutes);
 router.use('/settings', settingsRoutes);
+router.use('/achievements', achievementsRoutes);
 // router.use('/physio', physioRoutes);
 
 module.exports = router;

@@ -648,12 +648,191 @@ main {
   margin: 0;
 }
 
+/* =============================================
+   Achievements Styles
+   ============================================= */
+
+.achievements-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  padding-bottom: 100px;
+}
+
+.achievements-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.achievements-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+.achievements-unlocked {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 20px;
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.achievement-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 16px 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.achievement-card--locked {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+
+.achievement-emoji {
+  font-size: 2.8rem;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.achievement-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 6px;
+}
+
+.achievement-desc {
+  font-size: 0.78rem;
+  color: #777;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* =============================================
+   Workout History Styles
+   ============================================= */
+
+.history-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  padding-bottom: 100px;
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.history-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.history-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid rgba(0,0,0,0.04);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.history-card-content {
+  flex: 1;
+}
+
+.history-card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 4px;
+}
+
+.history-card-meta {
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.history-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.history-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #e0f0ff;
+  color: #2980b9;
+}
+
+.history-tag--yellow {
+  background: #FFF3CC;
+  color: #c48a00;
+}
+
+.history-tag--green {
+  background: #e0f5ec;
+  color: #1e8449;
+}
+
+.history-card-date {
+  font-size: 0.78rem;
+  color: #aaa;
+  font-weight: 500;
+}
+
+.history-card-emoji {
+  font-size: 2rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.history-empty {
+  text-align: center;
+  color: #aaa;
+  padding: 60px 20px;
+  font-size: 0.95rem;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .dashboard-container,
   .profile-container,
   .profile-edit-container,
-  .settings-container {
+  .settings-container,
+  .achievements-container,
+  .history-container {
     padding: 16px;
     padding-bottom: 100px;
   }
