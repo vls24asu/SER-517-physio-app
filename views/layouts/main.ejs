@@ -12,12 +12,12 @@
 
   <%- include('../partials/navbar') %>
 
-  <main class="<%= (currentPath === '/dashboard' || currentPath === '/profile' || currentPath.startsWith('/profile/')) ? '' : 'container' %> py-4 d-flex flex-column flex-grow-1">
+  <main class="<%= (currentPath === '/dashboard' || currentPath === '/profile' || currentPath.startsWith('/profile/') || currentPath.startsWith('/settings')) ? '' : 'container' %> py-4 d-flex flex-column flex-grow-1">
     <%- include('../partials/flash') %>
     <%- body %>
   </main>
 
-  <% if (currentPath !== '/' && currentPath !== '/login' && currentPath !== '/register' && !currentPath.startsWith('/twofa') && currentPath !== '/dashboard' && currentPath !== '/profile' && !currentPath.startsWith('/profile/')) { %>
+  <% if (currentPath !== '/' && currentPath !== '/login' && currentPath !== '/register' && !currentPath.startsWith('/twofa') && currentPath !== '/dashboard' && currentPath !== '/profile' && !currentPath.startsWith('/profile/') && !currentPath.startsWith('/settings')) { %>
     <%- include('../partials/footer') %>
   <% } %>
 
