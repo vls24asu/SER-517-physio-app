@@ -1,0 +1,70 @@
+<div class="settings-container">
+  <div class="settings-header">
+    <a href="/settings" class="back-btn">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="settings-title">Personal Information</h1>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <form action="/settings/personal-info" method="POST">
+    <div class="settings-form-card">
+
+      <div class="settings-field">
+        <label class="settings-label" for="fullName">Full name</label>
+        <input
+          type="text"
+          id="fullName"
+          name="fullName"
+          class="settings-input"
+          value="<%= user.fullName %>"
+          placeholder="Your full name"
+          required
+        >
+      </div>
+
+      <div class="settings-field">
+        <label class="settings-label" for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          class="settings-input"
+          value="<%= user.email %>"
+          placeholder="your@email.com"
+          required
+        >
+      </div>
+
+      <div class="settings-field">
+        <label class="settings-label" for="age">Age</label>
+        <input
+          type="number"
+          id="age"
+          name="age"
+          class="settings-input"
+          value="<%= profile && profile.age ? profile.age : '' %>"
+          placeholder="e.g. 28"
+          min="1"
+          max="120"
+        >
+      </div>
+
+      <div class="settings-field settings-field--last">
+        <label class="settings-label" for="gender">Gender</label>
+        <select id="gender" name="gender" class="settings-input settings-select">
+          <option value="">Prefer not to say</option>
+          <option value="male" <%= profile && profile.gender === 'male' ? 'selected' : '' %>>Male</option>
+          <option value="female" <%= profile && profile.gender === 'female' ? 'selected' : '' %>>Female</option>
+          <option value="non-binary" <%= profile && profile.gender === 'non-binary' ? 'selected' : '' %>>Non-binary</option>
+          <option value="prefer_not_to_say" <%= profile && profile.gender === 'prefer_not_to_say' ? 'selected' : '' %>>Prefer not to say</option>
+        </select>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-settings-save">Save changes</button>
+  </form>
+</div>
+
+<%- include('../partials/bottomNav') %>

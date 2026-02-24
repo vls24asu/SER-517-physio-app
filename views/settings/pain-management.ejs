@@ -1,0 +1,32 @@
+<div class="settings-container">
+  <div class="settings-header">
+    <a href="/settings" class="back-btn">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="settings-title">Pain management</h1>
+  </div>
+
+  <%- include('../partials/flash') %>
+
+  <form action="/settings/pain-management" method="POST">
+    <div class="settings-form-card">
+
+      <p class="settings-help-text">Select your current pain or injury areas. This helps us suggest safer exercises.</p>
+
+      <div class="settings-field settings-field--last">
+        <label class="settings-label" for="painAreas">Pain areas</label>
+        <textarea
+          id="painAreas"
+          name="painAreas"
+          class="settings-input settings-textarea"
+          placeholder="e.g. Lower back, left knee, right shoulder..."
+          rows="4"
+        ><%= profile && profile.pain_areas ? profile.pain_areas : '' %></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-settings-save">Save changes</button>
+  </form>
+</div>
+
+<%- include('../partials/bottomNav') %>
