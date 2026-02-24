@@ -10,8 +10,6 @@
 </head>
 <body>
 
-  <%- include('../partials/navbar') %>
-
   <% const fullWidthPage = currentPath === '/dashboard' || currentPath === '/profile' || currentPath.startsWith('/profile/') || currentPath.startsWith('/settings') || currentPath.startsWith('/achievements') || currentPath.startsWith('/workout-history'); %>
   <main class="<%= fullWidthPage ? '' : 'container' %> py-4 d-flex flex-column flex-grow-1">
     <%- include('../partials/flash') %>
