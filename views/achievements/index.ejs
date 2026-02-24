@@ -1,0 +1,22 @@
+<div class="achievements-container">
+  <div class="achievements-header">
+    <a href="/profile" class="back-btn">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="achievements-title">Achievements</h1>
+  </div>
+
+  <p class="achievements-unlocked">Unlocked (<%= unlocked %>)</p>
+
+  <div class="achievements-grid">
+    <% achievements.forEach(a => { %>
+      <div class="achievement-card <%= a.earned ? '' : 'achievement-card--locked' %>">
+        <div class="achievement-emoji"><%= a.emoji %></div>
+        <p class="achievement-name"><%= a.name %></p>
+        <p class="achievement-desc"><%= a.description %></p>
+      </div>
+    <% }) %>
+  </div>
+</div>
+
+<%- include('../partials/bottomNav') %>

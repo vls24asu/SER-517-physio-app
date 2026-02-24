@@ -80,10 +80,16 @@ CREATE TABLE `Routine_Entry` (
 CREATE TABLE `User_Profile` (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL UNIQUE,
+    age INT NULL,
+    gender ENUM('male', 'female', 'non-binary', 'prefer_not_to_say') NULL,
+    height_cm DECIMAL(5,1) NULL,
+    weight_kg DECIMAL(5,1) NULL,
     fitness_level ENUM('beginner', 'intermediate', 'advanced') NULL DEFAULT 'beginner',
     exercise_preference ENUM('stretch', 'strengthen', 'both') NULL DEFAULT 'both',
     available_equipment TEXT NULL,
     goals TEXT NULL,
+    workout_duration_min INT NULL DEFAULT 30,
+    pain_areas TEXT NULL,
     notes TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -150,6 +156,18 @@ CREATE TABLE `Plan_Completion_Log` (
     notes TEXT NULL,
     FOREIGN KEY (plan_item_id) REFERENCES Exercise_Plan_Item(id) ON DELETE CASCADE,
     FOREIGN KEY (patient_id) REFERENCES User(id) ON DELETE CASCADE
+);
+
+CREATE TABLE `Workout_Session` (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    duration_min INT NOT NULL DEFAULT 0,
+    exercise_count INT NOT NULL DEFAULT 0,
+    tags VARCHAR(255) NULL,
+    emoji VARCHAR(10) NULL DEFAULT '🏋️',
+    session_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
 );
 
 -- =============================================

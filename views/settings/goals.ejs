@@ -1,0 +1,60 @@
+<div class="settings-container">
+  <div class="settings-header">
+    <a href="/settings" class="back-btn">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="settings-title">Goals &amp; preferences</h1>
+  </div>
+
+  <form action="/settings/goals" method="POST">
+    <div class="settings-form-card">
+
+      <div class="settings-field">
+        <label class="settings-label" for="fitnessLevel">Fitness level</label>
+        <select id="fitnessLevel" name="fitnessLevel" class="settings-input settings-select">
+          <option value="beginner" <%= profile && profile.fitness_level === 'beginner' ? 'selected' : '' %>>Beginner</option>
+          <option value="intermediate" <%= profile && profile.fitness_level === 'intermediate' ? 'selected' : '' %>>Intermediate</option>
+          <option value="advanced" <%= profile && profile.fitness_level === 'advanced' ? 'selected' : '' %>>Advanced</option>
+        </select>
+      </div>
+
+      <div class="settings-field">
+        <label class="settings-label" for="exercisePreference">Exercise type</label>
+        <select id="exercisePreference" name="exercisePreference" class="settings-input settings-select">
+          <option value="both" <%= profile && profile.exercise_preference === 'both' ? 'selected' : '' %>>Both</option>
+          <option value="stretch" <%= profile && profile.exercise_preference === 'stretch' ? 'selected' : '' %>>Stretching</option>
+          <option value="strengthen" <%= profile && profile.exercise_preference === 'strengthen' ? 'selected' : '' %>>Strengthening</option>
+        </select>
+      </div>
+
+      <div class="settings-field">
+        <label class="settings-label" for="workoutDurationMin">Session duration (minutes)</label>
+        <input
+          type="number"
+          id="workoutDurationMin"
+          name="workoutDurationMin"
+          class="settings-input"
+          value="<%= profile && profile.workout_duration_min ? profile.workout_duration_min : 30 %>"
+          placeholder="e.g. 30"
+          min="5"
+          max="180"
+        >
+      </div>
+
+      <div class="settings-field settings-field--last">
+        <label class="settings-label" for="goals">Goals</label>
+        <textarea
+          id="goals"
+          name="goals"
+          class="settings-input settings-textarea"
+          placeholder="e.g. Improve mobility, recover from knee injury..."
+          rows="3"
+        ><%= profile && profile.goals ? profile.goals : '' %></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-settings-save">Save changes</button>
+  </form>
+</div>
+
+<%- include('../partials/bottomNav') %>

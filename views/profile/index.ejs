@@ -7,7 +7,7 @@
     </div>
     <h2 class="user-name"><%= user.fullName %></h2>
     <p class="user-email"><%= user.email %></p>
-    <a href="/profile/edit" class="btn btn-edit-profile">Edit profile</a>
+    <a href="/settings/personal-info" class="btn btn-edit-profile">Edit profile</a>
     <form action="/logout" method="POST" class="logout-form">
       <button type="submit" class="btn btn-logout">Logout</button>
     </form>
@@ -35,9 +35,9 @@
         <i class="bi bi-trophy-fill"></i>
         <span>Achievements</span>
       </a>
-      <a href="/intensity" class="action-btn">
-        <span class="action-icon">💪</span>
-        <span>Intensity</span>
+      <a href="/workout-history" class="action-btn">
+        <i class="bi bi-clock-history"></i>
+        <span>Workout history</span>
       </a>
       <a href="<%= user.twofaEnabled ? '/twofa/disable' : '/twofa/setup' %>" class="action-btn">
         <i class="bi bi-shield-lock-fill"></i>
