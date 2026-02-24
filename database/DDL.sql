@@ -158,6 +158,18 @@ CREATE TABLE `Plan_Completion_Log` (
     FOREIGN KEY (patient_id) REFERENCES User(id) ON DELETE CASCADE
 );
 
+CREATE TABLE `Workout_Session` (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    duration_min INT NOT NULL DEFAULT 0,
+    exercise_count INT NOT NULL DEFAULT 0,
+    tags VARCHAR(255) NULL,
+    emoji VARCHAR(10) NULL DEFAULT '🏋️',
+    session_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
+);
+
 -- =============================================
 -- DATABASE USER AND GRANTS
 -- =============================================

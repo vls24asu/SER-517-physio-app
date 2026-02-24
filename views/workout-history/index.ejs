@@ -1,0 +1,34 @@
+<div class="history-container">
+  <div class="history-header">
+    <a href="/profile" class="back-btn">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="history-title">Workout history</h1>
+  </div>
+
+  <% if (sessions.length === 0) { %>
+    <div class="history-empty">
+      <p>No workouts yet. Start your first session!</p>
+    </div>
+  <% } else { %>
+    <div class="history-list">
+      <% sessions.forEach(s => { %>
+        <div class="history-card">
+          <div class="history-card-content">
+            <p class="history-card-title"><%= s.title %></p>
+            <p class="history-card-meta"><%= s.durationMin %> minutes&bull; <%= s.exerciseCount %> exercises</p>
+            <div class="history-tags">
+              <% s.tags.forEach((tag, i) => { %>
+                <span class="history-tag <%= i % 2 === 1 ? 'history-tag--yellow' : '' %>"><%= tag %></span>
+              <% }) %>
+            </div>
+            <p class="history-card-date"><%= s.sessionDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) %>, <%= s.sessionDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %></p>
+          </div>
+          <div class="history-card-emoji"><%= s.emoji %></div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/bottomNav') %>
