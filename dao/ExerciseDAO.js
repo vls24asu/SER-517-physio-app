@@ -15,7 +15,7 @@ class ExerciseDAO {
   async findAll(filters = {}) {
     const conn = await this.#connectionManager.getConnection();
     try {
-      let query = 'SELECT * FROM Exercise WHERE 1=1';
+      let query = 'SELECT * FROM exercise WHERE 1=1';
       const params = [];
 
       // Filter by category (strengthen, stretch, avoid)
@@ -26,7 +26,7 @@ class ExerciseDAO {
 
       // Filter by difficulty
       if (filters.difficulty) {
-        query += ' AND difficulty = ?';
+        query += ' AND skill_level = ?';
         params.push(filters.difficulty);
       }
 
@@ -42,8 +42,8 @@ class ExerciseDAO {
         params.push(`%${filters.search}%`);
       }
 
-      // Order by popularity (sessions_count)
-      query += ' ORDER BY sessions_count DESC, name ASC';
+      // Order by name
+      query += ' ORDER BY name ASC';
 
       const [rows] = await conn.execute(query, params);
       return rows;
@@ -61,7 +61,7 @@ class ExerciseDAO {
     const conn = await this.#connectionManager.getConnection();
     try {
       const [rows] = await conn.execute(
-        'SELECT * FROM Exercise WHERE id = ?',
+        'SELECT * FROM exercise WHERE id = ?',
         [id]
       );
       return rows.length > 0 ? rows[0] : null;
@@ -79,7 +79,7 @@ class ExerciseDAO {
     const conn = await this.#connectionManager.getConnection();
     try {
       const [rows] = await conn.execute(
-        'SELECT * FROM Exercise WHERE name LIKE ? ORDER BY sessions_count DESC LIMIT 50',
+        'SELECT * FROM exercise WHERE name LIKE ? ORDER BY name ASC LIMIT 50',
         [`%${query}%`]
       );
       return rows;
@@ -97,10 +97,10 @@ class ExerciseDAO {
     const conn = await this.#connectionManager.getConnection();
     try {
       const [rows] = await conn.execute(
-        `SELECT e.* FROM Exercise e
-         INNER JOIN Exercise_Muscle_Group emg ON e.id = emg.exercise_id
+        `SELECT e.* FROM exercise e
+         INNER JOIN exercise_muscle_group emg ON e.id = emg.exercise_id
          WHERE emg.muscle_group_id = ?
-         ORDER BY e.sessions_count DESC`,
+         ORDER BY e.name ASC`,
         [muscleGroupId]
       );
       return rows;
@@ -117,7 +117,7 @@ class ExerciseDAO {
     const conn = await this.#connectionManager.getConnection();
     try {
       await conn.execute(
-        'UPDATE Exercise SET sessions_count = sessions_count + 1 WHERE id = ?',
+        'UPDATE exercise SET sessions_count = sessions_count + 1 WHERE id = ?',
         [id]
       );
     } finally {
@@ -133,7 +133,7 @@ class ExerciseDAO {
     const conn = await this.#connectionManager.getConnection();
     try {
       const [rows] = await conn.execute(
-        'SELECT * FROM Muscle_Group ORDER BY name ASC'
+        'SELECT * FROM muscle_group ORDER BY name ASC'
       );
       return rows;
     } finally {
