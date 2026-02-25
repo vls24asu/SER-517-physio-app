@@ -1,0 +1,78 @@
+<%
+  const categoryLabelMap = {
+    strengthen: 'Strengthen',
+    stretch: 'Stretch',
+    avoid: 'Avoid'
+  };
+
+  const categoryEmojiMap = {
+    strengthen: '💪',
+    stretch: '🧘',
+    avoid: '⚠️'
+  };
+%>
+
+<div class="library-container">
+  <div class="library-header">
+    <h1 class="library-title">Search Results</h1>
+    <p class="library-subtitle">
+      Results for "<strong><%= searchQuery %></strong>"
+    </p>
+  </div>
+
+  <form action="/library/search" method="GET" class="library-search-form" role="search">
+    <div class="library-search-input-wrap">
+      <i class="bi bi-search library-search-icon" aria-hidden="true"></i>
+      <input
+        type="text"
+        name="q"
+        class="library-search-input"
+        placeholder="Search exercises..."
+        value="<%= searchQuery %>"
+        aria-label="Search exercises"
+      >
+    </div>
+  </form>
+
+  <% if (!exercises || exercises.length === 0) { %>
+    <div class="library-empty-state">
+      <div class="library-empty-emoji" aria-hidden="true">🔎</div>
+      <h2 class="library-empty-title">No results found</h2>
+      <p class="library-empty-text">
+        We couldn't find any exercises matching "<%= searchQuery %>".
+      </p>
+      <a href="/library" class="btn btn-start-session library-empty-btn">Browse Library</a>
+    </div>
+  <% } else { %>
+    <p class="library-results-meta">
+      <strong><%= exercises.length %></strong> result<%= exercises.length === 1 ? '' : 's' %> found
+    </p>
+
+    <div class="exercise-grid">
+      <% exercises.forEach(exercise => { %>
+        <a href="/library/<%= exercise.id %>" class="exercise-card">
+          <div class="exercise-card-top">
+            <div class="exercise-emoji" aria-hidden="true">
+              <%= categoryEmojiMap[exercise.category] || '🏋️' %>
+            </div>
+            <span class="exercise-tag">
+              <%= categoryLabelMap[exercise.category] || exercise.category %>
+            </span>
+          </div>
+
+          <div class="exercise-card-content">
+            <h3 class="exercise-card-title"><%= exercise.name %></h3>
+            <p class="exercise-card-meta">
+              <%= exercise.sets || 0 %> sessions
+              <% if (exercise.skill_level) { %>
+                • <%= exercise.skill_level %>
+              <% } %>
+            </p>
+          </div>
+        </a>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/bottomNav') %>
