@@ -10,7 +10,7 @@
 </head>
 <body>
 
-  <% const fullWidthPage = currentPath === '/dashboard' || currentPath === '/profile' || currentPath.startsWith('/profile/') || currentPath.startsWith('/settings') || currentPath.startsWith('/achievements') || currentPath.startsWith('/workout-history'); %>
+  <% const fullWidthPage = currentPath === '/dashboard' || currentPath === '/profile' || currentPath.startsWith('/profile/') || currentPath.startsWith('/settings') || currentPath.startsWith('/achievements') || currentPath.startsWith('/workout-history') || currentPath.startsWith('/library'); %>
   <main class="<%= fullWidthPage ? '' : 'container' %> py-4 d-flex flex-column flex-grow-1">
     <%- include('../partials/flash') %>
     <%- body %>
