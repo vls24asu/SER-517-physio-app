@@ -1,11 +1,12 @@
 <% if (currentUser) { %>
+<% const isLibraryPage = currentPath === '/library' || currentPath.startsWith('/library/'); %>
 <nav class="bottom-nav">
   <a href="/dashboard" class="nav-item <%= currentPath === '/dashboard' ? 'active' : '' %>">
     <i class="bi bi-house<%= currentPath === '/dashboard' ? '-fill' : '' %>"></i>
     <span>Today</span>
   </a>
-  <a href="/library" class="nav-item <%= currentPath === '/library' ? 'active' : '' %>">
-    <i class="bi bi-book<%= currentPath === '/library' ? '-fill' : '' %>"></i>
+  <a href="/library" class="nav-item <%= isLibraryPage ? 'active' : '' %>">
+    <i class="bi bi-book<%= isLibraryPage ? '-fill' : '' %>"></i>
     <span>Library</span>
   </a>
   <a href="/progress" class="nav-item <%= currentPath === '/progress' ? 'active' : '' %>">
