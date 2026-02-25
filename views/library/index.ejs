@@ -1,0 +1,105 @@
+<%
+  const categoryLabelMap = {
+    strengthen: 'Strengthen',
+    stretch: 'Stretch',
+    avoid: 'Avoid'
+  };
+
+  const categoryEmojiMap = {
+    strengthen: '💪',
+    stretch: '🧘',
+    avoid: '⚠️'
+  };
+%>
+
+<div class="library-container">
+  <div class="library-header">
+    <h1 class="library-title">Exercise Library</h1>
+    <p class="library-subtitle">Browse all workouts and programs</p>
+  </div>
+
+  <form action="/library" method="GET" class="library-search-form" role="search">
+    <div class="library-search-input-wrap">
+      <i class="bi bi-search library-search-icon" aria-hidden="true"></i>
+      <input
+        type="text"
+        name="search"
+        class="library-search-input"
+        placeholder="Search exercises..."
+        value="<%= searchQuery %>"
+        aria-label="Search exercises"
+      >
+      <% if (activeCategory && activeCategory !== 'all') { %>
+        <input type="hidden" name="category" value="<%= activeCategory %>">
+      <% } %>
+    </div>
+  </form>
+
+  <div class="library-filter-tabs" role="tablist" aria-label="Exercise categories">
+    <a
+      href="/library?category=all"
+      class="library-filter-tab <%= activeCategory === 'all' ? 'active' : '' %>"
+      aria-current="<%= activeCategory === 'all' ? 'page' : 'false' %>"
+    >
+      All
+    </a>
+    <a
+      href="/library?category=strengthen"
+      class="library-filter-tab <%= activeCategory === 'strengthen' ? 'active' : '' %>"
+      aria-current="<%= activeCategory === 'strengthen' ? 'page' : 'false' %>"
+    >
+      Upper body
+    </a>
+    <a
+      href="/library?category=stretch"
+      class="library-filter-tab <%= activeCategory === 'stretch' ? 'active' : '' %>"
+      aria-current="<%= activeCategory === 'stretch' ? 'page' : 'false' %>"
+    >
+      Lower body
+    </a>
+  </div>
+
+  <% if (searchQuery) { %>
+    <p class="library-results-meta">
+      Showing results for "<strong><%= searchQuery %></strong>"
+    </p>
+  <% } %>
+
+  <% if (!exercises || exercises.length === 0) { %>
+    <div class="library-empty-state">
+      <div class="library-empty-emoji" aria-hidden="true">🔎</div>
+      <h2 class="library-empty-title">No exercises found</h2>
+      <p class="library-empty-text">
+        Try a different search term or browse all exercises in the library.
+      </p>
+      <a href="/library" class="btn btn-start-session library-empty-btn">Browse Library</a>
+    </div>
+  <% } else { %>
+    <div class="exercise-grid">
+      <% exercises.forEach(exercise => { %>
+        <a href="/library/<%= exercise.id %>" class="exercise-card">
+          <div class="exercise-card-top">
+            <div class="exercise-emoji" aria-hidden="true">
+              <%= categoryEmojiMap[exercise.category] || '🏋️' %>
+            </div>
+            <span class="exercise-tag">
+              <%= categoryLabelMap[exercise.category] || exercise.category %>
+            </span>
+          </div>
+
+          <div class="exercise-card-content">
+            <h3 class="exercise-card-title"><%= exercise.name %></h3>
+            <p class="exercise-card-meta">
+              <%= exercise.sets || 0 %> sessions
+              <% if (exercise.skill_level) { %>
+                • <%= exercise.skill_level %>
+              <% } %>
+            </p>
+          </div>
+        </a>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/bottomNav') %>
