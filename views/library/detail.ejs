@@ -1,0 +1,95 @@
+<%
+  const categoryLabelMap = {
+    strengthen: 'Strengthen',
+    stretch: 'Stretch',
+    avoid: 'Avoid'
+  };
+
+  const categoryEmojiMap = {
+    strengthen: '💪',
+    stretch: '🧘',
+    avoid: '⚠️'
+  };
+
+  const displayCategory = categoryLabelMap[exercise.category] || exercise.category || 'General';
+  const displayEmoji = categoryEmojiMap[exercise.category] || '🏋️';
+  const equipment = exercise.equipment_needed || 'None';
+  const difficulty = exercise.skill_level || 'Not specified';
+  const position = exercise.position || 'Not specified';
+  const tempo = exercise.tempo || 'Not specified';
+  const setsReps = [exercise.sets ? `${exercise.sets} sets` : null, exercise.reps ? `${exercise.reps} reps` : null]
+    .filter(Boolean)
+    .join(' • ') || 'Not specified';
+  const locationLabel = Number(exercise.is_gym_only) === 1 ? 'Gym only' : 'Home friendly';
+%>
+
+<div class="library-detail-container">
+  <div class="library-detail-header">
+    <a href="/library" class="back-btn" aria-label="Back to exercise library">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="library-detail-title">Exercise details</h1>
+  </div>
+
+  <div class="library-detail-hero">
+    <div class="library-detail-emoji" aria-hidden="true"><%= displayEmoji %></div>
+    <h2 class="library-detail-name"><%= exercise.name %></h2>
+
+    <div class="library-detail-tags">
+      <span class="library-pill library-pill--category"><%= displayCategory %></span>
+      <span class="library-pill"><%= difficulty %></span>
+      <span class="library-pill"><%= locationLabel %></span>
+    </div>
+  </div>
+
+  <div class="library-detail-card">
+    <h3 class="library-detail-section-title">Exercise stats</h3>
+    <div class="library-detail-stats-grid">
+      <div class="library-stat-tile">
+        <p class="library-stat-label">Tempo / Duration</p>
+        <p class="library-stat-value"><%= tempo %></p>
+      </div>
+      <div class="library-stat-tile">
+        <p class="library-stat-label">Difficulty</p>
+        <p class="library-stat-value"><%= difficulty %></p>
+      </div>
+      <div class="library-stat-tile">
+        <p class="library-stat-label">Equipment</p>
+        <p class="library-stat-value"><%= equipment %></p>
+      </div>
+      <div class="library-stat-tile">
+        <p class="library-stat-label">Sets & Reps</p>
+        <p class="library-stat-value"><%= setsReps %></p>
+      </div>
+      <div class="library-stat-tile">
+        <p class="library-stat-label">Position</p>
+        <p class="library-stat-value"><%= position %></p>
+      </div>
+      <div class="library-stat-tile">
+        <p class="library-stat-label">Category</p>
+        <p class="library-stat-value"><%= displayCategory %></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="library-detail-card">
+    <h3 class="library-detail-section-title">How to perform</h3>
+    <div class="library-detail-info-block">
+      <p class="library-detail-info-heading">Tips</p>
+      <p class="library-detail-info-text">
+        <%= exercise.tips || 'No tips available yet for this exercise.' %>
+      </p>
+    </div>
+
+    <div class="library-detail-info-block">
+      <p class="library-detail-info-heading">Common mistakes</p>
+      <p class="library-detail-info-text">
+        <%= exercise.common_mistakes || 'No common mistakes listed yet.' %>
+      </p>
+    </div>
+  </div>
+
+  <a href="/library" class="btn btn-start-session library-detail-back-btn">Back to library</a>
+</div>
+
+<%- include('../partials/bottomNav') %>
