@@ -22,6 +22,18 @@ class UserDAO {
     }
   }
 
+  async markOnboardingComplete(userId) {
+  const conn = await this.#connectionManager.getConnection();
+  try {
+    await conn.execute(
+      'UPDATE User SET onboarding_completed = TRUE WHERE id = ?',
+      [userId]
+    );
+  } finally {
+    conn.release();
+  }
+}
+
   async findById(id) {
     const conn = await this.#connectionManager.getConnection();
     try {

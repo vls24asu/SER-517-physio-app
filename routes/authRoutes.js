@@ -18,4 +18,12 @@ router.post('/login', validateLogin, authController.postLogin);
 // Logout
 router.post('/logout', isAuthenticated, authController.logout);
 
+// Onboarding Page
+
+router.get('/onboarding', isAuthenticated, (req, res) => {
+  res.render('onboarding', { layout: false });
+});
+// Complete Onboarding
+router.post('/onboarding/complete', isAuthenticated, authController.completeOnboarding);
+
 module.exports = router;
