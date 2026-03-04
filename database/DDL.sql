@@ -36,6 +36,7 @@ CREATE TABLE `User` (
     role ENUM('patient', 'physio') NOT NULL DEFAULT 'patient',
     twofa_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     twofa_secret VARCHAR(64) NULL,
+    onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
