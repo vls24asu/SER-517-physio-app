@@ -3,6 +3,10 @@ const { validationResult } = require('express-validator');
 
 const userService = new UserService();
 
+/* =========================
+   REGISTER
+========================= */
+
 const getRegister = (req, res) => {
   res.render('auth/register', { errors: [] });
 };
@@ -23,15 +27,28 @@ const postRegister = async (req, res) => {
       });
     }
 
-    await userService.register(fullName, email, password);
-    req.flash('success', 'Account created successfully. Please log in.');
-    res.redirect('/login');
+    const newUser = await userService.register(fullName, email, password);
+
+    // Auto-login after register
+    req.session.user = {
+      id: newUser.id,
+      fullName: newUser.fullName,
+      email: newUser.email,
+      role: newUser.role
+    };
+
+    return res.redirect('/onboarding');
+
   } catch (err) {
     console.error(err);
     req.flash('error', 'Something went wrong. Please try again.');
-    res.redirect('/register');
+    return res.redirect('/register');
   }
 };
+
+/* =========================
+   LOGIN
+========================= */
 
 const getLogin = (req, res) => {
   if (req.query.loggedOut === '1') {
@@ -67,16 +84,26 @@ const postLogin = async (req, res) => {
       email: user.email,
       role: user.role
     };
-    res.redirect('/dashboard');
+
+    // Force onboarding if not completed
+    if (!user.onboarding_completed) {
+      return res.redirect('/onboarding');
+    }
+
+    return res.redirect('/dashboard');
+
   } catch (err) {
     console.error(err);
     req.flash('error', 'Something went wrong. Please try again.');
-    res.redirect('/login');
+    return res.redirect('/login');
   }
 };
 
+/* =========================
+   LOGOUT
+========================= */
+
 const logout = (req, res) => {
-  // Set no-cache headers before destroying session
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
@@ -86,14 +113,17 @@ const logout = (req, res) => {
       console.error(err);
       return res.redirect('/dashboard');
     }
+
     res.clearCookie('connect.sid');
-    // Use query param since flash is lost with session destroy
     res.redirect('/login?loggedOut=1');
   });
 };
 
+/* =========================
+   SESSION STATUS
+========================= */
+
 const sessionStatus = (req, res) => {
-  // Explicitly prevent caching of this check.
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
@@ -101,7 +131,35 @@ const sessionStatus = (req, res) => {
   if (req.session.user && req.session.user.id) {
     return res.status(200).json({ authenticated: true });
   }
+
   return res.status(401).json({ authenticated: false });
 };
 
-module.exports = { getRegister, postRegister, getLogin, postLogin, logout, sessionStatus };
+/* =========================
+   ONBOARDING COMPLETE
+========================= */
+
+const completeOnboarding = async (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+
+  try {
+    await userService.markOnboardingComplete(req.session.user.id);
+    return res.redirect('/dashboard');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Could not complete onboarding.');
+    return res.redirect('/onboarding');
+  }
+};
+
+module.exports = {
+  getRegister,
+  postRegister,
+  getLogin,
+  postLogin,
+  logout,
+  sessionStatus,
+  completeOnboarding
+};

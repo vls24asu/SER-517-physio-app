@@ -11,7 +11,24 @@ class UserService {
 
   async register(fullName, email, password) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    await this.#userDAO.create(fullName, email, hashedPassword);
+
+    const createdUser = await this.#userDAO.create(
+      fullName,
+      email,
+      hashedPassword
+    );
+
+    // Fetch full user after creation (to include onboarding flag)
+    const user = await this.#userDAO.findByEmail(email);
+
+    return new UserDTO({
+      id: user.id,
+      fullName: user.full_name,
+      email: user.email,
+      role: user.role,
+      twofaEnabled: user.twofa_enabled,
+      onboarding_completed: user.onboarding_completed
+    });
   }
 
   async authenticate(email, password) {
@@ -26,7 +43,8 @@ class UserService {
       fullName: user.full_name,
       email: user.email,
       role: user.role,
-      twofaEnabled: user.twofa_enabled
+      twofaEnabled: user.twofa_enabled,
+      onboarding_completed: user.onboarding_completed
     });
   }
 
@@ -36,6 +54,10 @@ class UserService {
 
   async getUserById(id) {
     return await this.#userDAO.findById(id);
+  }
+
+  async markOnboardingComplete(userId) {
+    await this.#userDAO.markOnboardingComplete(userId);
   }
 
   async enableTwoFa(userId, secret) {
