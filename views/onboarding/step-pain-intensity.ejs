@@ -1,0 +1,36 @@
+<!-- STEP 3: Pain intensity -->
+<div class="step">
+  <h4 class="step-title">How intense is it?</h4>
+  <p class="subtitle">Rate your pain level</p>
+
+  <p class="field-label">
+    Pain level:
+    <span id="painLevelValue">5/10</span>
+  </p>
+
+  <input
+    type="range"
+    class="form-range pain-slider"
+    name="pain_intensity"
+    min="0"
+    max="10"
+    step="1"
+    value="5"
+    id="painIntensityRange"
+  >
+  <div class="range-labels">
+    <span>Mild</span>
+    <span>Moderate</span>
+    <span>Severe</span>
+  </div>
+
+  <div class="info-box">
+    <strong>Note:</strong> If you experience numbness, weakness, or severe pain, please consult a healthcare professional before starting any exercise program.
+  </div>
+
+  <div class="btn-row">
+    <button type="button" class="btn btn-outline-secondary rounded-pill px-4 prev-btn">Back</button>
+    <button type="button" class="btn btn-yellow next-btn">Continue</button>
+  </div>
+</div>
+

@@ -21,7 +21,7 @@ router.post('/logout', isAuthenticated, authController.logout);
 // Onboarding Page
 
 router.get('/onboarding', isAuthenticated, (req, res) => {
-  res.render('onboarding', { layout: false });
+  res.render('onboarding/index', { layout: false });
 });
 // Complete Onboarding
 router.post('/onboarding/complete', isAuthenticated, authController.completeOnboarding);
