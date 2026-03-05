@@ -85,8 +85,9 @@ const postLogin = async (req, res) => {
       role: user.role
     };
 
-    // Force onboarding if not completed
-    if (!user.onboarding_completed) {
+    // New users created after onboarding launch have onboarding_completed = 0 (false).
+    // Older existing users may have null here and should go straight to dashboard.
+    if (user.onboarding_completed === 0) {
       return res.redirect('/onboarding');
     }
 
