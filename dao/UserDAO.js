@@ -104,6 +104,15 @@ class UserDAO {
       conn.release();
     }
   }
+  async getDatabaseTime() {
+    const conn = await this.#connectionManager.getConnection();
+    try {
+      const [rows] = await conn.execute('SELECT NOW() AS currentTime');
+      return rows[0].currentTime;
+    } finally {
+      conn.release();
+    }
+  }
 }
 
 module.exports = UserDAO;
