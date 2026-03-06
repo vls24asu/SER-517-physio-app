@@ -109,7 +109,51 @@
       </div>
       <i class="bi bi-chevron-right settings-chevron"></i>
     </a>
+
+    <button type="button" class="settings-row settings-row-btn" id="deleteAccountBtn">
+      <div class="settings-row-left">
+        <div class="settings-icon-wrap settings-icon-red">
+          <i class="bi bi-trash-fill"></i>
+        </div>
+        <div class="settings-row-text">
+          <span class="settings-row-title settings-row-title--danger">Delete account</span>
+        </div>
+      </div>
+      <i class="bi bi-chevron-right settings-chevron"></i>
+    </button>
   </div>
 </div>
+
+<!-- Delete Account Modal -->
+<div class="delete-modal-overlay" id="deleteModalOverlay">
+  <div class="delete-modal">
+    <p class="delete-modal-title">Delete account</p>
+    <p class="delete-modal-body">Are you sure you want to delete this account? This action cannot be undone.</p>
+    <div class="delete-modal-actions">
+      <button type="button" class="delete-modal-btn delete-modal-btn--cancel" id="deleteModalCancel">No</button>
+      <form action="/settings/delete-account" method="POST" style="flex:1;">
+        <button type="submit" class="delete-modal-btn delete-modal-btn--confirm">Yes, delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const deleteBtn = document.getElementById('deleteAccountBtn');
+  const overlay   = document.getElementById('deleteModalOverlay');
+  const cancelBtn = document.getElementById('deleteModalCancel');
+
+  deleteBtn.addEventListener('click', () => {
+    overlay.classList.add('active');
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    overlay.classList.remove('active');
+  });
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('active');
+  });
+</script>
 
 <%- include('../partials/bottomNav') %>

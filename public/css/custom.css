@@ -543,6 +543,90 @@ main {
   font-size: 0.9rem;
 }
 
+.settings-row-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.settings-row-title--danger {
+  color: #c0392b;
+}
+
+/* Delete Account Modal */
+.delete-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.delete-modal-overlay.active {
+  display: flex;
+}
+
+.delete-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 24px 20px;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.delete-modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 10px;
+}
+
+.delete-modal-body {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+.delete-modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.delete-modal-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+  transition: opacity 0.2s;
+}
+
+.delete-modal-btn:hover {
+  opacity: 0.85;
+}
+
+.delete-modal-btn--cancel {
+  background: #f0f0f0;
+  color: #000;
+}
+
+.delete-modal-btn--confirm {
+  background: #c0392b;
+  color: #fff;
+}
+
 /* Settings Form Card */
 .settings-form-card {
   background: #fff;
@@ -1184,6 +1268,132 @@ main {
   margin-top: 6px;
 }
 
+/* =============================================
+   Progress Page Styles
+   ============================================= */
+
+.progress-page-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  padding-bottom: 100px;
+}
+
+.progress-page-header {
+  margin-bottom: 32px;
+}
+
+.progress-page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 6px;
+}
+
+.progress-page-subtitle {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+}
+
+.progress-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.progress-empty-icon {
+  font-size: 5rem;
+  line-height: 1;
+  margin-bottom: 28px;
+}
+
+.progress-empty-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 12px;
+}
+
+.progress-empty-text {
+  font-size: 0.95rem;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 32px;
+  max-width: 260px;
+}
+
+.progress-empty-btn {
+  width: 100%;
+  max-width: 320px;
+}
+
+.progress-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.progress-stat-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px 10px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.progress-stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #F7B32B;
+  margin: 0 0 6px;
+}
+
+.progress-stat-label {
+  font-size: 0.72rem;
+  color: #888;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.progress-week-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid rgba(0,0,0,0.04);
+  margin-bottom: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-week-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+.progress-week-value {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0;
+}
+
+.progress-recent-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 14px;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .dashboard-container,
@@ -1193,7 +1403,8 @@ main {
   .achievements-container,
   .history-container,
   .library-container,
-  .library-detail-container {
+  .library-detail-container,
+  .progress-page-container {
     padding: 16px;
     padding-bottom: 100px;
   }

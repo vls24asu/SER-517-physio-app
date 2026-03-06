@@ -113,6 +113,15 @@ class UserDAO {
       conn.release();
     }
   }
+
+  async deleteById(userId) {
+    const conn = await this.#connectionManager.getConnection();
+    try {
+      await conn.execute('DELETE FROM User WHERE id = ?', [userId]);
+    } finally {
+      conn.release();
+    }
+  }
 }
 
 module.exports = UserDAO;

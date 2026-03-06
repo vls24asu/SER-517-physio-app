@@ -67,6 +67,10 @@ class UserService {
   async disableTwoFa(userId) {
     await this.#userDAO.clearTwoFaSecret(userId);
   }
+
+  async deleteUser(userId) {
+    await this.#userDAO.deleteById(userId);
+  }
 }
 
 module.exports = UserService;
