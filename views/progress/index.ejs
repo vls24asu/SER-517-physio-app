@@ -1,0 +1,65 @@
+<div class="progress-page-container">
+
+  <div class="progress-page-header">
+    <h1 class="progress-page-title">Progress</h1>
+    <p class="progress-page-subtitle">Your fitness journey starts here.</p>
+  </div>
+
+  <% if (sessions.length === 0) { %>
+
+    <div class="progress-empty-state">
+      <div class="progress-empty-icon">⏳</div>
+      <h2 class="progress-empty-title">No workouts yet</h2>
+      <p class="progress-empty-text">Complete your first session to start tracking your progress!</p>
+      <a href="/library" class="btn-start-session progress-empty-btn">Start first session</a>
+    </div>
+
+  <% } else { %>
+
+    <div class="progress-stats-grid">
+      <div class="progress-stat-card">
+        <p class="progress-stat-value"><%= stats.totalSessions %></p>
+        <p class="progress-stat-label">Total sessions</p>
+      </div>
+      <div class="progress-stat-card">
+        <p class="progress-stat-value"><%= stats.streak %></p>
+        <p class="progress-stat-label">Day streak</p>
+      </div>
+      <div class="progress-stat-card">
+        <p class="progress-stat-value"><%= stats.totalTime %>h</p>
+        <p class="progress-stat-label">Total time</p>
+      </div>
+    </div>
+
+    <div class="progress-week-card">
+      <p class="progress-week-label">This week</p>
+      <p class="progress-week-value"><%= stats.sessionsThisWeek %> sessions &bull; <%= stats.minutesThisWeek %> min</p>
+    </div>
+
+    <h2 class="progress-recent-title">Recent workouts</h2>
+
+    <div class="history-list">
+      <% sessions.slice(0, 5).forEach(s => { %>
+        <div class="history-card">
+          <div class="history-card-content">
+            <p class="history-card-title"><%= s.title %></p>
+            <p class="history-card-meta"><%= s.durationMin %> min &bull; <%= s.exerciseCount %> exercises</p>
+            <% if (s.tags.length > 0) { %>
+              <div class="history-tags">
+                <% s.tags.forEach((tag, i) => { %>
+                  <span class="history-tag <%= i % 2 === 1 ? 'history-tag--yellow' : '' %>"><%= tag %></span>
+                <% }) %>
+              </div>
+            <% } %>
+            <p class="history-card-date"><%= s.sessionDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) %></p>
+          </div>
+          <div class="history-card-emoji"><%= s.emoji %></div>
+        </div>
+      <% }) %>
+    </div>
+
+  <% } %>
+
+</div>
+
+<%- include('../partials/bottomNav') %>
