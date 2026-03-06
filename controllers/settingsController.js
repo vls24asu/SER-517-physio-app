@@ -177,6 +177,22 @@ const postPainManagement = async (req, res) => {
   }
 };
 
+// POST /settings/delete-account
+const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    await userService.deleteUser(userId);
+    req.session.destroy(() => {
+      res.clearCookie('connect.sid');
+      res.redirect('/login');
+    });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Failed to delete account. Please try again.');
+    res.redirect('/settings');
+  }
+};
+
 module.exports = {
   getSettings,
   getPersonalInfo,
@@ -188,5 +204,6 @@ module.exports = {
   getGoals,
   postGoals,
   getPainManagement,
-  postPainManagement
+  postPainManagement,
+  deleteAccount
 };
