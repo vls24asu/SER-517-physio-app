@@ -543,6 +543,90 @@ main {
   font-size: 0.9rem;
 }
 
+.settings-row-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.settings-row-title--danger {
+  color: #c0392b;
+}
+
+/* Delete Account Modal */
+.delete-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.delete-modal-overlay.active {
+  display: flex;
+}
+
+.delete-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px 24px 20px;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.delete-modal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 10px;
+}
+
+.delete-modal-body {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+.delete-modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.delete-modal-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  font-family: inherit;
+  transition: opacity 0.2s;
+}
+
+.delete-modal-btn:hover {
+  opacity: 0.85;
+}
+
+.delete-modal-btn--cancel {
+  background: #f0f0f0;
+  color: #000;
+}
+
+.delete-modal-btn--confirm {
+  background: #c0392b;
+  color: #fff;
+}
+
 /* Settings Form Card */
 .settings-form-card {
   background: #fff;
