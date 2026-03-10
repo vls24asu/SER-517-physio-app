@@ -32,14 +32,13 @@ const getPersonalInfo = async (req, res) => {
 // POST /settings/personal-info
 const postPersonalInfo = async (req, res) => {
   try {
-    const { fullName, email, age, gender } = req.body;
+    const { fullName, age, gender } = req.body;
     const userId = req.session.user.id;
 
-    await profileService.updateNameEmail(userId, { fullName, email });
+    await profileService.updateNameEmail(userId, { fullName, email: req.session.user.email });
     await profileService.updatePersonalInfo(userId, { age: age || null, gender: gender || null });
 
     req.session.user.fullName = fullName;
-    req.session.user.email = email;
 
     req.flash('success', 'Personal information updated.');
     res.redirect('/settings/personal-info');
