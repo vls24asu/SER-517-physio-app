@@ -46,7 +46,12 @@
             <i class="bi bi-eye"></i>
           </button>
         </div>
-        <small class="text-muted">At least 8 characters</small>
+        <div class="pw-rules mt-2" id="pwRules">
+          <p class="pw-rule" id="rule-length"><i class="bi bi-x-circle-fill"></i> At least 8 characters</p>
+          <p class="pw-rule" id="rule-upper"><i class="bi bi-x-circle-fill"></i> One uppercase letter</p>
+          <p class="pw-rule" id="rule-lower"><i class="bi bi-x-circle-fill"></i> One lowercase letter</p>
+          <p class="pw-rule" id="rule-special"><i class="bi bi-x-circle-fill"></i> One special character (!@#$...)</p>
+        </div>
       </div>
 
       <!-- Terms -->
@@ -75,6 +80,30 @@
 </div>
 
 <script>
+  // Password complexity rules
+  const passwordInput = document.getElementById('password');
+  const rules = {
+    'rule-length':  v => v.length >= 8,
+    'rule-upper':   v => /[A-Z]/.test(v),
+    'rule-lower':   v => /[a-z]/.test(v),
+    'rule-special': v => /[!@#$%^&*(),.?":{}|<>]/.test(v),
+  };
+
+  passwordInput.addEventListener('input', () => {
+    const v = passwordInput.value;
+    Object.entries(rules).forEach(([id, test]) => {
+      const el = document.getElementById(id);
+      const icon = el.querySelector('i');
+      if (test(v)) {
+        el.classList.add('pw-rule--pass');
+        icon.className = 'bi bi-check-circle-fill';
+      } else {
+        el.classList.remove('pw-rule--pass');
+        icon.className = 'bi bi-x-circle-fill';
+      }
+    });
+  });
+
   document.getElementById('togglePassword').addEventListener('click', function () {
     const input = document.getElementById('password');
     const icon = this.querySelector('i');

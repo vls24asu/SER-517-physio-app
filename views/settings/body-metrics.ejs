@@ -6,37 +6,45 @@
     <h1 class="settings-title">Body metrics</h1>
   </div>
 
-  <form action="/settings/body-metrics" method="POST">
+  <form action="/settings/body-metrics" method="POST" id="bodyMetricsForm">
     <div class="settings-form-card">
 
+      <!-- Height -->
       <div class="settings-field">
-        <label class="settings-label" for="heightCm">Height (cm)</label>
+        <div class="settings-label-row">
+          <label class="settings-label">Height</label>
+          <div class="unit-toggle">
+            <button type="button" class="unit-btn active" id="btnCm">cm</button>
+            <button type="button" class="unit-btn" id="btnIn">in</button>
+          </div>
+        </div>
         <input
           type="number"
-          id="heightCm"
-          name="heightCm"
+          id="heightDisplay"
           class="settings-input"
-          value="<%= profile && profile.height_cm ? profile.height_cm : '' %>"
           placeholder="e.g. 175"
-          min="50"
-          max="300"
           step="0.1"
         >
+        <input type="hidden" id="heightCm" name="heightCm">
       </div>
 
+      <!-- Weight -->
       <div class="settings-field settings-field--last">
-        <label class="settings-label" for="weightKg">Weight (kg)</label>
+        <div class="settings-label-row">
+          <label class="settings-label">Weight</label>
+          <div class="unit-toggle">
+            <button type="button" class="unit-btn active" id="btnKg">kg</button>
+            <button type="button" class="unit-btn" id="btnLb">lb</button>
+          </div>
+        </div>
         <input
           type="number"
-          id="weightKg"
-          name="weightKg"
+          id="weightDisplay"
           class="settings-input"
-          value="<%= profile && profile.weight_kg ? profile.weight_kg : '' %>"
           placeholder="e.g. 70"
-          min="10"
-          max="500"
           step="0.1"
         >
+        <input type="hidden" id="weightKg" name="weightKg">
       </div>
     </div>
 
@@ -45,3 +53,75 @@
 </div>
 
 <%- include('../partials/bottomNav') %>
+
+<script>
+  const savedHeightCm = <%= profile && profile.height_cm ? profile.height_cm : 'null' %>;
+  const savedWeightKg = <%= profile && profile.weight_kg ? profile.weight_kg : 'null' %>;
+
+  let heightUnit = 'cm';
+  let weightUnit = 'kg';
+
+  const heightDisplay = document.getElementById('heightDisplay');
+  const weightDisplay = document.getElementById('weightDisplay');
+  const heightCmInput = document.getElementById('heightCm');
+  const weightKgInput = document.getElementById('weightKg');
+
+  // Init display values
+  if (savedHeightCm) heightDisplay.value = savedHeightCm;
+  if (savedWeightKg) weightDisplay.value = savedWeightKg;
+
+  // Height toggle
+  document.getElementById('btnCm').addEventListener('click', () => {
+    if (heightUnit === 'in') {
+      const inches = parseFloat(heightDisplay.value);
+      if (!isNaN(inches)) heightDisplay.value = (inches * 2.54).toFixed(1);
+      heightDisplay.placeholder = 'e.g. 175';
+    }
+    heightUnit = 'cm';
+    document.getElementById('btnCm').classList.add('active');
+    document.getElementById('btnIn').classList.remove('active');
+  });
+
+  document.getElementById('btnIn').addEventListener('click', () => {
+    if (heightUnit === 'cm') {
+      const cm = parseFloat(heightDisplay.value);
+      if (!isNaN(cm)) heightDisplay.value = (cm / 2.54).toFixed(1);
+      heightDisplay.placeholder = 'e.g. 69';
+    }
+    heightUnit = 'in';
+    document.getElementById('btnIn').classList.add('active');
+    document.getElementById('btnCm').classList.remove('active');
+  });
+
+  // Weight toggle
+  document.getElementById('btnKg').addEventListener('click', () => {
+    if (weightUnit === 'lb') {
+      const lb = parseFloat(weightDisplay.value);
+      if (!isNaN(lb)) weightDisplay.value = (lb / 2.20462).toFixed(1);
+      weightDisplay.placeholder = 'e.g. 70';
+    }
+    weightUnit = 'kg';
+    document.getElementById('btnKg').classList.add('active');
+    document.getElementById('btnLb').classList.remove('active');
+  });
+
+  document.getElementById('btnLb').addEventListener('click', () => {
+    if (weightUnit === 'kg') {
+      const kg = parseFloat(weightDisplay.value);
+      if (!isNaN(kg)) weightDisplay.value = (kg * 2.20462).toFixed(1);
+      weightDisplay.placeholder = 'e.g. 154';
+    }
+    weightUnit = 'lb';
+    document.getElementById('btnLb').classList.add('active');
+    document.getElementById('btnKg').classList.remove('active');
+  });
+
+  // On submit: always convert back to cm/kg before sending
+  document.getElementById('bodyMetricsForm').addEventListener('submit', () => {
+    const h = parseFloat(heightDisplay.value);
+    const w = parseFloat(weightDisplay.value);
+
+    heightCmInput.value = isNaN(h) ? '' : (heightUnit === 'in' ? (h * 2.54).toFixed(1) : h);
+    weightKgInput.value = isNaN(w) ? '' : (weightUnit === 'lb' ? (w / 2.20462).toFixed(1) : w);
+  });
+</script>
