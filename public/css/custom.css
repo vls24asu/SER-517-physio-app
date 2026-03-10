@@ -681,6 +681,40 @@ main {
   line-height: 1.5;
 }
 
+.settings-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.settings-label-row .settings-label {
+  margin-bottom: 0;
+}
+
+.unit-toggle {
+  display: flex;
+  gap: 4px;
+}
+
+.unit-btn {
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1.5px solid #ddd;
+  border-radius: 20px;
+  background: transparent;
+  color: #999;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.unit-btn.active {
+  background: #c9a84c;
+  border-color: #c9a84c;
+  color: #fff;
+}
+
 .settings-input-wrap {
   display: flex;
   align-items: center;
