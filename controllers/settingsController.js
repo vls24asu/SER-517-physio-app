@@ -105,6 +105,21 @@ const postPassword = async (req, res) => {
       return res.redirect('/settings/password');
     }
 
+    if (!/[A-Z]/.test(newPassword)) {
+      req.flash('error', 'New password must contain at least one uppercase letter.');
+      return res.redirect('/settings/password');
+    }
+
+    if (!/[a-z]/.test(newPassword)) {
+      req.flash('error', 'New password must contain at least one lowercase letter.');
+      return res.redirect('/settings/password');
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
+      req.flash('error', 'New password must contain at least one special character.');
+      return res.redirect('/settings/password');
+    }
+
     await profileService.changePassword(req.session.user.id, currentPassword, newPassword);
     req.flash('success', 'Password updated successfully.');
     res.redirect('/settings/password');
