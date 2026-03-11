@@ -17,7 +17,7 @@ const dashboardController = require('../controllers/dashboardController'); //imp
 // const {convertMuscleGroupAndCategoryInSessionToArray, resetMuscleGroupAndCategoryInSession} = require('../middleware/muscleSessionHandler'); //import muscle session handler middleware
 // const exerciseRoutineController = require('../controllers/exerciseRoutineController'); //import exercise routine controller/
 // const favouriteExercisesController = require('../controllers/favouriteExercisesController'); //import favourite exercises controller
-const twofaCtrl     = require('../controllers/twofacontroller');                //import 2FA controller
+const twofaCtrl     = require('../controllers/twofaController');                //import 2FA controller
 
 // — Setup 2FA —
 router.get( '/twofa/setup',  isAuthenticated, twofaCtrl.getTwofaSetup);
