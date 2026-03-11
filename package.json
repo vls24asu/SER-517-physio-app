@@ -9,6 +9,9 @@
   },
   "author": "Team 7",
   "license": "ISC",
+  "engines": {
+  "node": ">=18.0.0"
+},
   "dependencies": {
     "bcrypt": "^6.0.0",
     "connect-flash": "^0.1.1",
