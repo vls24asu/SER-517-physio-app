@@ -1,7 +1,9 @@
 const UserService = require('../services/UserService');
+const UserProfileService = require('../services/UserProfileService');
 const { validationResult } = require('express-validator');
 
 const userService = new UserService();
+const profileService = new UserProfileService();
 
 /* =========================
    REGISTER
@@ -146,6 +148,15 @@ const completeOnboarding = async (req, res) => {
   }
 
   try {
+    const { pain_status, pain_intensity } = req.body;
+    const rawAreas = req.body.pain_areas;
+    const painAreas = Array.isArray(rawAreas) ? rawAreas.join(',') : (rawAreas || null);
+    await profileService.updatePainAreas(req.session.user.id, {
+      painAreas,
+      painStatus: pain_status || null,
+      painIntensity: pain_intensity !== undefined ? pain_intensity : null
+    });
+
     await userService.markOnboardingComplete(req.session.user.id);
     return res.redirect('/dashboard');
   } catch (err) {

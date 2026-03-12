@@ -180,13 +180,19 @@ const getPainManagement = async (req, res) => {
 // POST /settings/pain-management
 const postPainManagement = async (req, res) => {
   try {
-    const { painAreas } = req.body;
-    await profileService.updatePainAreas(req.session.user.id, { painAreas: painAreas || null });
-    req.flash('success', 'Pain areas updated.');
+    const { pain_status, pain_intensity } = req.body;
+    const rawAreas = req.body.pain_areas;
+    const painAreas = Array.isArray(rawAreas) ? rawAreas.join(',') : (rawAreas || null);
+    await profileService.updatePainAreas(req.session.user.id, {
+      painAreas,
+      painStatus: pain_status || null,
+      painIntensity: pain_intensity !== undefined ? pain_intensity : null
+    });
+    req.flash('success', 'Pain management updated.');
     res.redirect('/settings/pain-management');
   } catch (err) {
     console.error(err);
-    req.flash('error', 'Failed to update pain areas.');
+    req.flash('error', 'Failed to update pain management.');
     res.redirect('/settings/pain-management');
   }
 };

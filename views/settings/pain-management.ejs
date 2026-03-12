@@ -1,3 +1,69 @@
+<style>
+.pm-select-card {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid #E4E1DB;
+  margin-bottom: 10px;
+  cursor: pointer;
+  background: #fff;
+  transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pm-select-card-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pm-select-card .pm-emoji {
+  font-size: 18px;
+}
+.pm-select-card.active {
+  border-color: #E7B04A;
+  background: #FFF6E4;
+  box-shadow: 0 5px 10px rgba(231,176,74,0.18);
+}
+.pm-select-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.pm-select-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.pm-pain-slider {
+  width: 100%;
+  accent-color: #E7B04A;
+}
+.pm-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #7A7A7A;
+  margin-top: 4px;
+}
+.pm-info-box {
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #E8F2FF;
+  color: #2F4E7A;
+  font-size: 12px;
+  margin-top: 18px;
+}
+.pm-field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #333;
+}
+</style>
+
 <div class="settings-container">
   <div class="settings-header">
     <a href="/settings" class="back-btn">
@@ -6,20 +72,73 @@
     <h1 class="settings-title">Pain management</h1>
   </div>
 
-  <form action="/settings/pain-management" method="POST">
-    <div class="settings-form-card">
+  <% const savedAreas = (profile && profile.pain_areas) ? profile.pain_areas.split(',') : []; %>
+  <% const savedStatus = (profile && profile.pain_status) ? profile.pain_status : ''; %>
+  <% const savedIntensity = (profile && profile.pain_intensity !== null && profile.pain_intensity !== undefined) ? profile.pain_intensity : 5; %>
 
+  <form action="/settings/pain-management" method="POST">
+    <div id="pmHiddenFields"></div>
+
+    <div class="settings-form-card">
       <p class="settings-help-text">Select your current pain or injury areas. This helps us suggest safer exercises.</p>
 
-      <div class="settings-field settings-field--last">
-        <label class="settings-label" for="painAreas">Pain areas</label>
-        <textarea
-          id="painAreas"
-          name="painAreas"
-          class="settings-input settings-textarea"
-          placeholder="e.g. Lower back, left knee, right shoulder..."
-          rows="4"
-        ><%= profile && profile.pain_areas ? profile.pain_areas : '' %></textarea>
+      <p class="pm-field-label">Do you currently have any pain or discomfort?</p>
+      <div class="pm-select-row">
+        <div class="pm-select-card <%= savedStatus === 'yes' ? 'active' : '' %>" data-name="pain_status" data-value="yes">
+          <div class="pm-select-card-content">
+            <span class="pm-emoji">😣</span>
+            <span>Yes, I have pain</span>
+          </div>
+        </div>
+        <div class="pm-select-card <%= savedStatus === 'no' ? 'active' : '' %>" data-name="pain_status" data-value="no">
+          <div class="pm-select-card-content">
+            <span class="pm-emoji">🙂</span>
+            <span>No pain</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="pm-field-label">Where does it hurt?</p>
+      <div class="pm-select-grid multi">
+        <div class="pm-select-card <%= savedAreas.includes('neck') ? 'active' : '' %>" data-name="pain_areas" data-value="neck">
+          <span>🛠️</span>
+          <span>Neck</span>
+        </div>
+        <div class="pm-select-card <%= savedAreas.includes('back') ? 'active' : '' %>" data-name="pain_areas" data-value="back">
+          <span>🧍</span>
+          <span>Back</span>
+        </div>
+        <div class="pm-select-card <%= savedAreas.includes('shoulders') ? 'active' : '' %>" data-name="pain_areas" data-value="shoulders">
+          <span>💪</span>
+          <span>Shoulders</span>
+        </div>
+        <div class="pm-select-card <%= savedAreas.includes('knees') ? 'active' : '' %>" data-name="pain_areas" data-value="knees">
+          <span>🦵</span>
+          <span>Knees</span>
+        </div>
+      </div>
+
+      <p class="pm-field-label">
+        Pain level: <span id="pmPainLevelValue"><%= savedIntensity %>/10</span>
+      </p>
+      <input
+        type="range"
+        class="pm-pain-slider"
+        name="pain_intensity"
+        min="0"
+        max="10"
+        step="1"
+        value="<%= savedIntensity %>"
+        id="pmPainIntensityRange"
+      >
+      <div class="pm-range-labels">
+        <span>Mild</span>
+        <span>Moderate</span>
+        <span>Severe</span>
+      </div>
+
+      <div class="pm-info-box">
+        <strong>Note:</strong> If you experience numbness, weakness, or severe pain, please consult a healthcare professional before starting any exercise program.
       </div>
     </div>
 
@@ -28,3 +147,58 @@
 </div>
 
 <%- include('../partials/bottomNav') %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const cards = document.querySelectorAll('.pm-select-card');
+  const hiddenContainer = document.getElementById('pmHiddenFields');
+  const painRange = document.getElementById('pmPainIntensityRange');
+  const painLevelValue = document.getElementById('pmPainLevelValue');
+
+  function syncHiddenFields() {
+    hiddenContainer.innerHTML = '';
+    const selections = {};
+
+    cards.forEach(function (card) {
+      if (card.classList.contains('active')) {
+        const name = card.getAttribute('data-name');
+        const value = card.getAttribute('data-value');
+        if (!name || !value) return;
+        if (!selections[name]) selections[name] = [];
+        selections[name].push(value);
+      }
+    });
+
+    Object.keys(selections).forEach(function (name) {
+      selections[name].forEach(function (value) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name === 'pain_areas' ? 'pain_areas[]' : name;
+        input.value = value;
+        hiddenContainer.appendChild(input);
+      });
+    });
+  }
+
+  cards.forEach(function (card) {
+    card.addEventListener('click', function () {
+      const parentIsMulti = this.parentElement.classList.contains('multi');
+      const name = this.getAttribute('data-name');
+      if (!parentIsMulti && name) {
+        document.querySelectorAll('.pm-select-card[data-name="' + name + '"]')
+          .forEach(function (c) { c.classList.remove('active'); });
+      }
+      this.classList.toggle('active');
+      syncHiddenFields();
+    });
+  });
+
+  if (painRange && painLevelValue) {
+    painRange.addEventListener('input', function () {
+      painLevelValue.textContent = painRange.value + '/10';
+    });
+  }
+
+  syncHiddenFields();
+});
+</script>
