@@ -1,0 +1,205 @@
+<div class="settings-container">
+  <div class="settings-header">
+    <a href="/settings" class="back-btn">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="settings-title">Help center</h1>
+  </div>
+
+  <!-- Search bar -->
+  <div class="help-search-wrap">
+    <i class="bi bi-search help-search-icon"></i>
+    <input
+      type="text"
+      id="helpSearch"
+      class="help-search-input"
+      placeholder="Search for help..."
+    >
+  </div>
+
+  <!-- FAQs -->
+  <p class="settings-section-label">FREQUENTLY ASKED QUESTIONS</p>
+
+  <div class="settings-group" id="faqList">
+
+    <div class="help-faq-item">
+      <button class="help-faq-question" type="button">
+        How do I update my pain areas?
+        <i class="bi bi-chevron-down help-faq-chevron"></i>
+      </button>
+      <div class="help-faq-answer">
+        Go to <strong>Settings → Pain management</strong> to update your current pain or injury areas and intensity level. This helps the app suggest safer exercises for you.
+      </div>
+    </div>
+
+    <div class="help-faq-item">
+      <button class="help-faq-question" type="button">
+        How do I change my password?
+        <i class="bi bi-chevron-down help-faq-chevron"></i>
+      </button>
+      <div class="help-faq-answer">
+        Go to <strong>Settings → Password &amp; security</strong> and enter your current password followed by a new one. Your new password must be at least 8 characters and include uppercase, lowercase, and a special character.
+      </div>
+    </div>
+
+    <div class="help-faq-item">
+      <button class="help-faq-question" type="button">
+        How do I set up two-factor authentication?
+        <i class="bi bi-chevron-down help-faq-chevron"></i>
+      </button>
+      <div class="help-faq-answer">
+        Go to <strong>Settings → Password &amp; security</strong> and follow the steps to enable two-factor authentication using an authenticator app.
+      </div>
+    </div>
+
+    <div class="help-faq-item">
+      <button class="help-faq-question" type="button">
+        How do I track my workout history?
+        <i class="bi bi-chevron-down help-faq-chevron"></i>
+      </button>
+      <div class="help-faq-answer">
+        Your completed workouts are automatically saved and can be viewed in the <strong>Workout History</strong> section from the bottom navigation bar.
+      </div>
+    </div>
+
+    <div class="help-faq-item">
+      <button class="help-faq-question" type="button">
+        How do I delete my account?
+        <i class="bi bi-chevron-down help-faq-chevron"></i>
+      </button>
+      <div class="help-faq-answer">
+        Go to <strong>Settings</strong> and scroll to the bottom. Tap <strong>Delete account</strong> and confirm. This action is permanent and cannot be undone.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Contact -->
+  <p class="settings-section-label">CONTACT SUPPORT</p>
+
+  <div class="settings-group">
+    <div class="help-contact-card">
+      <i class="bi bi-envelope-fill help-contact-icon"></i>
+      <div>
+        <p class="help-contact-title">Email us</p>
+        <p class="help-contact-sub">support@physioapp.com</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<%- include('../partials/bottomNav') %>
+
+<style>
+.help-search-wrap {
+  position: relative;
+  margin-bottom: 20px;
+}
+.help-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 14px;
+}
+.help-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 36px;
+  border-radius: 12px;
+  border: 1px solid #E0E0E0;
+  font-size: 14px;
+  background: #fff;
+  outline: none;
+}
+.help-search-input:focus {
+  border-color: #E7B04A;
+  box-shadow: 0 0 0 2px rgba(231,176,74,0.2);
+}
+.help-faq-item {
+  border-bottom: 1px solid #F0EDE8;
+}
+.help-faq-item:last-child {
+  border-bottom: none;
+}
+.help-faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  gap: 10px;
+}
+.help-faq-chevron {
+  font-size: 13px;
+  color: #999;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+.help-faq-item.open .help-faq-chevron {
+  transform: rotate(180deg);
+}
+.help-faq-answer {
+  display: none;
+  padding: 0 16px 14px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+}
+.help-faq-item.open .help-faq-answer {
+  display: block;
+}
+.help-contact-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+}
+.help-contact-icon {
+  font-size: 20px;
+  color: #E7B04A;
+}
+.help-contact-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  color: #1a1a1a;
+}
+.help-contact-sub {
+  font-size: 13px;
+  color: #777;
+  margin: 0;
+}
+.help-faq-item--hidden {
+  display: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Accordion
+  document.querySelectorAll('.help-faq-question').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const item = this.closest('.help-faq-item');
+      item.classList.toggle('open');
+    });
+  });
+
+  // Search filter
+  document.getElementById('helpSearch').addEventListener('input', function () {
+    const query = this.value.toLowerCase();
+    document.querySelectorAll('.help-faq-item').forEach(function (item) {
+      const text = item.textContent.toLowerCase();
+      item.classList.toggle('help-faq-item--hidden', query !== '' && !text.includes(query));
+    });
+  });
+});
+</script>
