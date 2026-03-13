@@ -20,8 +20,8 @@ class UserProfileService {
     await this.#dao.upsertBodyMetrics(userId, { heightCm, weightKg });
   }
 
-  async updateGoalsAndPreferences(userId, { fitnessLevel, exercisePreference, workoutDurationMin, goals }) {
-    await this.#dao.upsertGoalsAndPreferences(userId, { fitnessLevel, exercisePreference, workoutDurationMin, goals });
+  async updateGoalsAndPreferences(userId, { fitnessLevel, exercisePreference, workoutDurationMin, goals, availableEquipment }) {
+    await this.#dao.upsertGoalsAndPreferences(userId, { fitnessLevel, exercisePreference, workoutDurationMin, goals, availableEquipment });
   }
 
   async updatePainAreas(userId, { painAreas, painStatus, painIntensity }) {
