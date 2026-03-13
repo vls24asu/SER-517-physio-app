@@ -10,22 +10,24 @@ const profileService = new UserProfileService();
 ========================= */
 
 const getRegister = (req, res) => {
-  res.render('auth/register', { errors: [] });
+  res.render('auth/register', { errors: [], fullName: '', email: '' });
 };
 
 const postRegister = async (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.render('auth/register', { errors: errors.array() });
-  }
-
   const { fullName, email, password } = req.body;
+
+  if (!errors.isEmpty()) {
+    return res.render('auth/register', { errors: errors.array(), fullName, email });
+  }
 
   try {
     const emailTaken = await userService.isEmailTaken(email);
     if (emailTaken) {
       return res.render('auth/register', {
-        errors: [{ msg: 'Email is already registered' }]
+        errors: [{ msg: 'Email is already registered' }],
+        fullName,
+        email
       });
     }
 
