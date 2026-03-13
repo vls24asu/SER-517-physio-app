@@ -28,13 +28,13 @@
       <!-- Full Name -->
       <div class="mb-3">
         <label for="fullName" class="form-label">Full Name</label>
-        <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Enter your name" required>
+        <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Enter your name" value="<%= typeof fullName !== 'undefined' ? fullName : '' %>" required>
       </div>
 
       <!-- Email -->
       <div class="mb-3">
         <label for="email" class="form-label">Email address</label>
-        <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com" required>
+        <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com" value="<%= typeof email !== 'undefined' ? email : '' %>" required>
       </div>
 
       <!-- Password -->
