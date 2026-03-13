@@ -25,6 +25,7 @@ CREATE TABLE `Exercise` (
     reps VARCHAR(45) NULL,
     hold_time_sec INT NULL,
     rest_time_sec INT NULL,
+    sessions_count INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -91,6 +92,8 @@ CREATE TABLE `User_Profile` (
     goals TEXT NULL,
     workout_duration_min INT NULL DEFAULT 30,
     pain_areas TEXT NULL,
+    pain_status ENUM('yes', 'no') NULL,
+    pain_intensity INT NULL,
     notes TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

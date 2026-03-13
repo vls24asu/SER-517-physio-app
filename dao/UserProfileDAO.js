@@ -48,19 +48,20 @@ class UserProfileDAO {
     }
   }
 
-  async upsertGoalsAndPreferences(userId, { fitnessLevel, exercisePreference, workoutDurationMin, goals }) {
+  async upsertGoalsAndPreferences(userId, { fitnessLevel, exercisePreference, workoutDurationMin, goals, availableEquipment }) {
     const conn = await this.#connectionManager.getConnection();
     try {
       await conn.execute(
-        `INSERT INTO User_Profile (user_id, fitness_level, exercise_preference, workout_duration_min, goals)
-         VALUES (?, ?, ?, ?, ?)
+        `INSERT INTO User_Profile (user_id, fitness_level, exercise_preference, workout_duration_min, goals, available_equipment)
+         VALUES (?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
            fitness_level = VALUES(fitness_level),
            exercise_preference = VALUES(exercise_preference),
            workout_duration_min = VALUES(workout_duration_min),
            goals = VALUES(goals),
+           available_equipment = VALUES(available_equipment),
            updated_at = CURRENT_TIMESTAMP`,
-        [userId, fitnessLevel || 'beginner', exercisePreference || 'both', workoutDurationMin || 30, goals || null]
+        [userId, fitnessLevel || 'beginner', exercisePreference || 'both', workoutDurationMin || 30, goals || null, availableEquipment || null]
       );
     } finally {
       conn.release();
