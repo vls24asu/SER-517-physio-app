@@ -1,0 +1,64 @@
+<main class="page">
+  <h1 class="page-title">Routines</h1>
+
+  <% if (success && success.length) { %>
+    <div class="alert success"><%= success[0] %></div>
+  <% } %>
+  <% if (error && error.length) { %>
+    <div class="alert error"><%= error[0] %></div>
+  <% } %>
+
+  <section class="card">
+    <h2 class="card-title">Add an exercise</h2>
+
+    <form method="POST" action="/routines/add" class="form-row">
+      <select name="exercise_id" required>
+        <option value="">Select exercise...</option>
+        <% exercises.forEach(ex => { %>
+          <option value="<%= ex.id %>"><%= ex.name %> (<%= ex.category %>)</option>
+        <% }) %>
+      </select>
+      <button class="btn" type="submit">Add</button>
+    </form>
+
+    <form method="POST" action="/routines/start-session" style="margin-top:12px;">
+      <button class="btn btn-start-session" type="submit">Start a session</button>
+    </form>
+  </section>
+
+  <section class="card" style="margin-top:16px;">
+    <h2 class="card-title">Your routine</h2>
+
+    <% if (routine.length === 0) { %>
+      <p>No exercises yet. Add some above.</p>
+    <% } else { %>
+      <ul class="list">
+        <% routine.forEach(item => { %>
+          <li class="list-item">
+            <div>
+              <strong><%= item.name %></strong>
+              <span style="opacity:.7"> — <%= item.category %></span>
+              <% if (item.is_completed) { %>
+                <span style="margin-left:8px;">✅</span>
+              <% } %>
+            </div>
+
+            <div class="actions">
+              <% if (!item.is_completed) { %>
+                <form method="POST" action="/routines/complete" style="display:inline;">
+                  <input type="hidden" name="entry_id" value="<%= item.id %>"/>
+                  <button class="btn" type="submit">Complete</button>
+                </form>
+              <% } %>
+
+              <form method="POST" action="/routines/remove" style="display:inline;">
+                <input type="hidden" name="entry_id" value="<%= item.id %>"/>
+                <button class="btn" type="submit">Remove</button>
+              </form>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+</main>
