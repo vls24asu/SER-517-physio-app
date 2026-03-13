@@ -161,7 +161,14 @@ const completeOnboarding = async (req, res) => {
     const userId = req.session.user.id;
     const body = req.body;
 
-    // Body metrics — convert to cm/kg
+    // Age validation
+    const age = body.age ? parseInt(body.age) : null;
+    if (age !== null && (age < 10 || age > 110)) {
+      req.flash('error', 'Age must be between 10 and 110.');
+      return res.redirect('/onboarding');
+    }
+
+    // Body metrics — convert to cm/kg with real human bounds
     const heightVal = parseFloat(body.height) || null;
     const weightVal = parseFloat(body.weight) || null;
     const heightCm = heightVal
@@ -170,6 +177,15 @@ const completeOnboarding = async (req, res) => {
     const weightKg = weightVal
       ? (body.weight_unit === 'lb' ? parseFloat((weightVal / 2.2046).toFixed(1)) : weightVal)
       : null;
+
+    if (heightCm !== null && (heightCm < 50 || heightCm > 275)) {
+      req.flash('error', 'Please enter a valid height.');
+      return res.redirect('/onboarding');
+    }
+    if (weightKg !== null && (weightKg < 20 || weightKg > 300)) {
+      req.flash('error', 'Please enter a valid weight.');
+      return res.redirect('/onboarding');
+    }
 
     // Gender
     const gender = GENDER_MAP[body.gender] || 'prefer_not_to_say';
@@ -197,7 +213,7 @@ const completeOnboarding = async (req, res) => {
     const painIntensity = body.pain_intensity !== undefined ? parseInt(body.pain_intensity) : null;
 
     await profileService.updateBodyMetrics(userId, { heightCm, weightKg });
-    await profileService.updatePersonalInfo(userId, { age: null, gender });
+    await profileService.updatePersonalInfo(userId, { age, gender });
     await profileService.updateGoalsAndPreferences(userId, {
       fitnessLevel,
       exercisePreference: 'both',
