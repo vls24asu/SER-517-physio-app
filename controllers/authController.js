@@ -142,22 +142,88 @@ const sessionStatus = (req, res) => {
    ONBOARDING COMPLETE
 ========================= */
 
+const VALID_PAIN_AREAS = ['neck', 'back', 'shoulders', 'knees'];
+
+const GENDER_MAP = {
+  male: 'male',
+  female: 'female',
+  nonbinary: 'non-binary',
+  other: 'prefer_not_to_say',
+  '': 'prefer_not_to_say'
+};
+
 const completeOnboarding = async (req, res) => {
   if (!req.session.user) {
     return res.redirect('/login');
   }
 
   try {
-    const { pain_status, pain_intensity } = req.body;
-    const rawAreas = req.body.pain_areas;
-    const painAreas = Array.isArray(rawAreas) ? rawAreas.join(',') : (rawAreas || null);
-    await profileService.updatePainAreas(req.session.user.id, {
-      painAreas,
-      painStatus: pain_status || null,
-      painIntensity: pain_intensity !== undefined ? pain_intensity : null
-    });
+    const userId = req.session.user.id;
+    const body = req.body;
 
-    await userService.markOnboardingComplete(req.session.user.id);
+    // Age validation
+    const age = body.age ? parseInt(body.age) : null;
+    if (age !== null && (age < 10 || age > 110)) {
+      req.flash('error', 'Age must be between 10 and 110.');
+      return res.redirect('/onboarding');
+    }
+
+    // Body metrics — convert to cm/kg with real human bounds
+    const heightVal = parseFloat(body.height) || null;
+    const weightVal = parseFloat(body.weight) || null;
+    const heightCm = heightVal
+      ? (body.height_unit === 'in' ? parseFloat((heightVal * 2.54).toFixed(1)) : heightVal)
+      : null;
+    const weightKg = weightVal
+      ? (body.weight_unit === 'lb' ? parseFloat((weightVal / 2.2046).toFixed(1)) : weightVal)
+      : null;
+
+    if (heightCm !== null && (heightCm < 50 || heightCm > 275)) {
+      req.flash('error', 'Please enter a valid height.');
+      return res.redirect('/onboarding');
+    }
+    if (weightKg !== null && (weightKg < 20 || weightKg > 300)) {
+      req.flash('error', 'Please enter a valid weight.');
+      return res.redirect('/onboarding');
+    }
+
+    // Gender
+    const gender = GENDER_MAP[body.gender] || 'prefer_not_to_say';
+
+    // Goals & preferences
+    const fitnessLevel = ['beginner', 'intermediate', 'advanced'].includes(body.activity_level)
+      ? body.activity_level : 'beginner';
+    const workoutDurationMin = body.session_duration ? parseInt(body.session_duration) : 30;
+    const goals = body.primary_goal || null;
+
+    // Equipment — single or multi-select
+    const rawEquipment = body['equipment[]'] || body.equipment;
+    const availableEquipment = Array.isArray(rawEquipment)
+      ? rawEquipment.join(',')
+      : (rawEquipment || null);
+
+    // Pain areas — whitelist validated
+    const rawAreas = body['pain_areas[]'] || body.pain_areas;
+    const areasArray = Array.isArray(rawAreas) ? rawAreas : (rawAreas ? [rawAreas] : []);
+    const painAreas = areasArray.filter(a => VALID_PAIN_AREAS.includes(a)).join(',') || null;
+
+    // Pain status & intensity
+    const painStatus = body.pain_status === 'yes' || body.pain_status === 'no'
+      ? body.pain_status : null;
+    const painIntensity = body.pain_intensity !== undefined ? parseInt(body.pain_intensity) : null;
+
+    await profileService.updateBodyMetrics(userId, { heightCm, weightKg });
+    await profileService.updatePersonalInfo(userId, { age, gender });
+    await profileService.updateGoalsAndPreferences(userId, {
+      fitnessLevel,
+      exercisePreference: 'both',
+      workoutDurationMin,
+      goals,
+      availableEquipment
+    });
+    await profileService.updatePainAreas(userId, { painAreas, painStatus, painIntensity });
+
+    await userService.markOnboardingComplete(userId);
     return res.redirect('/dashboard');
   } catch (err) {
     console.error(err);

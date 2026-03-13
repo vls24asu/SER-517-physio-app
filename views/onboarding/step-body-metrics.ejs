@@ -5,16 +5,31 @@
 
   <div class="dual-fields">
     <div class="dual-field">
+      <label class="field-label">Age</label>
+      <input
+        type="number"
+        class="form-control fancy-input"
+        name="age"
+        placeholder="25"
+        min="10"
+        max="110"
+      >
+    </div>
+
+    <div class="dual-field">
       <label class="field-label">Height</label>
       <div class="dual-input">
         <input
+          id="heightInput"
           type="number"
           class="form-control fancy-input"
           name="height"
           placeholder="170"
+          min="50"
+          max="275"
         >
         <div class="select-wrapper unit-select">
-          <select class="form-select" name="height_unit">
+          <select id="heightUnit" class="form-select" name="height_unit">
             <option value="cm">cm</option>
             <option value="in">in</option>
           </select>
@@ -26,13 +41,16 @@
       <label class="field-label">Weight</label>
       <div class="dual-input">
         <input
+          id="weightInput"
           type="number"
           class="form-control fancy-input"
           name="weight"
           placeholder="70"
+          min="20"
+          max="300"
         >
         <div class="select-wrapper unit-select">
-          <select class="form-select" name="weight_unit">
+          <select id="weightUnit" class="form-select" name="weight_unit">
             <option value="kg">kg</option>
             <option value="lb">lb</option>
           </select>
@@ -59,4 +77,32 @@
     <button type="button" class="btn btn-yellow next-btn">Continue</button>
   </div>
 </div>
+
+<script>
+  (function () {
+    const heightInput = document.getElementById('heightInput');
+    const heightUnit  = document.getElementById('heightUnit');
+    const weightInput = document.getElementById('weightInput');
+    const weightUnit  = document.getElementById('weightUnit');
+
+    const heightLimits = { cm: { min: 50,  max: 275, placeholder: '170' },
+                           in: { min: 20,  max: 108, placeholder: '67'  } };
+    const weightLimits = { kg: { min: 20,  max: 300, placeholder: '70'  },
+                           lb: { min: 44,  max: 660, placeholder: '154' } };
+
+    heightUnit.addEventListener('change', function () {
+      const l = heightLimits[this.value];
+      heightInput.min = l.min; heightInput.max = l.max;
+      heightInput.placeholder = l.placeholder;
+      heightInput.value = '';
+    });
+
+    weightUnit.addEventListener('change', function () {
+      const l = weightLimits[this.value];
+      weightInput.min = l.min; weightInput.max = l.max;
+      weightInput.placeholder = l.placeholder;
+      weightInput.value = '';
+    });
+  })();
+</script>
 
