@@ -1,64 +1,67 @@
-<main class="page">
-  <h1 class="page-title">Routines</h1>
+<div class="settings-container">
+  <div class="settings-header">
+    <h1 class="settings-title">Routines</h1>
+  </div>
 
   <% if (success && success.length) { %>
-    <div class="alert success"><%= success[0] %></div>
+    <div class="alert alert-success mb-3"><%= success[0] %></div>
   <% } %>
   <% if (error && error.length) { %>
-    <div class="alert error"><%= error[0] %></div>
+    <div class="alert alert-danger mb-3"><%= error[0] %></div>
   <% } %>
 
-  <section class="card">
-    <h2 class="card-title">Add an exercise</h2>
+  <!-- Add an exercise -->
+  <p class="settings-section-label">ADD AN EXERCISE</p>
 
-    <form method="POST" action="/routines/add" class="form-row">
-      <select name="exercise_id" required>
+  <div class="library-detail-card">
+    <form method="POST" action="/routines/add">
+      <select name="exercise_id" required class="routines-select">
         <option value="">Select exercise...</option>
         <% exercises.forEach(ex => { %>
           <option value="<%= ex.id %>"><%= ex.name %> (<%= ex.category %>)</option>
         <% }) %>
       </select>
-      <button class="btn" type="submit">Add</button>
+      <button class="btn-settings-save" type="submit" style="margin-top:12px;">Add to routine</button>
     </form>
 
     <form method="POST" action="/routines/start-session" style="margin-top:12px;">
-      <button class="btn btn-start-session" type="submit">Start a session</button>
+      <button class="btn-start-session" type="submit">Start a session</button>
     </form>
-  </section>
+  </div>
 
-  <section class="card" style="margin-top:16px;">
-    <h2 class="card-title">Your routine</h2>
+  <!-- Your routine -->
+  <p class="settings-section-label" style="margin-top:24px;">YOUR ROUTINE</p>
 
-    <% if (routine.length === 0) { %>
-      <p>No exercises yet. Add some above.</p>
-    <% } else { %>
-      <ul class="list">
-        <% routine.forEach(item => { %>
-          <li class="list-item">
-            <div>
-              <strong><%= item.name %></strong>
-              <span style="opacity:.7"> — <%= item.category %></span>
-              <% if (item.is_completed) { %>
-                <span style="margin-left:8px;">✅</span>
-              <% } %>
-            </div>
-
-            <div class="actions">
-              <% if (!item.is_completed) { %>
-                <form method="POST" action="/routines/complete" style="display:inline;">
-                  <input type="hidden" name="entry_id" value="<%= item.id %>"/>
-                  <button class="btn" type="submit">Complete</button>
-                </form>
-              <% } %>
-
+  <% if (routine.length === 0) { %>
+    <div class="library-detail-card" style="text-align:center; color:#888; font-size:0.95rem;">
+      No exercises yet. Add some above.
+    </div>
+  <% } else { %>
+    <div class="routines-list">
+      <% routine.forEach(item => { %>
+        <div class="routines-item">
+          <div class="routines-item-info">
+            <span class="routines-item-name"><%= item.name %></span>
+            <span class="routines-item-category"><%= item.category %></span>
+          </div>
+          <% if (item.is_completed) { %>
+            <span class="routines-item-done">✅ Done</span>
+          <% } else { %>
+            <div class="routines-item-actions">
+              <form method="POST" action="/routines/complete" style="display:inline;">
+                <input type="hidden" name="entry_id" value="<%= item.id %>"/>
+                <button class="routines-btn routines-btn--complete" type="submit">Complete</button>
+              </form>
               <form method="POST" action="/routines/remove" style="display:inline;">
                 <input type="hidden" name="entry_id" value="<%= item.id %>"/>
-                <button class="btn" type="submit">Remove</button>
+                <button class="routines-btn routines-btn--remove" type="submit">Remove</button>
               </form>
             </div>
-          </li>
-        <% }) %>
-      </ul>
-    <% } %>
-  </section>
-</main>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/bottomNav') %>
