@@ -122,6 +122,20 @@ class UserProfileDAO {
       conn.release();
     }
   }
+
+  async getOnboardingStatus(userId) {
+    const conn = await this.#connectionManager.getConnection();
+    try {
+      const [rows] = await conn.execute(
+        'SELECT onboarding_completed FROM User WHERE id = ?',
+        [userId]
+      );
+      if (rows.length === 0) return { completed: false, step: 1 };
+      return { completed: !!rows[0].onboarding_completed, step: 1 };
+    } finally {
+      conn.release();
+    }
+  }
 }
 
 module.exports = UserProfileDAO;
