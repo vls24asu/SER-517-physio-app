@@ -18,22 +18,80 @@
     <p class="library-subtitle">Browse all workouts and programs</p>
   </div>
 
-  <form action="/library" method="GET" class="library-search-form" role="search">
-    <div class="library-search-input-wrap">
+  <form action="/library" method="GET" class="library-search-form" role="search" id="librarySearchForm">
+    <div class="library-search-input-wrap" style="position: relative;">
       <i class="bi bi-search library-search-icon" aria-hidden="true"></i>
       <input
         type="text"
         name="search"
+        id="librarySearchInput"
         class="library-search-input"
         placeholder="Search exercises..."
         value="<%= searchQuery %>"
         aria-label="Search exercises"
+        autocomplete="off"
       >
       <% if (activeCategory && activeCategory !== 'all') { %>
         <input type="hidden" name="category" value="<%= activeCategory %>">
       <% } %>
+      <ul id="searchSuggestions" style="
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0; right: 0;
+        background: #fff;
+        border: 1px solid #E0D3BE;
+        border-radius: 12px;
+        margin-top: 4px;
+        padding: 4px 0;
+        list-style: none;
+        z-index: 100;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      "></ul>
     </div>
   </form>
+
+  <script>
+    (function () {
+      const input = document.getElementById('librarySearchInput');
+      const list  = document.getElementById('searchSuggestions');
+      let debounceTimer;
+
+      const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' };
+
+      input.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        const q = this.value.trim();
+        if (q.length < 2) { list.style.display = 'none'; return; }
+
+        debounceTimer = setTimeout(async () => {
+          try {
+            const res  = await fetch('/library/suggestions?q=' + encodeURIComponent(q));
+            const data = await res.json();
+            list.innerHTML = '';
+            if (data.length === 0) { list.style.display = 'none'; return; }
+
+            data.forEach(ex => {
+              const li = document.createElement('li');
+              li.style.cssText = 'padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 14px;';
+              li.innerHTML = '<span>' + (categoryEmoji[ex.category] || '🏋️') + '</span><span>' + ex.name + '</span>';
+              li.addEventListener('mousedown', () => {
+                window.location.href = '/library/' + ex.id;
+              });
+              li.addEventListener('mouseover', () => li.style.background = '#FAF6EE');
+              li.addEventListener('mouseout',  () => li.style.background = '');
+              list.appendChild(li);
+            });
+            list.style.display = 'block';
+          } catch (e) { list.style.display = 'none'; }
+        }, 250);
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!input.contains(e.target)) list.style.display = 'none';
+      });
+    })();
+  </script>
 
   <div class="library-filter-tabs" role="tablist" aria-label="Exercise categories">
     <a
