@@ -75,8 +75,31 @@ const searchExercises = async (req, res) => {
   }
 };
 
+/**
+ * GET /library/suggestions?q=
+ * Returns JSON array of matching exercise names for autocomplete
+ */
+const getSuggestions = async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.trim().length < 2) return res.json([]);
+
+    const exercises = await exerciseService.searchExercises(q.trim());
+    const suggestions = exercises.slice(0, 8).map(e => ({
+      id: e.id,
+      name: e.name,
+      category: e.category
+    }));
+    res.json(suggestions);
+  } catch (err) {
+    console.error(err);
+    res.json([]);
+  }
+};
+
 module.exports = {
   getLibrary,
   getExerciseDetail,
-  searchExercises
+  searchExercises,
+  getSuggestions
 };

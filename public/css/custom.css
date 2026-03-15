@@ -1,9 +1,14 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: #FCF7EE;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  overflow-x: hidden;
 }
 
 main {
@@ -11,6 +16,7 @@ main {
 }
 
 .dashboard-container {
+  width: 100%;
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
@@ -145,10 +151,11 @@ main {
 
 /* Profile Styles */
 .profile-container {
+  width: 100%;
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
-  padding-bottom: 100px; /* Extra space for bottom nav */
+  padding-bottom: 100px;
 }
 
 .profile-title {
@@ -349,9 +356,11 @@ main {
 }
 
 .profile-edit-container {
+  width: 100%;
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
+  padding-bottom: 100px;
 }
 
 .profile-edit-form {
@@ -421,6 +430,7 @@ main {
    ============================================= */
 
 .settings-container {
+  width: 100%;
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
@@ -793,6 +803,7 @@ main {
    ============================================= */
 
 .achievements-container {
+  width: 100%;
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
@@ -865,6 +876,7 @@ main {
    ============================================= */
 
 .history-container {
+  width: 100%;
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
@@ -971,6 +983,7 @@ main {
 
 .library-container,
 .library-detail-container {
+  width: 100%;
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
@@ -1329,6 +1342,7 @@ main {
    ============================================= */
 
 .progress-page-container {
+  width: 100%;
   max-width: 600px;
   margin: 0 auto;
   padding: 20px;
@@ -1484,4 +1498,107 @@ main {
   .library-detail-stats-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* =============================================
+   Routines Page Styles
+   ============================================= */
+
+.routines-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #000;
+  background: #fafafa;
+  font-family: inherit;
+  outline: none;
+  appearance: auto;
+  box-sizing: border-box;
+}
+
+.routines-select:focus {
+  border-color: #F7B32B;
+  box-shadow: 0 0 0 2px rgba(247,179,43,0.2);
+}
+
+.routines-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.routines-item {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid rgba(0,0,0,0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.routines-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.routines-item-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.routines-item-category {
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: capitalize;
+}
+
+.routines-item-done {
+  font-size: 0.82rem;
+  color: #27ae60;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.routines-item-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.routines-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.2s;
+}
+
+.routines-btn:hover {
+  opacity: 0.8;
+}
+
+.routines-btn--complete {
+  background: #F7B32B;
+  color: #000;
+}
+
+.routines-btn--remove {
+  background: #f0f0f0;
+  color: #555;
 }
