@@ -321,6 +321,52 @@ document.addEventListener("DOMContentLoaded", function () {
 
   let currentStep = 0;
 
+// ADD THIS
+document.querySelectorAll(".step input:not([type='hidden']):not([type='range']), .step select")
+.forEach(el => {
+  el.setAttribute("required","required");
+});
+
+document.querySelectorAll(".step select").forEach(select => {
+
+  if(!select.querySelector("option[value='']")){
+
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Select an option";
+    option.disabled = true;
+    option.selected = true;
+
+    select.insertBefore(option, select.firstChild);
+  }
+
+});
+
+  function validateStep() {
+  const step = steps[currentStep];
+
+  const cards = step.querySelectorAll(".select-card");
+  const activeCards = step.querySelectorAll(".select-card.active");
+
+  const requiredInputs = step.querySelectorAll("select[required], input[required]");
+
+  // check card selections
+  if (cards.length > 0 && activeCards.length === 0) {
+    alert("Please select an option before continuing.");
+    return false;
+  }
+
+  // check required inputs
+  for (let input of requiredInputs) {
+    if (!input.value) {
+      alert("Please fill all required fields.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
   function updateStep() {
     steps.forEach((step, i) => {
       step.style.display = i === currentStep ? "block" : "none";
@@ -330,7 +376,6 @@ document.addEventListener("DOMContentLoaded", function () {
       c.classList.toggle("active", i <= currentStep);
     });
   }
-
   function syncHiddenFields() {
     hiddenFieldsContainer.innerHTML = "";
 
@@ -361,13 +406,18 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   nextBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      if (currentStep < steps.length - 1) {
-        currentStep++;
-        updateStep();
-        syncHiddenFields();
-      }
-    });
+  btn.addEventListener("click", () => {
+
+    if (!validateStep()) return;
+
+    if (currentStep < steps.length - 1) {
+      currentStep++;
+      updateStep();
+      syncHiddenFields();
+    } else {
+  document.querySelector("form").submit();
+}
+  });
   });
 
   prevBtns.forEach(btn => {

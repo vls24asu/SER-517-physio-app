@@ -1,5 +1,4 @@
-<!-- STEP 5: Activity level -->
-<div class="step">
+<div class="step" data-required="true">
   <h4 class="step-title">Activity Level</h4>
   <p class="subtitle">How active are you currently?</p>
 
@@ -13,6 +12,7 @@
         </div>
       </div>
     </div>
+
     <div class="select-card" data-name="activity_level" data-value="intermediate">
       <div class="select-card-content">
         <span class="emoji">🏃</span>
@@ -22,6 +22,7 @@
         </div>
       </div>
     </div>
+
     <div class="select-card" data-name="activity_level" data-value="advanced">
       <div class="select-card-content">
         <span class="emoji">🏋️</span>
@@ -36,7 +37,8 @@
   <div class="mb-3 mt-3">
     <label class="field-label">Preferred session duration</label>
     <div class="select-wrapper">
-      <select class="form-select" name="session_duration">
+      <select class="form-select" name="session_duration" required>
+        <option value="" disabled selected>Select duration</option>
         <option value="15-20">15–20 minutes</option>
         <option value="20-30">20–30 minutes</option>
         <option value="30-45">30–45 minutes</option>
@@ -49,4 +51,3 @@
     <button type="button" class="btn btn-yellow next-btn">Continue</button>
   </div>
 </div>
-
