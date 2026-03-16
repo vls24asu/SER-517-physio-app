@@ -1,0 +1,58 @@
+<%
+  const categoryLabel = { strengthen: 'Strength', stretch: 'Stretch', avoid: 'Avoid' };
+  const categoryColor = { strengthen: 'saved-tag--yellow', stretch: 'saved-tag--blue', avoid: 'saved-tag--red' };
+%>
+
+<div class="settings-container">
+  <div class="settings-header">
+    <a href="/dashboard" class="back-btn"><i class="bi bi-arrow-left"></i></a>
+    <h1 class="settings-title">Saved Routines</h1>
+  </div>
+
+  <p class="settings-section-label" style="margin-bottom:16px;">Quick access to your favourite workout combinations</p>
+
+  <% if (routines.length === 0) { %>
+    <div class="library-detail-card" style="text-align:center; padding:40px 20px;">
+      <div style="font-size:2.5rem; margin-bottom:12px;">📋</div>
+      <p style="font-weight:700; font-size:1.1rem; margin-bottom:6px;">No routines yet</p>
+      <p style="color:#888; font-size:0.9rem; margin-bottom:20px;">Create your first routine to get started.</p>
+      <a href="/routines" class="btn-start-session" style="display:block; text-decoration:none; text-align:center;">+ Create a routine</a>
+    </div>
+  <% } else { %>
+    <div class="saved-routines-list">
+      <% routines.forEach(r => { %>
+        <div class="saved-routine-card">
+          <div class="saved-routine-card-top">
+            <div class="saved-routine-card-info">
+              <h3 class="saved-routine-name"><%= r.name %></h3>
+              <p class="saved-routine-meta">
+                <% if (r.total_min > 0) { %><%= r.total_min %> min &bull; <% } %><%= r.exercise_count %> exercise<%= r.exercise_count !== 1 ? 's' : '' %>
+              </p>
+              <% if (r.category_list.length > 0) { %>
+                <div class="saved-routine-tags">
+                  <% r.category_list.forEach(cat => { %>
+                    <span class="saved-tag <%= categoryColor[cat] || '' %>"><%= categoryLabel[cat] || cat %></span>
+                  <% }) %>
+                </div>
+              <% } %>
+            </div>
+            <div class="saved-routine-emoji"><%= r.emoji || '🏋️' %></div>
+          </div>
+
+          <a href="#" class="btn-start-session saved-routine-start-btn">Start routine</a>
+
+          <form method="POST" action="/routines/saved/delete" style="margin-top:8px;">
+            <input type="hidden" name="routine_id" value="<%= r.id %>"/>
+            <button class="saved-routine-delete-btn" type="submit">Delete routine</button>
+          </form>
+        </div>
+      <% }) %>
+    </div>
+
+    <a href="/routines" class="btn-create-routine" style="display:block; text-align:center; text-decoration:none; margin-top:16px;">
+      + Create new routine
+    </a>
+  <% } %>
+</div>
+
+<%- include('../partials/bottomNav') %>

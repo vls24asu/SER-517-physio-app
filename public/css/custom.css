@@ -66,6 +66,27 @@ main {
   color: #000;
 }
 
+.btn-create-routine {
+  width: 100%;
+  background-color: transparent;
+  color: #000;
+  font-weight: 600;
+  padding: 14px;
+  border-radius: 12px;
+  border: 2px solid #F7B32B;
+  font-size: 1rem;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-create-routine:hover {
+  background-color: #F7B32B;
+  color: #000;
+}
+
 .activity-cards {
   display: flex;
   flex-direction: column;
@@ -1601,4 +1622,109 @@ main {
 .routines-btn--remove {
   background: #f0f0f0;
   color: #555;
+}
+
+/* =============================================
+   Saved Routines Card Styles
+   ============================================= */
+
+.saved-routines-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.saved-routine-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px 16px 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid rgba(0,0,0,0.04);
+  box-sizing: border-box;
+}
+
+.saved-routine-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.saved-routine-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.saved-routine-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 4px;
+}
+
+.saved-routine-meta {
+  font-size: 0.82rem;
+  color: #888;
+  margin: 0 0 8px;
+}
+
+.saved-routine-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.saved-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #e0f0ff;
+  color: #2980b9;
+}
+
+.saved-tag--yellow {
+  background: #FFF3CC;
+  color: #c48a00;
+}
+
+.saved-tag--blue {
+  background: #e0f0ff;
+  color: #2980b9;
+}
+
+.saved-tag--red {
+  background: #ffe5e5;
+  color: #c0392b;
+}
+
+.saved-routine-emoji {
+  font-size: 2rem;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.saved-routine-start-btn {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+
+.saved-routine-delete-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #aaa;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 0;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+
+.saved-routine-delete-btn:hover {
+  color: #c0392b;
 }
