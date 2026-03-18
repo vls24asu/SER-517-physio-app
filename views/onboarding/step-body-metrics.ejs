@@ -30,7 +30,7 @@
         >
         <div class="select-wrapper unit-select">
           <select id="heightUnit" class="form-select" name="height_unit">
-            <option value="cm">cm</option>
+            <option value="cm" selected>cm</option>
             <option value="in">in</option>
           </select>
         </div>
@@ -51,7 +51,7 @@
         >
         <div class="select-wrapper unit-select">
           <select id="weightUnit" class="form-select" name="weight_unit">
-            <option value="kg">kg</option>
+            <option value="kg" selected>kg</option>
             <option value="lb">lb</option>
           </select>
         </div>
@@ -80,10 +80,20 @@
 
 <script>
   (function () {
+
     const heightInput = document.getElementById('heightInput');
     const heightUnit  = document.getElementById('heightUnit');
     const weightInput = document.getElementById('weightInput');
     const weightUnit  = document.getElementById('weightUnit');
+
+    setTimeout(() => {
+      heightUnit.value = "cm";
+      weightUnit.value = "kg";
+
+      // trigger change in case UI library needs it
+      heightUnit.dispatchEvent(new Event('change'));
+      weightUnit.dispatchEvent(new Event('change'));
+    }, 100);
 
     const heightLimits = { cm: { min: 50,  max: 275, placeholder: '170' },
                            in: { min: 20,  max: 108, placeholder: '67'  } };
