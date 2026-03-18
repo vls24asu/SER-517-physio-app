@@ -34,7 +34,10 @@
       <!-- Email -->
       <div class="mb-3">
         <label for="email" class="form-label">Email address</label>
-        <input type="email" class="form-control" id="email" name="email" placeholder="your.email@example.com" value="<%= typeof email !== 'undefined' ? email : '' %>" required>
+        <input type="text" class="form-control" id="email" name="email" placeholder="your.email@example.com" value="<%= typeof email !== 'undefined' ? email : '' %>" required>
+        <div class="pw-rules mt-2" id="emailRules" style="display:none;">
+          <p class="pw-rule" id="rule-email"><i class="bi bi-x-circle-fill"></i> Enter a valid email (e.g. name@example.com)</p>
+        </div>
       </div>
 
       <!-- Password -->
@@ -80,6 +83,26 @@
 </div>
 
 <script>
+  // Email validation
+  const emailInput = document.getElementById('email');
+  const emailRules = document.getElementById('emailRules');
+  const emailRule = document.getElementById('rule-email');
+  const emailIcon = emailRule.querySelector('i');
+
+  emailInput.addEventListener('input', () => {
+    const v = emailInput.value;
+    if (v.length === 0) { emailRules.style.display = 'none'; return; }
+    emailRules.style.display = 'block';
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    if (valid) {
+      emailRule.classList.add('pw-rule--pass');
+      emailIcon.className = 'bi bi-check-circle-fill';
+    } else {
+      emailRule.classList.remove('pw-rule--pass');
+      emailIcon.className = 'bi bi-x-circle-fill';
+    }
+  });
+
   // Password complexity rules
   const passwordInput = document.getElementById('password');
   const rules = {
