@@ -13,14 +13,14 @@ router.get('/', isAuthenticated, requireOnboardingComplete, async (req, res) => 
   const userId = req.session.user.id;
 
   const [exercises] = await db.query(
-    `SELECT id, name, category FROM Exercise ORDER BY name ASC`
+    `SELECT id, name, category FROM exercise ORDER BY name ASC`
   );
 
   const [routine] = await db.query(
     `SELECT re.id, re.sort_order,
             e.id AS exercise_id, e.name, e.category
      FROM Routine_Entry re
-     JOIN Exercise e ON e.id = re.exercise_id
+     JOIN exercise e ON e.id = re.exercise_id
      WHERE re.user_id = ?
      ORDER BY re.sort_order ASC, re.created_at DESC`,
     [userId]
@@ -122,7 +122,7 @@ router.get('/saved', isAuthenticated, requireOnboardingComplete, async (req, res
             GROUP_CONCAT(DISTINCT e.category ORDER BY e.category SEPARATOR ',') AS categories
      FROM Saved_Routine sr
      LEFT JOIN Saved_Routine_Entry sre ON sre.routine_id = sr.id
-     LEFT JOIN Exercise e ON e.id = sre.exercise_id
+     LEFT JOIN exercise e ON e.id = sre.exercise_id
      WHERE sr.user_id = ?
      GROUP BY sr.id
      ORDER BY sr.created_at DESC`,
@@ -159,7 +159,7 @@ router.get('/saved/:id/preview', isAuthenticated, requireOnboardingComplete, asy
             GROUP_CONCAT(DISTINCT e.category ORDER BY e.category SEPARATOR ',') AS categories
      FROM Saved_Routine sr
      LEFT JOIN Saved_Routine_Entry sre ON sre.routine_id = sr.id
-     LEFT JOIN Exercise e ON e.id = sre.exercise_id
+     LEFT JOIN exercise e ON e.id = sre.exercise_id
      WHERE sr.id = ? AND sr.user_id = ?
      GROUP BY sr.id`,
     [routineId, userId]
@@ -175,7 +175,7 @@ router.get('/saved/:id/preview', isAuthenticated, requireOnboardingComplete, asy
             e.id AS exercise_id, e.name, e.category,
             e.reps, e.sets, e.hold_time_sec, e.rest_time_sec
      FROM Saved_Routine_Entry sre
-     JOIN Exercise e ON e.id = sre.exercise_id
+     JOIN exercise e ON e.id = sre.exercise_id
      WHERE sre.routine_id = ?
      ORDER BY sre.sort_order ASC`,
     [routineId]
@@ -220,14 +220,14 @@ router.get('/saved/:id/edit', isAuthenticated, requireOnboardingComplete, async 
     `SELECT sre.id, sre.sort_order,
             e.id AS exercise_id, e.name, e.category
      FROM Saved_Routine_Entry sre
-     JOIN Exercise e ON e.id = sre.exercise_id
+     JOIN exercise e ON e.id = sre.exercise_id
      WHERE sre.routine_id = ?
      ORDER BY sre.sort_order ASC`,
     [routineId]
   );
 
   const [allExercises] = await db.query(
-    `SELECT id, name, category FROM Exercise ORDER BY name ASC`
+    `SELECT id, name, category FROM exercise ORDER BY name ASC`
   );
 
   res.render('routines/edit', { routine, entries, allExercises });
@@ -302,7 +302,7 @@ router.get('/saved/:id/session', isAuthenticated, requireOnboardingComplete, asy
   const [exercises] = await db.query(
     `SELECT e.name, e.category, e.sets, e.reps, e.hold_time_sec, e.tips, e.common_mistakes
      FROM Saved_Routine_Entry sre
-     JOIN Exercise e ON e.id = sre.exercise_id
+     JOIN exercise e ON e.id = sre.exercise_id
      WHERE sre.routine_id = ?
      ORDER BY sre.sort_order ASC`,
     [routineId]
@@ -345,7 +345,7 @@ router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
             GROUP_CONCAT(DISTINCT e.category ORDER BY e.category SEPARATOR ',') AS categories
      FROM Saved_Routine sr
      LEFT JOIN Saved_Routine_Entry sre ON sre.routine_id = sr.id
-     LEFT JOIN Exercise e ON e.id = sre.exercise_id
+     LEFT JOIN exercise e ON e.id = sre.exercise_id
      WHERE sr.id = ? AND sr.user_id = ?
      GROUP BY sr.id`,
     [routineId, userId]
