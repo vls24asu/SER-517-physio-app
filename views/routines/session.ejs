@@ -61,10 +61,21 @@
 
 </div>
 
+<!-- Session complete overlay -->
+<div id="sessionCompleteOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#FCF7EE; z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center;">
+  <div style="width:72px;height:72px;background:#F5A623;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:28px;">
+    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#000" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+  </div>
+  <h1 style="font-size:28px;font-weight:700;margin-bottom:8px;">Nice work, <span><%= currentUser ? currentUser.fullName.split(' ')[0] : 'User' %></span>.</h1>
+  <p style="color:#7A7A7A;font-size:15px;margin-bottom:48px;">You trained for <span id="completeMinutes">0</span> minutes today.</p>
+  <button id="doneBtn" style="width:100%;max-width:400px;background:#F5A623;border:none;border-radius:999px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;">Done</button>
+</div>
+
 <script>
   const steps = <%- stepsJson %>;
   const ARC_LEN = 2 * Math.PI * 50; // circumference for r=50
   const REST_DURATION = 30;
+  const sessionStartTime = Date.now();
 
   let currentStep = 0;
   let timerInterval = null;
@@ -101,11 +112,24 @@
     arc.style.strokeDashoffset = ARC_LEN * (1 - fraction);
   }
 
+  function showCompleteScreen() {
+    clearInterval(timerInterval);
+    clearInterval(restInterval);
+    var elapsedMin = Math.max(1, Math.round((Date.now() - sessionStartTime) / 60000));
+    document.getElementById('completeMinutes').textContent = elapsedMin;
+    var overlay = document.getElementById('sessionCompleteOverlay');
+    overlay.style.display = 'flex';
+  }
+
   function logAndRedirect() {
     fetch('/routines/saved/<%= routineId %>/log-session', { method: 'POST' })
       .catch(function() {})
-      .finally(function() { window.location.href = '/routines/saved'; });
+      .finally(showCompleteScreen);
   }
+
+  document.getElementById('doneBtn').addEventListener('click', function() {
+    window.location.href = '/routines/saved';
+  });
 
   function endRest(nextIdx) {
     document.getElementById('restOverlay').style.display = 'none';
