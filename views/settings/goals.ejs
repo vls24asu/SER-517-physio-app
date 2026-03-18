@@ -18,38 +18,25 @@
         </select>
       </div>
 
+      <input type="hidden" name="exercisePreference" value="<%= profile && profile.exercise_preference ? profile.exercise_preference : 'both' %>">
+
       <div class="settings-field">
-        <label class="settings-label" for="exercisePreference">Exercise type</label>
-        <select id="exercisePreference" name="exercisePreference" class="settings-input settings-select">
-          <option value="both" <%= profile && profile.exercise_preference === 'both' ? 'selected' : '' %>>Both</option>
-          <option value="stretch" <%= profile && profile.exercise_preference === 'stretch' ? 'selected' : '' %>>Stretching</option>
-          <option value="strengthen" <%= profile && profile.exercise_preference === 'strengthen' ? 'selected' : '' %>>Strengthening</option>
+        <label class="settings-label" for="goals">Goals</label>
+        <select id="goals" name="goals" class="settings-input settings-select">
+          <option value="build_strength"    <%= profile && profile.goals === 'build_strength'    ? 'selected' : '' %>>Build strength</option>
+          <option value="stretch_recover"   <%= profile && profile.goals === 'stretch_recover'   ? 'selected' : '' %>>Stretch and recover</option>
+          <option value="work_around_pain"  <%= profile && profile.goals === 'work_around_pain'  ? 'selected' : '' %>>Work around pain</option>
+          <option value="improve_mobility"  <%= profile && profile.goals === 'improve_mobility'  ? 'selected' : '' %>>Improve mobility</option>
         </select>
       </div>
 
-      <div class="settings-field">
-        <label class="settings-label" for="workoutDurationMin">Session duration (minutes)</label>
-        <input
-          type="number"
-          id="workoutDurationMin"
-          name="workoutDurationMin"
-          class="settings-input"
-          value="<%= profile && profile.workout_duration_min ? profile.workout_duration_min : 30 %>"
-          placeholder="e.g. 30"
-          min="5"
-          max="180"
-        >
-      </div>
-
       <div class="settings-field settings-field--last">
-        <label class="settings-label" for="goals">Goals</label>
-        <textarea
-          id="goals"
-          name="goals"
-          class="settings-input settings-textarea"
-          placeholder="e.g. Improve mobility, recover from knee injury..."
-          rows="3"
-        ><%= profile && profile.goals ? profile.goals : '' %></textarea>
+        <label class="settings-label" for="workoutDurationMin">Preferred session duration</label>
+        <select id="workoutDurationMin" name="workoutDurationMin" class="settings-input settings-select">
+          <option value="15" <%= profile && profile.workout_duration_min == 15 ? 'selected' : '' %>>15–20 minutes</option>
+          <option value="20" <%= profile && profile.workout_duration_min == 20 ? 'selected' : '' %>>20–30 minutes</option>
+          <option value="30" <%= profile && (profile.workout_duration_min == 30 || !profile.workout_duration_min) ? 'selected' : '' %>>30–45 minutes</option>
+        </select>
       </div>
     </div>
 
