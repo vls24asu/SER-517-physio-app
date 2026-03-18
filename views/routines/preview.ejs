@@ -1,0 +1,44 @@
+<%
+  const categoryLabel = { strengthen: 'Strength', stretch: 'Stretch', avoid: 'Avoid' };
+%>
+
+<div class="settings-container">
+  <div class="settings-header">
+    <a href="/routines/saved" class="back-btn"><i class="bi bi-arrow-left"></i></a>
+    <h1 class="settings-title"><%= routine.name %></h1>
+  </div>
+
+  <!-- Meta row: category tags + estimated time -->
+  <div class="session-meta-row">
+    <% routine.category_list.forEach(cat => { %>
+      <span class="session-meta-tag"><%= categoryLabel[cat] || cat %></span>
+    <% }) %>
+    <% if (routine.total_min > 0) { %>
+      <span class="session-meta-time">~<%= routine.total_min %> minutes</span>
+    <% } %>
+  </div>
+
+  <!-- Exercise list -->
+  <div class="session-exercise-list">
+    <% exercises.forEach(ex => { %>
+      <div class="session-exercise-card">
+        <div class="session-exercise-emoji"><%= ex.emoji %></div>
+        <div class="session-exercise-info">
+          <h3 class="session-exercise-name"><%= ex.name %></h3>
+          <% if (ex.meta) { %>
+            <p class="session-exercise-meta"><%= ex.meta %></p>
+          <% } %>
+          <span class="session-exercise-tag"><%= categoryLabel[ex.category] || ex.category %></span>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="session-action-bar">
+    <a href="/routines/saved/<%= routine.id %>/edit" class="btn-edit-exercises">Edit Exercises</a>
+    <a href="#" class="btn-start-session session-start-btn">Start Session</a>
+  </div>
+</div>
+
+<%- include('../partials/bottomNav') %>

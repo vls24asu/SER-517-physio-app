@@ -39,7 +39,10 @@
             <div class="saved-routine-emoji"><%= r.emoji || '🏋️' %></div>
           </div>
 
-          <a href="#" class="btn-start-session saved-routine-start-btn">Start routine</a>
+          <div class="saved-routine-btn-row">
+            <a href="/routines/saved/<%= r.id %>/preview" class="btn-start-session saved-routine-start-btn">Start routine</a>
+            <a href="/routines/saved/<%= r.id %>/edit" class="btn-edit-routine">Edit</a>
+          </div>
 
           <form method="POST" action="/routines/saved/delete" style="margin-top:8px;">
             <input type="hidden" name="routine_id" value="<%= r.id %>"/>
