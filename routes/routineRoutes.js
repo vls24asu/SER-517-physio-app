@@ -284,6 +284,89 @@ router.post('/saved/:id/remove', isAuthenticated, requireOnboardingComplete, asy
   res.redirect(`/routines/saved/${routineId}/edit`);
 });
 
+// Start session for a saved routine
+router.get('/saved/:id/session', isAuthenticated, requireOnboardingComplete, async (req, res) => {
+  const userId = req.session.user.id;
+  const routineId = Number(req.params.id);
+
+  const [[routine]] = await db.query(
+    `SELECT id, name FROM Saved_Routine WHERE id = ? AND user_id = ?`,
+    [routineId, userId]
+  );
+
+  if (!routine) {
+    req.flash('error', 'Routine not found.');
+    return res.redirect('/routines/saved');
+  }
+
+  const [exercises] = await db.query(
+    `SELECT e.name, e.category, e.sets, e.reps, e.hold_time_sec, e.tips, e.common_mistakes
+     FROM Saved_Routine_Entry sre
+     JOIN Exercise e ON e.id = sre.exercise_id
+     WHERE sre.routine_id = ?
+     ORDER BY sre.sort_order ASC`,
+    [routineId]
+  );
+
+  const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' };
+  const steps = [];
+  const totalExercises = exercises.length;
+
+  exercises.forEach((ex, exIdx) => {
+    const numSets = Math.max(1, Math.round(Number(ex.sets) || 1));
+    for (let s = 1; s <= numSets; s++) {
+      steps.push({
+        name: ex.name,
+        category: ex.category,
+        emoji: categoryEmoji[ex.category] || '🏋️',
+        exerciseNum: exIdx + 1,
+        totalExercises,
+        setNum: s,
+        totalSets: numSets,
+        timerSec: ex.hold_time_sec || 90,
+        reps: ex.reps || null,
+        tips: ex.tips || ex.common_mistakes || null
+      });
+    }
+  });
+
+  res.render('routines/session', { stepsJson: JSON.stringify(steps), routineId });
+});
+
+// Log a completed session
+router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
+  const userId = req.session.user.id;
+  const routineId = Number(req.params.id);
+
+  const [[routine]] = await db.query(
+    `SELECT sr.name,
+            COUNT(sre.id) AS exercise_count,
+            COALESCE(SUM(COALESCE(e.hold_time_sec, 0)), 0) AS total_seconds,
+            GROUP_CONCAT(DISTINCT e.category ORDER BY e.category SEPARATOR ',') AS categories
+     FROM Saved_Routine sr
+     LEFT JOIN Saved_Routine_Entry sre ON sre.routine_id = sr.id
+     LEFT JOIN Exercise e ON e.id = sre.exercise_id
+     WHERE sr.id = ? AND sr.user_id = ?
+     GROUP BY sr.id`,
+    [routineId, userId]
+  );
+
+  if (!routine) return res.json({ ok: false });
+
+  const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' };
+  const cats = routine.categories ? routine.categories.split(',') : [];
+  const emoji = categoryEmoji[cats[0]] || '🏋️';
+  const durationMin = Math.max(1, Math.round((routine.total_seconds || 0) / 60));
+
+  await db.query(
+    `INSERT INTO Workout_Session (user_id, title, duration_min, exercise_count, tags, emoji)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [userId, routine.name, durationMin, routine.exercise_count || 0, cats.join(','), emoji]
+  );
+
+  res.json({ ok: true });
+});
+
 // Delete a saved routine
 router.post('/saved/delete', isAuthenticated, requireOnboardingComplete, async (req, res) => {
   const userId = req.session.user.id;

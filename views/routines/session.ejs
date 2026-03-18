@@ -1,0 +1,143 @@
+<div class="ex-session-overlay">
+
+  <!-- Progress header -->
+  <div class="ex-progress-header">
+    <p class="ex-step-label">Exercise <span id="exNum">1</span> of <span id="exTotal">1</span></p>
+    <div class="ex-progress-bars" id="progressBars"></div>
+  </div>
+
+  <!-- Exercise name -->
+  <div class="ex-name-section">
+    <h1 class="ex-name" id="exName"></h1>
+    <p class="ex-set-label" id="exSetLabel"></p>
+  </div>
+
+  <!-- Circular timer -->
+  <div class="ex-timer-section">
+    <div class="ex-timer-ring">
+      <svg viewBox="0 0 120 120" width="160" height="160">
+        <circle class="ex-timer-bg" cx="60" cy="60" r="50"/>
+        <circle class="ex-timer-arc" id="timerArc" cx="60" cy="60" r="50"/>
+      </svg>
+      <div class="ex-timer-display">
+        <span id="timerDisplay">1:30</span>
+        <span class="ex-timer-label">remaining</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tips card -->
+  <div class="ex-tips-card" id="tipsCard">
+    <div class="ex-tips-emoji" id="tipsEmoji"></div>
+    <p id="tipsText"></p>
+  </div>
+
+  <!-- Mark as complete -->
+  <div class="ex-complete-section">
+    <button class="ex-complete-btn" id="completeBtn">Mark as Complete</button>
+    <button class="ex-end-btn" id="endBtn">End Workout</button>
+  </div>
+
+</div>
+
+<script>
+  const steps = <%- stepsJson %>;
+  const ARC_LEN = 2 * Math.PI * 50; // circumference for r=50
+
+  let currentStep = 0;
+  let timerInterval = null;
+  let timeLeft = 0;
+  let stepTimerSec = 0;
+
+  function renderProgressBars(activeIdx) {
+    const container = document.getElementById('progressBars');
+    container.innerHTML = '';
+    steps.forEach(function(_, i) {
+      const bar = document.createElement('div');
+      bar.className = 'ex-progress-bar' + (i <= activeIdx ? ' ex-progress-bar--done' : '');
+      container.appendChild(bar);
+    });
+  }
+
+  function updateTimerDisplay() {
+    const mins = Math.floor(timeLeft / 60);
+    const secs = timeLeft % 60;
+    document.getElementById('timerDisplay').textContent =
+      mins + ':' + String(secs).padStart(2, '0');
+
+    const arc = document.getElementById('timerArc');
+    const fraction = stepTimerSec > 0 ? timeLeft / stepTimerSec : 0;
+    arc.style.strokeDashoffset = ARC_LEN * (1 - fraction);
+  }
+
+  function logAndRedirect() {
+    fetch('/routines/saved/<%= routineId %>/log-session', { method: 'POST' })
+      .catch(function() {})
+      .finally(function() { window.location.href = '/routines/saved'; });
+  }
+
+  function advance() {
+    currentStep++;
+    if (currentStep >= steps.length) {
+      logAndRedirect();
+    } else {
+      renderStep(currentStep);
+    }
+  }
+
+  function startTimer(seconds) {
+    clearInterval(timerInterval);
+    stepTimerSec = seconds;
+    timeLeft = seconds;
+    updateTimerDisplay();
+
+    timerInterval = setInterval(function() {
+      timeLeft--;
+      updateTimerDisplay();
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        advance();
+      }
+    }, 1000);
+  }
+
+  function renderStep(idx) {
+    const step = steps[idx];
+
+    document.getElementById('exNum').textContent = step.exerciseNum;
+    document.getElementById('exTotal').textContent = step.totalExercises;
+    document.getElementById('exName').textContent = step.name;
+
+    const setLabel = document.getElementById('exSetLabel');
+    if (step.totalSets > 1) {
+      setLabel.textContent = 'Set ' + step.setNum + ' of ' + step.totalSets;
+      setLabel.style.display = 'block';
+    } else {
+      setLabel.style.display = 'none';
+    }
+
+    const tipsCard = document.getElementById('tipsCard');
+    if (step.tips) {
+      document.getElementById('tipsEmoji').textContent = step.emoji;
+      document.getElementById('tipsText').textContent = step.tips;
+      tipsCard.style.display = 'flex';
+    } else {
+      tipsCard.style.display = 'none';
+    }
+
+    renderProgressBars(idx);
+    startTimer(step.timerSec);
+  }
+
+  document.getElementById('completeBtn').addEventListener('click', function() {
+    clearInterval(timerInterval);
+    advance();
+  });
+
+  document.getElementById('endBtn').addEventListener('click', function() {
+    clearInterval(timerInterval);
+    logAndRedirect();
+  });
+
+  renderStep(0);
+</script>
