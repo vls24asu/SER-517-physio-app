@@ -13,7 +13,9 @@
         </div>
       </div>
     </div>
-    <div class="select-card" data-name="primary_goal" data-value="stretch_recover">
+
+    <!-- ✅ DEFAULT SELECTED -->
+    <div class="select-card active" data-name="primary_goal" data-value="stretch_recover">
       <div class="select-card-content">
         <span class="emoji">🧘</span>
         <div>
@@ -22,6 +24,7 @@
         </div>
       </div>
     </div>
+
     <div class="select-card" data-name="primary_goal" data-value="work_around_pain">
       <div class="select-card-content">
         <span class="emoji">⚡</span>
@@ -31,6 +34,7 @@
         </div>
       </div>
     </div>
+
     <div class="select-card" data-name="primary_goal" data-value="improve_mobility">
       <div class="select-card-content">
         <span class="emoji">🏃</span>
@@ -42,9 +46,41 @@
     </div>
   </div>
 
+  <!-- ✅ SESSION DURATION (FIXED) -->
+  <div class="mb-3 mt-4">
+    <label class="field-label">Preferred session duration</label>
+    <div class="select-wrapper">
+      <select class="form-select" name="session_duration">
+        <option value="10_15" selected>10–15 min</option>
+        <option value="20_30">20–30 min</option>
+        <option value="30_45">30–45 min</option>
+      </select>
+    </div>
+  </div>
+
   <div class="btn-row">
     <button type="button" class="btn btn-outline-secondary rounded-pill px-4 prev-btn">Back</button>
     <button type="button" class="btn btn-yellow next-btn">Continue</button>
   </div>
 </div>
 
+<!-- ✅ FORCE DEFAULTS (handles any overrides) -->
+<script>
+  window.addEventListener("load", function () {
+    // Default goal card
+    const defaultCard = document.querySelector(
+      '.select-card[data-value="stretch_recover"]'
+    );
+
+    if (defaultCard) {
+      document.querySelectorAll('.select-card').forEach(c => c.classList.remove('active'));
+      defaultCard.classList.add('active');
+    }
+
+    // Default session duration
+    const duration = document.querySelector('[name="session_duration"]');
+    if (duration) {
+      duration.value = "10_15";
+    }
+  });
+</script>
