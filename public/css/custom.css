@@ -1728,3 +1728,330 @@ main {
 .saved-routine-delete-btn:hover {
   color: #c0392b;
 }
+
+/* ── Saved Routine card button row ──────────────────────────────────────── */
+
+.saved-routine-btn-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.saved-routine-btn-row .saved-routine-start-btn {
+  flex: 1;
+}
+
+.btn-edit-routine {
+  flex-shrink: 0;
+  padding: 12px 18px;
+  background: #f0f0f0;
+  color: #444;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  display: block;
+}
+
+/* ── Session Preview Page ────────────────────────────────────────────────── */
+
+.session-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.session-meta-tag {
+  background: #e8f4ff;
+  color: #2980b9;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 20px;
+}
+
+.session-meta-time {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.session-exercise-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.session-exercise-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid rgba(0,0,0,0.04);
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.session-exercise-emoji {
+  font-size: 2rem;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.session-exercise-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.session-exercise-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 4px;
+}
+
+.session-exercise-meta {
+  font-size: 0.82rem;
+  color: #888;
+  margin: 0 0 8px;
+}
+
+.session-exercise-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: #e8f4ff;
+  color: #2980b9;
+}
+
+.session-action-bar {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.btn-edit-exercises {
+  flex: 1;
+  padding: 14px;
+  background: #e0e0e0;
+  color: #333;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+}
+
+.session-start-btn {
+  flex: 1;
+  display: block;
+  padding: 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  border-radius: 14px;
+}
+
+/* ── Exercise Session Overlay ───────────────────────────────────────────── */
+
+.ex-session-overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  z-index: 1001;
+  background: #FCF7EE;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 20px 24px;
+  overflow: hidden;
+  box-sizing: border-box;
+  gap: 16px;
+}
+
+.ex-progress-header {
+  flex-shrink: 0;
+}
+
+.ex-step-label {
+  font-size: 0.82rem;
+  color: #888;
+  text-align: center;
+  margin: 0 0 10px;
+  font-weight: 500;
+}
+
+.ex-progress-bars {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.ex-progress-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #e0e0e0;
+}
+
+.ex-progress-bar--done {
+  background: #F7B32B;
+}
+
+.ex-name-section {
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.ex-name {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #000;
+  margin: 0 0 6px;
+  line-height: 1.2;
+}
+
+.ex-set-label {
+  font-size: 0.95rem;
+  color: #888;
+  margin: 0;
+}
+
+.ex-timer-section {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.ex-timer-ring {
+  position: relative;
+  width: 160px;
+  height: 160px;
+}
+
+.ex-timer-ring svg {
+  width: 160px;
+  height: 160px;
+}
+
+.ex-timer-bg {
+  fill: none;
+  stroke: #e0e0e0;
+  stroke-width: 8;
+}
+
+.ex-timer-arc {
+  fill: none;
+  stroke: #F7B32B;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 314.16;
+  stroke-dashoffset: 0;
+  transform: rotate(-90deg);
+  transform-origin: 60px 60px;
+  transition: stroke-dashoffset 0.9s linear;
+}
+
+.ex-timer-display {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#timerDisplay {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #000;
+  line-height: 1;
+}
+
+.ex-timer-label {
+  font-size: 0.78rem;
+  color: #888;
+  margin-top: 4px;
+}
+
+.ex-tips-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 0;
+  gap: 8px;
+}
+
+.ex-tips-emoji {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.ex-tips-card p {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.ex-complete-section {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ex-complete-btn {
+  width: 100%;
+  padding: 16px;
+  background: #F7B32B;
+  color: #000;
+  border: none;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.2s;
+}
+
+.ex-complete-btn:hover {
+  opacity: 0.85;
+}
+
+.ex-end-btn {
+  width: 100%;
+  padding: 12px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.2s;
+}
+
+.ex-end-btn:hover {
+  color: #c0392b;
+}
