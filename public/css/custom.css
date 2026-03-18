@@ -2055,3 +2055,124 @@ main {
 .ex-end-btn:hover {
   color: #c0392b;
 }
+
+/* ── Rest timer overlay ─────────────────────────────────────────── */
+.ex-rest-overlay {
+  position: absolute;
+  inset: 0;
+  background: #FCF7EE;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px 24px;
+  z-index: 10;
+  gap: 14px;
+  box-sizing: border-box;
+}
+
+.ex-rest-upnext {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 500;
+  margin: 0;
+  text-align: center;
+}
+
+.ex-rest-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #000;
+  margin: 0;
+  text-align: center;
+}
+
+.ex-rest-timer-ring {
+  position: relative;
+  width: 180px;
+  height: 180px;
+}
+
+.ex-rest-timer-ring svg {
+  width: 180px;
+  height: 180px;
+}
+
+.ex-rest-timer-bg {
+  fill: none;
+  stroke: #e0e0e0;
+  stroke-width: 8;
+}
+
+.ex-rest-timer-arc {
+  fill: none;
+  stroke: #4A9B8E;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 314.16;
+  stroke-dashoffset: 0;
+  transform: rotate(-90deg);
+  transform-origin: 60px 60px;
+  transition: stroke-dashoffset 0.9s linear;
+}
+
+.ex-rest-timer-display {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#restTimerDisplay {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #4A9B8E;
+  line-height: 1;
+}
+
+.ex-rest-seconds {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0;
+}
+
+.ex-rest-next-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  width: 100%;
+  text-align: center;
+}
+
+.ex-rest-next-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 4px;
+}
+
+.ex-rest-next-detail {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0;
+}
+
+.ex-rest-skip-btn {
+  width: 100%;
+  padding: 16px;
+  background: #F7B32B;
+  color: #000;
+  border: none;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.2s;
+}
+
+.ex-rest-skip-btn:hover {
+  opacity: 0.85;
+}

@@ -38,16 +38,40 @@
     <button class="ex-end-btn" id="endBtn">End Workout</button>
   </div>
 
+  <!-- Rest timer overlay (shown between exercises) -->
+  <div id="restOverlay" class="ex-rest-overlay" style="display:none;">
+    <p class="ex-rest-upnext">Up next</p>
+    <h1 class="ex-rest-title">Take a breath</h1>
+    <div class="ex-rest-timer-ring">
+      <svg viewBox="0 0 120 120" width="180" height="180">
+        <circle class="ex-rest-timer-bg" cx="60" cy="60" r="50"/>
+        <circle class="ex-rest-timer-arc" id="restTimerArc" cx="60" cy="60" r="50"/>
+      </svg>
+      <div class="ex-rest-timer-display">
+        <span id="restTimerDisplay">30</span>
+      </div>
+    </div>
+    <p class="ex-rest-seconds">seconds rest</p>
+    <div class="ex-rest-next-card">
+      <p class="ex-rest-next-label">Next: <strong id="restNextName"></strong></p>
+      <p class="ex-rest-next-detail" id="restNextDetail"></p>
+    </div>
+    <button class="ex-rest-skip-btn" id="restSkipBtn">Skip rest</button>
+  </div>
+
 </div>
 
 <script>
   const steps = <%- stepsJson %>;
   const ARC_LEN = 2 * Math.PI * 50; // circumference for r=50
+  const REST_DURATION = 30;
 
   let currentStep = 0;
   let timerInterval = null;
+  let restInterval = null;
   let timeLeft = 0;
   let stepTimerSec = 0;
+  let restTimeLeft = 0;
 
   function renderProgressBars(activeIdx) {
     const container = document.getElementById('progressBars');
@@ -70,16 +94,72 @@
     arc.style.strokeDashoffset = ARC_LEN * (1 - fraction);
   }
 
+  function updateRestDisplay() {
+    document.getElementById('restTimerDisplay').textContent = restTimeLeft;
+    const arc = document.getElementById('restTimerArc');
+    const fraction = restTimeLeft / REST_DURATION;
+    arc.style.strokeDashoffset = ARC_LEN * (1 - fraction);
+  }
+
   function logAndRedirect() {
     fetch('/routines/saved/<%= routineId %>/log-session', { method: 'POST' })
       .catch(function() {})
       .finally(function() { window.location.href = '/routines/saved'; });
   }
 
+  function endRest(nextIdx) {
+    document.getElementById('restOverlay').style.display = 'none';
+    renderStep(nextIdx);
+  }
+
+  function showRestTimer(nextIdx) {
+    clearInterval(timerInterval);
+    const nextStep = steps[nextIdx];
+
+    // Populate next exercise info
+    document.getElementById('restNextName').textContent = nextStep.name;
+    let detail = '';
+    if (nextStep.timerSec) {
+      detail = nextStep.timerSec + 's hold';
+    } else if (nextStep.reps) {
+      detail = nextStep.reps + ' reps';
+    }
+    if (nextStep.totalSets > 1) {
+      detail += ' \u2022 ' + nextStep.totalSets + ' sets';
+    }
+    document.getElementById('restNextDetail').textContent = detail;
+
+    // Show rest overlay
+    document.getElementById('restOverlay').style.display = 'flex';
+
+    // Start 30-second countdown
+    restTimeLeft = REST_DURATION;
+    updateRestDisplay();
+
+    clearInterval(restInterval);
+    restInterval = setInterval(function() {
+      restTimeLeft--;
+      updateRestDisplay();
+      if (restTimeLeft <= 0) {
+        clearInterval(restInterval);
+        endRest(nextIdx);
+      }
+    }, 1000);
+
+    document.getElementById('restSkipBtn').onclick = function() {
+      clearInterval(restInterval);
+      endRest(nextIdx);
+    };
+  }
+
   function advance() {
+    const prevStep = currentStep;
     currentStep++;
     if (currentStep >= steps.length) {
       logAndRedirect();
+    } else if (steps.length > 1 && steps[currentStep].exerciseNum !== steps[prevStep].exerciseNum) {
+      // Moving to a new exercise — show rest timer (only if more than 1 exercise total)
+      showRestTimer(currentStep);
     } else {
       renderStep(currentStep);
     }
@@ -136,6 +216,7 @@
 
   document.getElementById('endBtn').addEventListener('click', function() {
     clearInterval(timerInterval);
+    clearInterval(restInterval);
     logAndRedirect();
   });
 
