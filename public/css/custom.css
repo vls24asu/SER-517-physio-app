@@ -924,6 +924,19 @@ main {
   gap: 14px;
 }
 
+.history-card--link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.history-card--link:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  transform: translateY(-1px);
+}
+
 .history-card {
   background: #fff;
   border-radius: 14px;
