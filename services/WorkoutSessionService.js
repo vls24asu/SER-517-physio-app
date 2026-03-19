@@ -20,6 +20,22 @@ class WorkoutSessionService {
     }));
   }
 
+  async getSessionDetail(sessionId, userId) {
+    const row = await this.#dao.findByIdAndUserId(sessionId, userId);
+    if (!row) return null;
+    const exercises = await this.#dao.getExercisesForSession(sessionId);
+    return {
+      id: row.id,
+      title: row.title,
+      durationMin: row.duration_min,
+      exerciseCount: row.exercise_count,
+      tags: row.tags ? row.tags.split(',').map(t => t.trim()) : [],
+      emoji: row.emoji || '🏋️',
+      sessionDate: row.session_date,
+      exercises
+    };
+  }
+
   async getChartData(userId, period) {
     return this.#dao.getChartData(userId, period);
   }

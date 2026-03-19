@@ -358,11 +358,29 @@ router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
   const emoji = categoryEmoji[cats[0]] || '🏋️';
   const durationMin = Math.max(1, Math.round((routine.total_seconds || 0) / 60));
 
-  await db.query(
+  const [wsResult] = await db.query(
     `INSERT INTO Workout_Session (user_id, routine_id, title, duration_min, exercise_count, tags, emoji)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [userId, routineId, routine.name, durationMin, routine.exercise_count || 0, cats.join(','), emoji]
   );
+  const sessionId = wsResult.insertId;
+
+  // Snapshot exercises so history survives routine deletion
+  const [exercises] = await db.query(
+    `SELECT sre.sort_order, e.id, e.name, e.category, e.sets, e.reps, e.hold_time_sec
+     FROM Saved_Routine_Entry sre
+     JOIN exercise e ON e.id = sre.exercise_id
+     WHERE sre.routine_id = ?
+     ORDER BY sre.sort_order ASC`,
+    [routineId]
+  );
+  for (const ex of exercises) {
+    await db.query(
+      `INSERT INTO Workout_Session_Exercise (session_id, exercise_id, name, category, sets, reps, hold_time_sec, sort_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [sessionId, ex.id, ex.name, ex.category, ex.sets, ex.reps, ex.hold_time_sec, ex.sort_order]
+    );
+  }
 
   res.json({ ok: true });
 });

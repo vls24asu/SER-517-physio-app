@@ -1,0 +1,54 @@
+<div class="history-container">
+  <div class="history-header">
+    <a href="/workout-history" class="back-btn">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+    <h1 class="history-title"><%= session.title %></h1>
+  </div>
+
+  <div class="history-card" style="margin-bottom: 20px;">
+    <div class="history-card-content">
+      <p class="history-card-meta"><%= session.durationMin %> min &bull; <%= session.exerciseCount %> exercises</p>
+      <% if (session.tags.length > 0) { %>
+        <div class="history-tags">
+          <% session.tags.forEach((tag, i) => { %>
+            <span class="history-tag <%= i % 2 === 1 ? 'history-tag--yellow' : '' %>"><%= tag %></span>
+          <% }) %>
+        </div>
+      <% } %>
+      <p class="history-card-date">
+        <%= session.sessionDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %>
+        &bull;
+        <%= session.sessionDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %>
+      </p>
+    </div>
+    <div class="history-card-emoji"><%= session.emoji %></div>
+  </div>
+
+  <% if (session.exercises.length === 0) { %>
+    <div class="progress-exercises-card">
+      <p class="progress-no-exercises">No exercise details available for this session.</p>
+    </div>
+  <% } else { %>
+    <div class="progress-exercises-card">
+      <h2 class="progress-exercises-title">Exercises done</h2>
+      <% const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' }; %>
+      <% session.exercises.forEach(function(ex) { %>
+        <div class="progress-exercise-item">
+          <span class="progress-exercise-emoji"><%= categoryEmoji[ex.category] || '🏋️' %></span>
+          <div class="progress-exercise-info">
+            <span class="progress-exercise-name"><%= ex.name %></span>
+            <span class="progress-exercise-cat">
+              <%= ex.category %>
+              <% if (ex.sets) { %>&bull; <%= ex.sets %> sets<% } %>
+              <% if (ex.reps) { %>&bull; <%= ex.reps %> reps<% } %>
+              <% if (ex.hold_time_sec && !ex.reps) { %>&bull; <%= ex.hold_time_sec %>s hold<% } %>
+            </span>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/bottomNav') %>
