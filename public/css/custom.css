@@ -1485,6 +1485,158 @@ main {
   margin-bottom: 14px;
 }
 
+/* ── Progress Page – tabs, chart, exercises ───────────────────────────── */
+
+.progress-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.progress-tab {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 1.5px solid #ddd;
+  background: transparent;
+  color: #555;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.progress-tab--active {
+  background: #F7B32B;
+  border-color: #F7B32B;
+  color: #000;
+}
+
+/* Light chart card */
+.progress-chart-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px 20px 20px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.progress-period-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 4px;
+}
+
+.progress-session-count {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #F7B32B;
+  margin: 0 0 2px;
+  line-height: 1.1;
+}
+
+.progress-time-total {
+  font-size: 0.9rem;
+  color: #888;
+  margin: 0 0 20px;
+}
+
+/* Bar chart */
+.progress-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 90px;
+}
+
+.bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.bar-fill {
+  width: 100%;
+  min-height: 12px;
+  border-radius: 20px;
+  background: #e8e8e8;
+  transition: height 0.3s ease;
+}
+
+.bar-fill--active {
+  background: #F7B32B;
+}
+
+.bar-label {
+  font-size: 0.7rem;
+  color: #999;
+  font-weight: 600;
+}
+
+/* Exercises card */
+.progress-exercises-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.progress-exercises-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 14px;
+}
+
+.progress-no-exercises {
+  font-size: 0.9rem;
+  color: #888;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.progress-exercise-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.progress-exercise-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.progress-exercise-emoji {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.progress-exercise-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.progress-exercise-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #000;
+}
+
+.progress-exercise-cat {
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: capitalize;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .dashboard-container,
