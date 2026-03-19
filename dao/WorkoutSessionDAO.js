@@ -39,12 +39,10 @@ class WorkoutSessionDAO {
     const conn = await this.#connectionManager.getConnection();
     try {
       const [rows] = await conn.execute(
-        `SELECT e.name, e.category, e.sets, e.reps, e.hold_time_sec, e.tips
-         FROM Workout_Session ws
-         JOIN Saved_Routine_Entry sre ON sre.routine_id = ws.routine_id
-         JOIN exercise e ON e.id = sre.exercise_id
-         WHERE ws.id = ? AND ws.routine_id IS NOT NULL
-         ORDER BY sre.sort_order ASC`,
+        `SELECT wse.name, wse.category, wse.sets, wse.reps, wse.hold_time_sec
+         FROM Workout_Session_Exercise wse
+         WHERE wse.session_id = ?
+         ORDER BY wse.sort_order ASC`,
         [sessionId]
       );
       return rows;
@@ -141,12 +139,11 @@ class WorkoutSessionDAO {
         where = `AND YEAR(ws.session_date) = YEAR(CURDATE())`;
       }
       const [rows] = await conn.execute(
-        `SELECT DISTINCT e.name, e.category
+        `SELECT DISTINCT wse.name, wse.category
          FROM Workout_Session ws
-         JOIN Saved_Routine_Entry sre ON sre.routine_id = ws.routine_id
-         JOIN exercise e ON e.id = sre.exercise_id
-         WHERE ws.user_id = ? AND ws.routine_id IS NOT NULL ${where}
-         ORDER BY e.name ASC`,
+         JOIN Workout_Session_Exercise wse ON wse.session_id = ws.id
+         WHERE ws.user_id = ? ${where}
+         ORDER BY wse.name ASC`,
         [userId]
       );
       return rows;
