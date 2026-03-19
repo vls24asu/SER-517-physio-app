@@ -13,4 +13,21 @@ const getWorkoutHistory = async (req, res) => {
   }
 };
 
-module.exports = { getWorkoutHistory };
+const getWorkoutHistoryDetail = async (req, res) => {
+  try {
+    const sessionId = Number(req.params.id);
+    const userId = req.session.user.id;
+    const session = await sessionService.getSessionDetail(sessionId, userId);
+    if (!session) {
+      req.flash('error', 'Session not found.');
+      return res.redirect('/workout-history');
+    }
+    res.render('workout-history/detail', { session });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong.');
+    res.redirect('/workout-history');
+  }
+};
+
+module.exports = { getWorkoutHistory, getWorkoutHistoryDetail };
