@@ -22,6 +22,37 @@ class WorkoutSessionDAO {
     }
   }
 
+  async findByIdAndUserId(sessionId, userId) {
+    const conn = await this.#connectionManager.getConnection();
+    try {
+      const [rows] = await conn.execute(
+        `SELECT * FROM Workout_Session WHERE id = ? AND user_id = ?`,
+        [sessionId, userId]
+      );
+      return rows[0] || null;
+    } finally {
+      conn.release();
+    }
+  }
+
+  async getExercisesForSession(sessionId) {
+    const conn = await this.#connectionManager.getConnection();
+    try {
+      const [rows] = await conn.execute(
+        `SELECT e.name, e.category, e.sets, e.reps, e.hold_time_sec, e.tips
+         FROM Workout_Session ws
+         JOIN Saved_Routine_Entry sre ON sre.routine_id = ws.routine_id
+         JOIN exercise e ON e.id = sre.exercise_id
+         WHERE ws.id = ? AND ws.routine_id IS NOT NULL
+         ORDER BY sre.sort_order ASC`,
+        [sessionId]
+      );
+      return rows;
+    } finally {
+      conn.release();
+    }
+  }
+
   async getChartData(userId, period) {
     const conn = await this.#connectionManager.getConnection();
     try {
