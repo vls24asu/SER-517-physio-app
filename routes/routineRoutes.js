@@ -359,9 +359,9 @@ router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
   const durationMin = Math.max(1, Math.round((routine.total_seconds || 0) / 60));
 
   await db.query(
-    `INSERT INTO Workout_Session (user_id, title, duration_min, exercise_count, tags, emoji)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [userId, routine.name, durationMin, routine.exercise_count || 0, cats.join(','), emoji]
+    `INSERT INTO Workout_Session (user_id, routine_id, title, duration_min, exercise_count, tags, emoji)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [userId, routineId, routine.name, durationMin, routine.exercise_count || 0, cats.join(','), emoji]
   );
 
   res.json({ ok: true });
