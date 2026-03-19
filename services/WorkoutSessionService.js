@@ -19,6 +19,18 @@ class WorkoutSessionService {
       sessionDate: row.session_date
     }));
   }
+
+  async getChartData(userId, period) {
+    return this.#dao.getChartData(userId, period);
+  }
+
+  async getSessionCountForPeriod(userId, period) {
+    return this.#dao.getSessionCountForPeriod(userId, period);
+  }
+
+  async getExercisesForPeriod(userId, period) {
+    return this.#dao.getExercisesForPeriod(userId, period);
+  }
 }
 
 module.exports = WorkoutSessionService;
