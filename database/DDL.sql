@@ -5,7 +5,7 @@ CREATE SCHEMA `physio`;
 USE `physio`;
 
 -- =============================================
--- CORE TABLES Introduced in Phase 1
+-- CORE TABLES
 -- =============================================
 
 CREATE TABLE `Exercise` (
