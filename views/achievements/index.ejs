@@ -6,17 +6,37 @@
     <h1 class="achievements-title">Achievements</h1>
   </div>
 
-  <p class="achievements-unlocked">Unlocked (<%= unlocked %>)</p>
+  <p class="achievements-unlocked">Unlocked (<%= unlockedCount %>/<%= totalCount %>)</p>
 
-  <div class="achievements-grid">
-    <% achievements.forEach(a => { %>
-      <div class="achievement-card <%= a.earned ? '' : 'achievement-card--locked' %>">
-        <div class="achievement-emoji"><%= a.emoji %></div>
-        <p class="achievement-name"><%= a.name %></p>
-        <p class="achievement-desc"><%= a.description %></p>
-      </div>
-    <% }) %>
-  </div>
+  <% if (unlocked.length > 0) { %>
+    <div class="achievements-grid">
+      <% unlocked.forEach(a => { %>
+        <div class="achievement-card achievement-card--earned">
+          <div class="achievement-emoji"><%= a.emoji %></div>
+          <p class="achievement-name"><%= a.name %></p>
+          <p class="achievement-desc"><%= a.description %></p>
+          <span class="achievement-badge">Unlocked</span>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <p class="achievements-empty">Complete workouts to unlock achievements!</p>
+  <% } %>
+
+  <% if (locked.length > 0) { %>
+    <h2 class="achievements-section-title">Locked</h2>
+    <div class="achievements-grid">
+      <% locked.forEach(a => { %>
+        <div class="achievement-card achievement-card--locked">
+          <div class="achievement-emoji achievement-emoji--locked">
+            <span class="achievement-lock-icon">🔒</span>
+          </div>
+          <p class="achievement-name"><%= a.name %></p>
+          <p class="achievement-desc"><%= a.description %></p>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
 </div>
 
 <%- include('../partials/bottomNav') %>
