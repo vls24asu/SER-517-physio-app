@@ -335,6 +335,16 @@ main {
   flex: 1;
 }
 
+.achievements-count-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #f5a623;
+  background: #fff3d6;
+  border-radius: 20px;
+  padding: 2px 8px;
+  margin-left: auto;
+}
+
 .stat-item {
   text-align: center;
 }

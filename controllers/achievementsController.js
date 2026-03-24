@@ -89,4 +89,4 @@ const getAchievements = async (req, res) => {
   }
 };
 
-module.exports = { getAchievements };
+module.exports = { getAchievements, ACHIEVEMENTS };
