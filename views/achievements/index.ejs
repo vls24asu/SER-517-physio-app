@@ -33,6 +33,12 @@
           </div>
           <p class="achievement-name"><%= a.name %></p>
           <p class="achievement-desc"><%= a.description %></p>
+          <div class="achievement-progress">
+            <div class="achievement-progress-bar">
+              <div class="achievement-progress-fill" style="width: <%= Math.round((a.progress.current / a.progress.target) * 100) %>%"></div>
+            </div>
+            <span class="achievement-progress-label"><%= a.progress.current %>/<%= a.progress.target %><% if (a.progress.unit) { %> <%= a.progress.unit %><% } %></span>
+          </div>
         </div>
       <% }) %>
     </div>
