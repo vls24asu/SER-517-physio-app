@@ -33,6 +33,9 @@
       <a href="/achievements" class="action-btn">
         <i class="bi bi-trophy-fill"></i>
         <span>Achievements</span>
+        <% if (unlockedCount > 0) { %>
+          <span class="achievements-count-badge"><%= unlockedCount %>/<%= totalCount %></span>
+        <% } %>
       </a>
       <a href="/workout-history" class="action-btn">
         <i class="bi bi-clock-history"></i>

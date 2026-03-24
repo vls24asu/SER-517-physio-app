@@ -1,5 +1,6 @@
 const UserService = require('../services/UserService');
 const StatsService = require('../services/StatsService');
+const { ACHIEVEMENTS } = require('./achievementsController');
 
 const userService = new UserService();
 const statsService = new StatsService();
@@ -10,6 +11,9 @@ const getProfile = async (req, res) => {
     const user = await userService.getUserById(userId);
     const stats = await statsService.getUserStats(userId);
 
+    const unlockedCount = ACHIEVEMENTS.filter(a => a.check(stats)).length;
+    const totalCount = ACHIEVEMENTS.length;
+
     res.render('profile/index', {
       user: {
         id: user.id,
@@ -17,7 +21,9 @@ const getProfile = async (req, res) => {
         email: user.email,
         twofaEnabled: user.twofaEnabled
       },
-      stats
+      stats,
+      unlockedCount,
+      totalCount
     });
   } catch (err) {
     console.error(err);
