@@ -52,6 +52,14 @@ const ACHIEVEMENTS = [
     })
   },
   {
+    id: 'week_warrior',
+    name: 'Week Warrior',
+    description: 'Complete 5 sessions in one week',
+    emoji: '🏅',
+    check: (stats) => stats.sessionsThisWeek >= 5,
+    progress: (stats) => ({ current: Math.min(stats.sessionsThisWeek, 5), target: 5 })
+  },
+  {
     id: 'consistent',
     name: 'Consistent',
     description: 'Train 14 days in a row',
