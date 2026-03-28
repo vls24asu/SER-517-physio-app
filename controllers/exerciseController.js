@@ -1,4 +1,5 @@
 const ExerciseService = require('../services/ExerciseService');
+const db = require('../config/db');
 
 const exerciseService = new ExerciseService();
 
@@ -42,7 +43,13 @@ const getExerciseDetail = async (req, res) => {
       return res.redirect('/library');
     }
 
-    res.render('library/detail', { exercise });
+    const userId = req.session.user.id;
+    const [savedRoutines] = await db.query(
+      `SELECT id, name FROM Saved_Routine WHERE user_id = ? ORDER BY name ASC`,
+      [userId]
+    );
+
+    res.render('library/detail', { exercise, savedRoutines });
   } catch (err) {
     console.error(err);
     req.flash('error', 'Failed to load exercise details');

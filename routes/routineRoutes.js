@@ -109,6 +109,19 @@ router.post('/save', isAuthenticated, requireOnboardingComplete, async (req, res
   res.redirect('/routines/saved');
 });
 
+// ── Exercise detail API (for preview card on create routine page) ───────────
+
+router.get('/exercise-info/:id', isAuthenticated, async (req, res) => {
+  const [rows] = await db.query(
+    `SELECT id, name, category, skill_level, equipment_needed, position,
+            tempo, \`sets\`, reps, is_gym_only, tips, common_mistakes
+     FROM exercise WHERE id = ?`,
+    [req.params.id]
+  );
+  if (!rows[0]) return res.json({ ok: false });
+  res.json({ ok: true, exercise: rows[0] });
+});
+
 // ── Saved Routines ─────────────────────────────────────────────────────────
 
 // List all saved routines
