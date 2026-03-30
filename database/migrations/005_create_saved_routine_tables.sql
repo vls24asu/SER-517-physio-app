@@ -1,8 +1,6 @@
 -- Migration 005: Create Saved_Routine and Saved_Routine_Entry tables
 -- Supports named saved routines (separate from the draft Routine_Entry builder)
 
-USE `physio`;
-
 CREATE TABLE IF NOT EXISTS `Saved_Routine` (
   id INT PRIMARY KEY AUTO_INCREMENT,
   user_id INT NOT NULL,
