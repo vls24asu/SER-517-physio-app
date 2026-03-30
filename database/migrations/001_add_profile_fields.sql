@@ -2,8 +2,6 @@
 -- Run this if your database already exists (created from the old DDL)
 -- NOTE: If columns already exist this will error — that means you already have them, skip it.
 
-USE `physio`;
-
 ALTER TABLE `User_Profile`
     ADD COLUMN `age` INT NULL AFTER `user_id`,
     ADD COLUMN `gender` ENUM('male', 'female', 'non-binary', 'prefer_not_to_say') NULL AFTER `age`,

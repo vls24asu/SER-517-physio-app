@@ -1,8 +1,6 @@
 -- Migration: Create Exercise and Muscle_Group tables
 -- For exercise library feature
 
-USE `physio`;
-
 -- Muscle groups table
 CREATE TABLE IF NOT EXISTS Muscle_Group (
   id INT PRIMARY KEY AUTO_INCREMENT,
