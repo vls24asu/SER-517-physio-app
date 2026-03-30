@@ -1,6 +1,7 @@
 <%
   const categoryLabel = { strengthen: 'Strength', stretch: 'Stretch', avoid: 'Avoid' };
   const categoryColor = { strengthen: 'saved-tag--yellow', stretch: 'saved-tag--blue', avoid: 'saved-tag--red' };
+  const catEmoji      = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' };
 %>
 
 <div class="settings-container">
@@ -10,6 +11,72 @@
   </div>
 
   <p class="settings-section-label" style="margin-bottom:16px;">Quick access to your favourite workout combinations</p>
+
+  <%
+    /* ── AI Recommended Routine Section ── */
+    const rec = recommendation;
+    const hasRec = rec && rec.exercises && rec.exercises.length > 0;
+  %>
+
+  <% if (hasRec) { %>
+    <%
+      const recCats = [...new Set(rec.exercises.map(e => e.category))];
+      const recEmoji = recCats.includes('strengthen') ? '💪' : '🧘';
+    %>
+
+    <p class="settings-section-label" style="margin-bottom:10px;">✨ Recommended for You</p>
+
+    <div class="saved-routine-card" style="margin-bottom:20px;">
+      <div class="saved-routine-card-top">
+        <div class="saved-routine-card-info">
+          <h3 class="saved-routine-name">AI Recommended Routine</h3>
+          <p class="saved-routine-meta">
+            ~<%= rec.totalEstMin %> min &bull; <%= rec.exercises.length %> exercise<%= rec.exercises.length !== 1 ? 's' : '' %>
+          </p>
+          <p style="font-size:0.8rem; color:#888; margin:0 0 8px; line-height:1.4;"><%= rec.reason %></p>
+          <% if (recCats.length > 0) { %>
+            <div class="saved-routine-tags">
+              <% recCats.forEach(cat => { %>
+                <span class="saved-tag <%= categoryColor[cat] || '' %>"><%= categoryLabel[cat] || cat %></span>
+              <% }) %>
+            </div>
+          <% } %>
+        </div>
+        <div class="saved-routine-emoji"><%= recEmoji %></div>
+      </div>
+
+      <!-- Exercise list -->
+      <div style="margin-bottom:14px;">
+        <% rec.exercises.forEach((ex, idx) => { %>
+          <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #f0f0f0;">
+            <span style="font-size:0.75rem; font-weight:700; color:#aaa; min-width:18px;"><%= idx + 1 %>.</span>
+            <span style="flex:1; font-size:0.9rem; font-weight:500; color:#222;"><%= ex.name %></span>
+            <span class="saved-tag <%= categoryColor[ex.category] || '' %>" style="flex-shrink:0;">
+              <%= catEmoji[ex.category] || '' %> <%= categoryLabel[ex.category] || ex.category %>
+            </span>
+          </div>
+        <% }) %>
+      </div>
+
+      <form method="POST" action="/routines/save-recommended">
+        <input type="hidden" name="exercise_ids" value="<%= JSON.stringify(rec.exercises.map(e => e.id)) %>"/>
+        <input
+          type="text"
+          name="routine_name"
+          placeholder="Name this routine (optional)"
+          maxlength="100"
+          style="width:100%; border:1.5px solid #e8e8e8; border-radius:10px; padding:10px 14px; font-size:0.88rem; font-family:inherit; background:#fafafa; margin-bottom:10px; box-sizing:border-box; outline:none;"
+        />
+        <div class="saved-routine-btn-row">
+          <button type="submit" class="btn-start-session saved-routine-start-btn" style="border:none; cursor:pointer; font-family:inherit;">
+            Save this Routine
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <p class="settings-section-label" style="margin-bottom:12px;">Your Saved Routines</p>
+  <% } %>
 
   <% if (routines.length === 0) { %>
     <div class="library-detail-card" style="text-align:center; padding:40px 20px;">
