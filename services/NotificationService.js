@@ -108,13 +108,13 @@ class NotificationService {
 
     const lastDateStr = await dao.getLastSessionDate(userId);
 
-    // Streak broken — fires the day after a streak ends (last session was exactly 2 days ago)
+    // Streak broken — fires when the user had a streak and missed at least one day
     if (prefs.type_streak_broken && currentStreak === 0 && lastDateStr) {
       const lastDate = new Date(lastDateStr);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const diffDays = Math.round((today - lastDate) / (1000 * 60 * 60 * 24));
-      if (diffDays === 2) {
+      if (diffDays >= 2) {
         await this.create(
           userId,
           'streak_broken',
@@ -124,15 +124,13 @@ class NotificationService {
       }
     }
 
-    // Pain check-in — if user has pain areas and hasn't worked out in 5+ days
-    if (prefs.type_pain_checkin) {
+    // Pain check-in — only for existing users (has at least one session) who haven't worked out in 5+ days
+    if (prefs.type_pain_checkin && lastDateStr) {
       const painProfile = await dao.getUserPainProfile(userId);
       const hasPain = painProfile?.pain_status === 'yes' ||
         (painProfile?.pain_areas && painProfile.pain_areas !== 'none' && painProfile.pain_areas !== '[]');
       if (hasPain) {
-        const daysSinceLast = lastDateStr
-          ? Math.round((new Date().setHours(0, 0, 0, 0) - new Date(lastDateStr)) / (1000 * 60 * 60 * 24))
-          : 999;
+        const daysSinceLast = Math.round((new Date().setHours(0, 0, 0, 0) - new Date(lastDateStr)) / (1000 * 60 * 60 * 24));
         if (daysSinceLast >= 5) {
           await this.create(
             userId,

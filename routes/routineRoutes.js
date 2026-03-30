@@ -405,7 +405,7 @@ router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
   );
   for (const ex of exercises) {
     await db.query(
-      `INSERT INTO Workout_Session_Exercise (session_id, exercise_id, name, category, sets, reps, hold_time_sec, sort_order)
+      `INSERT INTO Workout_Session_Exercise (session_id, exercise_id, name, category, \`sets\`, reps, hold_time_sec, sort_order)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [sessionId, ex.id, ex.name, ex.category, ex.sets, ex.reps, ex.hold_time_sec, ex.sort_order]
     );
@@ -438,7 +438,7 @@ router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
     }
 
     // Streak active (fires when streak increases, deduped to once per day)
-    if (statsAfter.streak >= 2 && statsAfter.streak > statsBefore.streak) {
+    if (statsAfter.streak >= 1 && statsAfter.streak > statsBefore.streak) {
       await notifService.create(
         userId,
         'streak_active',
