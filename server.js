@@ -8,6 +8,7 @@ const path = require('path');
 const sessionConfig = require('./config/session');
 const routes = require('./routes');
 const db = require('./config/db');
+const ensureSchema = require('./config/ensureSchema');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -73,6 +74,7 @@ app.get('/', (req, res) => {
 const start = async () => {
   try {
     await db.query('SELECT 1');
+    await ensureSchema();
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
