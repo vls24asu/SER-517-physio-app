@@ -6,6 +6,16 @@ router.get('/', (req, res) => {
     res.render('landing');
 });
 
+// Privacy Policy (public, no auth required)
+router.get('/privacy-policy', (req, res) => {
+    res.render('privacy-policy');
+});
+
+// Terms of Service (public, no auth required)
+router.get('/terms-of-service', (req, res) => {
+    res.render('terms-of-service');
+});
+
 // Mount sub-routers here as they are built:
 const authRoutes = require('./authRoutes');
 const dashboardRoutes = require('./dashboardRoutes');
