@@ -1,8 +1,6 @@
 -- Migration: Add Workout_Session table
 -- Run this if your database already exists (created from the old DDL)
 
-USE `physio`;
-
 CREATE TABLE IF NOT EXISTS `Workout_Session` (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,

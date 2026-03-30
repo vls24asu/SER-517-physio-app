@@ -1,5 +1,3 @@
-USE `physio`;
-
 CREATE TABLE `Notification_Preferences` (
     user_id INT PRIMARY KEY,
     in_app_enabled BOOLEAN NOT NULL DEFAULT TRUE,

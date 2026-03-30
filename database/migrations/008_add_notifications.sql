@@ -1,5 +1,3 @@
-USE `physio`;
-
 CREATE TABLE `Notification` (
     id INT PRIMARY KEY AUTO_INCREMENT,
     user_id INT NOT NULL,
