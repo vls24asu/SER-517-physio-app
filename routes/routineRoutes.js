@@ -5,6 +5,7 @@ const router = express.Router();
 const { isAuthenticated } = require('../middleware/auth');
 const { requireOnboardingComplete } = require('../middleware/onboarding');
 const db = require('../config/db');
+const { generateRecommendedRoutine } = require('../services/RecommendationService');
 const NotificationService = require('../services/NotificationService');
 const StatsService = require('../services/StatsService');
 const { ACHIEVEMENTS } = require('../controllers/achievementsController');
@@ -130,9 +131,12 @@ router.get('/exercise-info/:id', isAuthenticated, async (req, res) => {
 
 // ── Saved Routines ─────────────────────────────────────────────────────────
 
-// List all saved routines
+// List all saved routines (+ AI-generated recommendation)
 router.get('/saved', isAuthenticated, requireOnboardingComplete, async (req, res) => {
   const userId = req.session.user.id;
+
+  // Run routine fetch and AI recommendation in parallel for speed
+  const recommendationPromise = generateRecommendedRoutine(userId).catch(() => null);
 
   const [routines] = await db.query(
     `SELECT sr.id, sr.name, sr.created_at,
@@ -161,7 +165,9 @@ router.get('/saved', isAuthenticated, requireOnboardingComplete, async (req, res
     };
   });
 
-  res.render('routines/saved', { routines: formatted });
+  const recommendation = await recommendationPromise;
+
+  res.render('routines/saved', { routines: formatted, recommendation });
 });
 
 // ── Preview & Edit Saved Routine ───────────────────────────────────────────
@@ -472,6 +478,40 @@ router.post('/saved/delete', isAuthenticated, requireOnboardingComplete, async (
   );
 
   req.flash('success', 'Routine deleted.');
+  res.redirect('/routines/saved');
+});
+
+// ── Save AI-Recommended Routine ─────────────────────────────────────────────
+
+router.post('/save-recommended', isAuthenticated, requireOnboardingComplete, async (req, res) => {
+  const userId = req.session.user.id;
+  let exerciseIds;
+
+  try {
+    exerciseIds = JSON.parse(req.body.exercise_ids || '[]');
+    if (!Array.isArray(exerciseIds) || exerciseIds.length === 0) throw new Error('empty');
+  } catch {
+    req.flash('error', 'Could not save recommended routine.');
+    return res.redirect('/routines/saved');
+  }
+
+  const routineName = req.body.routine_name ||
+    `AI Recommended – ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+
+  const [result] = await db.query(
+    `INSERT INTO Saved_Routine (user_id, name) VALUES (?, ?)`,
+    [userId, routineName]
+  );
+  const routineId = result.insertId;
+
+  for (let i = 0; i < exerciseIds.length; i++) {
+    await db.query(
+      `INSERT INTO Saved_Routine_Entry (routine_id, exercise_id, sort_order) VALUES (?, ?, ?)`,
+      [routineId, Number(exerciseIds[i]), i + 1]
+    );
+  }
+
+  req.flash('success', `"${routineName}" saved to your routines!`);
   res.redirect('/routines/saved');
 });
 
