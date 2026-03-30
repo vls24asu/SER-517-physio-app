@@ -1,8 +1,10 @@
 const UserService = require('../services/UserService');
 const UserProfileService = require('../services/UserProfileService');
+const NotificationService = require('../services/NotificationService');
 
 const userService = new UserService();
 const profileService = new UserProfileService();
+const notifService = new NotificationService();
 
 // GET /settings
 const getSettings = async (req, res) => {
@@ -213,6 +215,56 @@ const deleteAccount = async (req, res) => {
   }
 };
 
+// GET /settings/notifications
+const getNotifications = async (req, res) => {
+  try {
+    const prefs = await notifService.getPreferences(req.session.user.id);
+    res.render('settings/notifications', { prefs });
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Something went wrong.');
+    res.redirect('/settings');
+  }
+};
+
+// POST /settings/notifications
+const postNotifications = async (req, res) => {
+  try {
+    const b = req.body;
+    await notifService.savePreferences(req.session.user.id, {
+      in_app_enabled:           b.in_app_enabled           === 'on',
+      push_enabled:             b.push_enabled             === 'on',
+      type_session_completed:   b.type_session_completed   === 'on',
+      type_achievement_unlocked:b.type_achievement_unlocked=== 'on',
+      type_streak_active:       b.type_streak_active       === 'on',
+      type_streak_broken:       b.type_streak_broken       === 'on',
+      type_progress_milestone:  b.type_progress_milestone  === 'on',
+      type_pain_checkin:        b.type_pain_checkin        === 'on',
+      type_workout_reminder:    b.type_workout_reminder    === 'on',
+      reminder_time:            b.reminder_time            || '09:00',
+    });
+    req.flash('success', 'Notification preferences saved.');
+    res.redirect('/settings/notifications');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Failed to save preferences.');
+    res.redirect('/settings/notifications');
+  }
+};
+
+// POST /settings/notifications/clear-all
+const clearAllNotifications = async (req, res) => {
+  try {
+    await notifService.deleteAll(req.session.user.id);
+    req.flash('success', 'All notifications cleared.');
+    res.redirect('/settings/notifications');
+  } catch (err) {
+    console.error(err);
+    req.flash('error', 'Failed to clear notifications.');
+    res.redirect('/settings/notifications');
+  }
+};
+
 module.exports = {
   getSettings,
   getPersonalInfo,
@@ -225,5 +277,8 @@ module.exports = {
   postGoals,
   getPainManagement,
   postPainManagement,
-  deleteAccount
+  deleteAccount,
+  getNotifications,
+  postNotifications,
+  clearAllNotifications,
 };

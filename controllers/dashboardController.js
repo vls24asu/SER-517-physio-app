@@ -1,11 +1,17 @@
 const StatsService = require('../services/StatsService');
+const NotificationService = require('../services/NotificationService');
 
 const statsService = new StatsService();
+const notifService = new NotificationService();
 
 const getDashboard = async (req, res) => {
   try {
     const userId = req.session.user.id;
     const stats = await statsService.getUserStats(userId);
+
+    // Trigger time-based notifications (workout reminder, streak broken, pain check-in).
+    // Runs fire-and-forget so a notification error never breaks the dashboard load.
+    notifService.triggerDashboardNotifications(userId, stats.streak).catch(console.error);
     
     // Get greeting based on time of day
     const hour = new Date().getHours();

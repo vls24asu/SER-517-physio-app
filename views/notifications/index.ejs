@@ -1,0 +1,207 @@
+<div class="notif-page-container">
+
+  <div class="notif-page-header">
+    <h2 class="notif-page-title">Notifications</h2>
+    <% if (notifications.length > 0) { %>
+      <button class="notif-mark-all-btn" id="markAllBtn">Mark all read</button>
+    <% } %>
+  </div>
+
+  <% if (notifications.length === 0) { %>
+    <div class="notif-empty">
+      <i class="bi bi-bell-slash notif-empty-icon"></i>
+      <p class="notif-empty-text">You're all caught up!</p>
+      <p class="notif-empty-sub">Notifications will appear here as you train.</p>
+    </div>
+  <% } else { %>
+    <div class="notif-list" id="notifList">
+      <% notifications.forEach(n => { %>
+        <div class="notif-card <%= n.is_read ? '' : 'notif-card--unread' %>" data-id="<%= n.id %>">
+          <div class="notif-icon-wrap" style="background-color: <%= n.meta.color %>22;">
+            <i class="bi <%= n.meta.icon %>" style="color: <%= n.meta.color %>;"></i>
+          </div>
+          <div class="notif-body">
+            <p class="notif-title"><%= n.title %></p>
+            <p class="notif-message"><%= n.message %></p>
+            <p class="notif-time" data-ts="<%= n.created_at %>"></p>
+          </div>
+          <button class="notif-dismiss-btn" data-id="<%= n.id %>" title="Dismiss">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+
+</div>
+
+<%- include('../partials/bottomNav') %>
+
+<style>
+.notif-page-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px 20px 100px;
+}
+.notif-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.notif-page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+.notif-mark-all-btn {
+  background: none;
+  border: none;
+  color: #F7B32B;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.notif-mark-all-btn:hover {
+  text-decoration: underline;
+}
+.notif-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+.notif-empty-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 16px;
+  color: #ccc;
+}
+.notif-empty-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 4px;
+}
+.notif-empty-sub {
+  font-size: 13px;
+  margin: 0;
+}
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.notif-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: opacity 0.2s;
+  position: relative;
+}
+.notif-card--unread {
+  border-left: 3px solid #F7B32B;
+}
+.notif-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+.notif-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 3px;
+}
+.notif-message {
+  font-size: 13px;
+  color: #555;
+  margin: 0 0 4px;
+  line-height: 1.4;
+}
+.notif-time {
+  font-size: 11px;
+  color: #aaa;
+  margin: 0;
+}
+.notif-dismiss-btn {
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.notif-dismiss-btn:hover {
+  color: #ef4444;
+}
+</style>
+
+<script>
+  // Relative time labels
+  function timeAgo(dateStr) {
+    const diff = Math.floor((Date.now() - new Date(dateStr)) / 1000);
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+  }
+
+  document.querySelectorAll('.notif-time[data-ts]').forEach(el => {
+    el.textContent = timeAgo(el.dataset.ts);
+  });
+
+  // Mark card as read on click (anywhere on card)
+  document.querySelectorAll('.notif-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const id = card.dataset.id;
+      if (card.classList.contains('notif-card--unread')) {
+        card.classList.remove('notif-card--unread');
+        fetch(`/notifications/${id}/read`, { method: 'POST' }).catch(() => {});
+      }
+    });
+  });
+
+  // Dismiss (delete) a notification
+  document.querySelectorAll('.notif-dismiss-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const id = btn.dataset.id;
+      const card = document.querySelector(`.notif-card[data-id="${id}"]`);
+      if (!card) return;
+      card.style.opacity = '0';
+      setTimeout(() => {
+        card.remove();
+        if (document.querySelectorAll('.notif-card').length === 0) {
+          location.reload();
+        }
+      }, 200);
+      fetch(`/notifications/${id}/delete`, { method: 'POST' }).catch(() => {});
+    });
+  });
+
+  // Mark all as read
+  const markAllBtn = document.getElementById('markAllBtn');
+  if (markAllBtn) {
+    markAllBtn.addEventListener('click', () => {
+      document.querySelectorAll('.notif-card--unread').forEach(c => c.classList.remove('notif-card--unread'));
+      fetch('/notifications/mark-all-read', { method: 'POST' }).catch(() => {});
+    });
+  }
+</script>
