@@ -68,6 +68,18 @@ class UserDAO {
     }
   }
 
+  async createOAuthUser(fullName, email) {
+    const conn = await this.#connectionManager.getConnection();
+    try {
+      await conn.execute(
+        'INSERT INTO User (full_name, email, password) VALUES (?, ?, NULL)',
+        [fullName, email]
+      );
+    } finally {
+      conn.release();
+    }
+  }
+
   async isEmailTaken(email) {
     const conn = await this.#connectionManager.getConnection();
     try {

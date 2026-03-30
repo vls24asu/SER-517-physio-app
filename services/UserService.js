@@ -34,6 +34,7 @@ class UserService {
   async authenticate(email, password) {
     const user = await this.#userDAO.findByEmail(email);
     if (!user) return null;
+    if (!user.password) return null;
 
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return null;

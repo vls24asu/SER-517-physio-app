@@ -9,6 +9,7 @@ const sessionConfig = require('./config/session');
 const routes = require('./routes');
 const db = require('./config/db');
 const ensureSchema = require('./config/ensureSchema');
+const passport = require('./config/passport');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,6 +25,7 @@ app.use(express.json());
 
 // Session and flash messages
 app.use(session(sessionConfig));
+app.use(passport.initialize());
 app.use(flash());
 
 // Configure Web Push VAPID (only when keys are present)
@@ -47,6 +49,10 @@ app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   res.locals.currentPath = req.path;
   res.locals.vapidPublicKey = process.env.VAPID_PUBLIC_KEY || null;
+  res.locals.googleOAuthEnabled = Boolean(
+    process.env.GOOGLE_CLIENT_ID &&
+    process.env.GOOGLE_CLIENT_SECRET
+  );
   next();
 });
 

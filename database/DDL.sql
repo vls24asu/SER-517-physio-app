@@ -33,7 +33,7 @@ CREATE TABLE `User` (
     id INT PRIMARY KEY AUTO_INCREMENT,
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NULL,
     role ENUM('patient', 'physio') NOT NULL DEFAULT 'patient',
     twofa_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     twofa_secret VARCHAR(64) NULL,
