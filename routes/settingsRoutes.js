@@ -20,6 +20,10 @@ router.post('/goals', isAuthenticated, ctrl.postGoals);
 router.get('/pain-management', isAuthenticated, ctrl.getPainManagement);
 router.post('/pain-management', isAuthenticated, ctrl.postPainManagement);
 
+router.get('/notifications',            isAuthenticated, ctrl.getNotifications);
+router.post('/notifications',           isAuthenticated, ctrl.postNotifications);
+router.post('/notifications/clear-all', isAuthenticated, ctrl.clearAllNotifications);
+
 router.post('/delete-account', isAuthenticated, ctrl.deleteAccount);
 
 module.exports = router;
