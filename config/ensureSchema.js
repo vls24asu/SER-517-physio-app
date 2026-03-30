@@ -24,6 +24,18 @@ async function hasColumn(tableName, columnName) {
   return rows.length > 0;
 }
 
+async function isColumnNullable(tableName, columnName) {
+  const [rows] = await db.query(
+    `SELECT is_nullable
+     FROM information_schema.columns
+     WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?
+     LIMIT 1`,
+    [tableName, columnName]
+  );
+
+  return rows[0]?.is_nullable === 'YES';
+}
+
 async function hasConstraint(tableName, constraintName, constraintType) {
   const [rows] = await db.query(
     `SELECT 1
@@ -178,6 +190,16 @@ async function ensureUserProfileSchema() {
   await addColumnIfMissing('User_Profile', 'pain_intensity', 'pain_intensity INT NULL');
 }
 
+async function ensureUserAuthSchema() {
+  if (!(await hasTable('User')) || !(await hasColumn('User', 'password'))) {
+    return;
+  }
+
+  if (!(await isColumnNullable('User', 'password'))) {
+    await db.query('ALTER TABLE `User` MODIFY COLUMN `password` VARCHAR(255) NULL');
+  }
+}
+
 async function ensureSavedRoutineSchema() {
   await db.query(
     `CREATE TABLE IF NOT EXISTS \`Saved_Routine\` (
@@ -286,6 +308,7 @@ async function ensureNotificationSchema() {
 
 async function ensureSchema() {
   await ensureLowercaseExerciseTables();
+  await ensureUserAuthSchema();
   await ensureUserProfileSchema();
   await ensureSavedRoutineSchema();
   await ensureWorkoutSessionSchema();
