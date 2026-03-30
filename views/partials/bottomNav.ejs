@@ -13,9 +13,29 @@
     <i class="bi bi-bar-chart<%= currentPath === '/progress' ? '-fill' : '' %>"></i>
     <span>Progress</span>
   </a>
+  <a href="/notifications" class="nav-item <%= currentPath === '/notifications' ? 'active' : '' %>" id="notif-nav-item">
+    <span class="notif-bell-wrap">
+      <i class="bi bi-bell<%= currentPath === '/notifications' ? '-fill' : '' %>"></i>
+      <span class="notif-badge" id="notif-badge" style="display:none;"></span>
+    </span>
+    <span>Alerts</span>
+  </a>
   <a href="/profile" class="nav-item <%= currentPath === '/profile' ? 'active' : '' %>">
     <i class="bi bi-person<%= currentPath === '/profile' ? '-fill' : '' %>"></i>
     <span>Profile</span>
   </a>
 </nav>
+
+<script>
+  fetch('/notifications/unread-count')
+    .then(r => r.json())
+    .then(({ count }) => {
+      const badge = document.getElementById('notif-badge');
+      if (badge && count > 0) {
+        badge.textContent = count > 99 ? '99+' : count;
+        badge.style.display = 'flex';
+      }
+    })
+    .catch(() => {});
+</script>
 <% } %>
