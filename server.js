@@ -25,12 +25,27 @@ app.use(express.json());
 app.use(session(sessionConfig));
 app.use(flash());
 
+// Configure Web Push VAPID (only when keys are present)
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  try {
+    const webpush = require('web-push');
+    webpush.setVapidDetails(
+      `mailto:${process.env.VAPID_EMAIL || 'hello@appyyo.com'}`,
+      process.env.VAPID_PUBLIC_KEY,
+      process.env.VAPID_PRIVATE_KEY
+    );
+  } catch {
+    console.warn('web-push not installed — push notifications disabled.');
+  }
+}
+
 // Make flash messages and current user available to all views
 app.use((req, res, next) => {
   res.locals.success = req.flash('success');
   res.locals.error = req.flash('error');
   res.locals.currentUser = req.session.user || null;
   res.locals.currentPath = req.path;
+  res.locals.vapidPublicKey = process.env.VAPID_PUBLIC_KEY || null;
   next();
 });
 

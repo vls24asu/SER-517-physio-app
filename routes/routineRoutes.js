@@ -5,6 +5,12 @@ const router = express.Router();
 const { isAuthenticated } = require('../middleware/auth');
 const { requireOnboardingComplete } = require('../middleware/onboarding');
 const db = require('../config/db');
+const NotificationService = require('../services/NotificationService');
+const StatsService = require('../services/StatsService');
+const { ACHIEVEMENTS } = require('../controllers/achievementsController');
+
+const notifService = new NotificationService();
+const statsService = new StatsService();
 
 // ── Create Custom Routine (builder/draft) ──────────────────────────────────
 
@@ -371,6 +377,10 @@ router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
   const emoji = categoryEmoji[cats[0]] || '🏋️';
   const durationMin = Math.max(1, Math.round((routine.total_seconds || 0) / 60));
 
+  // Capture stats before session to detect newly unlocked achievements
+  const statsBefore = await statsService.getUserStats(userId);
+  const unlockedBefore = new Set(ACHIEVEMENTS.filter(a => a.check(statsBefore)).map(a => a.id));
+
   const [wsResult] = await db.query(
     `INSERT INTO Workout_Session (user_id, routine_id, title, duration_min, exercise_count, tags, emoji)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -393,6 +403,59 @@ router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [sessionId, ex.id, ex.name, ex.category, ex.sets, ex.reps, ex.hold_time_sec, ex.sort_order]
     );
+  }
+
+  // Fire notifications (non-blocking — errors here don't fail the session log)
+  try {
+    const statsAfter = await statsService.getUserStats(userId);
+
+    // Session completed
+    await notifService.create(
+      userId,
+      'session_completed',
+      'Session complete!',
+      `You finished "${routine.name}" — ${durationMin} min, ${routine.exercise_count} exercises.`,
+      { dedupe: false }
+    );
+
+    // Newly unlocked achievements
+    for (const a of ACHIEVEMENTS) {
+      if (!unlockedBefore.has(a.id) && a.check(statsAfter)) {
+        await notifService.create(
+          userId,
+          'achievement_unlocked',
+          `Achievement unlocked: ${a.name}`,
+          `${a.emoji} ${a.description}`,
+          { dedupe: true, dedupeByTitle: true }
+        );
+      }
+    }
+
+    // Streak active (fires when streak increases, deduped to once per day)
+    if (statsAfter.streak >= 2 && statsAfter.streak > statsBefore.streak) {
+      await notifService.create(
+        userId,
+        'streak_active',
+        `${statsAfter.streak}-day streak!`,
+        `You've trained ${statsAfter.streak} days in a row. Keep it up!`
+      );
+    }
+
+    // Progress milestones
+    const MILESTONES = [5, 10, 25, 50, 100];
+    for (const milestone of MILESTONES) {
+      if (statsBefore.totalSessions < milestone && statsAfter.totalSessions >= milestone) {
+        await notifService.create(
+          userId,
+          'progress_milestone',
+          `${milestone} sessions milestone!`,
+          `You've completed ${milestone} workouts. Amazing progress!`,
+          { dedupe: false }
+        );
+      }
+    }
+  } catch (notifErr) {
+    console.error('Notification error after session log:', notifErr);
   }
 
   res.json({ ok: true });

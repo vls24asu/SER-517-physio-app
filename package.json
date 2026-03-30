@@ -10,8 +10,8 @@
   "author": "Team 7",
   "license": "ISC",
   "engines": {
-  "node": ">=18.0.0"
-},
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "connect-flash": "^0.1.1",
@@ -23,7 +23,8 @@
     "express-validator": "^7.2.0",
     "mysql2": "^3.14.1",
     "qrcode": "^1.5.4",
-    "speakeasy": "^2.0.0"
+    "speakeasy": "^2.0.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
