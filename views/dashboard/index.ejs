@@ -1,8 +1,31 @@
 <div class="dashboard-container">
   <div class="greeting-section mb-4">
     <h1 class="greeting-text"><%= greeting %>, <%= user.fullName %></h1>
-    <p class="greeting-subtitle">What do you want to do today?</p>
+    <% if (nextSession) { %>
+      <p class="greeting-subtitle">You have a session scheduled for today</p>
+    <% } else { %>
+      <p class="greeting-subtitle">What do you want to do today?</p>
+    <% } %>
   </div>
+
+  <% if (nextSession) {
+    const sat = new Date(nextSession.scheduled_at);
+    const today = new Date();
+    const isToday = sat.toDateString() === today.toDateString();
+    const timeStr = sat.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    const dateLabel = isToday ? timeStr : sat.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' · ' + timeStr;
+  %>
+  <div class="scheduled-session-card mb-4">
+    <p class="scheduled-label">SCHEDULED FOR <%= dateLabel.toUpperCase() %></p>
+    <h2 class="scheduled-name"><%= nextSession.routine_name %></h2>
+    <div class="scheduled-actions">
+      <a href="/routines/saved/<%= nextSession.routine_id %>/preview" class="scheduled-start-btn">Start now</a>
+      <form method="POST" action="/routines/schedule/<%= nextSession.id %>/cancel" style="margin:0;">
+        <button type="submit" class="scheduled-cancel-btn">Cancel</button>
+      </form>
+    </div>
+  </div>
+  <% } %>
 
   <div class="start-session-btn-wrapper mb-4">
     <a href="/routines/saved" class="btn btn-start-session">
