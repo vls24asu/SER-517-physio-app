@@ -86,11 +86,14 @@ class NotificationService {
     const prefs = await dao.getPreferences(userId);
     if (!prefs.in_app_enabled) return;
 
-    // Workout reminder — fires at or after the user's preferred reminder time
+    // Workout reminder — fires at or after the user's preferred reminder time (in their timezone)
     if (prefs.type_workout_reminder) {
       const [prefHour, prefMin] = prefs.reminder_time.split(':').map(Number);
-      const now = new Date();
-      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const tz = prefs.timezone || 'UTC';
+      const nowInTz = new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(new Date());
+      const tzHour = Number(nowInTz.find(p => p.type === 'hour').value);
+      const tzMin  = Number(nowInTz.find(p => p.type === 'minute').value);
+      const currentMinutes = tzHour * 60 + tzMin;
       const prefMinutes = prefHour * 60 + prefMin;
 
       if (currentMinutes >= prefMinutes) {

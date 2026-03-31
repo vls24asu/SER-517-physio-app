@@ -300,10 +300,13 @@ async function ensureNotificationSchema() {
       type_pain_checkin BOOLEAN NOT NULL DEFAULT TRUE,
       type_workout_reminder BOOLEAN NOT NULL DEFAULT TRUE,
       reminder_time VARCHAR(5) NOT NULL DEFAULT '09:00',
+      timezone VARCHAR(50) NOT NULL DEFAULT 'UTC',
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
     )`
   );
+
+  await addColumnIfMissing('Notification_Preferences', 'timezone', "timezone VARCHAR(50) NOT NULL DEFAULT 'UTC'");
 }
 
 async function ensureSchema() {

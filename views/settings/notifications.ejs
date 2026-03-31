@@ -152,10 +152,15 @@
         </label>
       </div>
 
-      <div class="settings-field settings-field--last" id="reminderTimeField" style="<%= prefs.type_workout_reminder ? '' : 'display:none;' %>">
+      <div class="settings-field" id="reminderTimeField" style="<%= prefs.type_workout_reminder ? '' : 'display:none;' %>">
         <label class="settings-label" for="reminderTime">Remind me at</label>
         <input type="time" id="reminderTime" name="reminder_time" class="settings-input"
                value="<%= prefs.reminder_time || '09:00' %>">
+      </div>
+
+      <div class="settings-field settings-field--last" id="reminderTzField" style="<%= prefs.type_workout_reminder ? '' : 'display:none;' %>">
+        <label class="settings-label" for="reminderTz">Your timezone</label>
+        <select id="reminderTz" name="timezone" class="settings-input"></select>
       </div>
 
     </div>
@@ -233,12 +238,41 @@
 </style>
 
 <script>
-  // Show/hide reminder time picker based on reminder toggle
+  // Populate timezone dropdown with browser-detected default
+  const tzSelect = document.getElementById('reminderTz');
+  const savedTz = '<%= prefs.timezone || "UTC" %>';
+  const commonZones = [
+    'UTC','America/New_York','America/Chicago','America/Denver','America/Los_Angeles',
+    'America/Anchorage','Pacific/Honolulu','Europe/London','Europe/Paris','Europe/Berlin',
+    'Europe/Moscow','Asia/Dubai','Asia/Kolkata','Asia/Bangkok','Asia/Singapore',
+    'Asia/Tokyo','Asia/Shanghai','Australia/Sydney','Pacific/Auckland'
+  ];
+  // Detect browser timezone and add it if not already in list
+  const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if (browserTz && !commonZones.includes(browserTz)) commonZones.unshift(browserTz);
+  commonZones.forEach(tz => {
+    const opt = document.createElement('option');
+    opt.value = tz;
+    opt.textContent = tz.replace(/_/g, ' ');
+    if (tz === savedTz) opt.selected = true;
+    tzSelect.appendChild(opt);
+  });
+  // If saved tz isn't in list, add it
+  if (savedTz && !commonZones.includes(savedTz)) {
+    const opt = document.createElement('option');
+    opt.value = savedTz; opt.textContent = savedTz; opt.selected = true;
+    tzSelect.insertBefore(opt, tzSelect.firstChild);
+  }
+
+  // Show/hide reminder time + timezone fields based on reminder toggle
   const reminderToggle = document.getElementById('reminderToggle');
   const reminderTimeField = document.getElementById('reminderTimeField');
+  const reminderTzField = document.getElementById('reminderTzField');
 
   reminderToggle.addEventListener('change', () => {
-    reminderTimeField.style.display = reminderToggle.checked ? '' : 'none';
+    const show = reminderToggle.checked ? '' : 'none';
+    reminderTimeField.style.display = show;
+    reminderTzField.style.display = show;
   });
 
   // Dim the type toggles and reminder section when in-app is off
