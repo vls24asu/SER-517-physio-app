@@ -164,7 +164,8 @@ class NotificationDAO {
     type_progress_milestone: true,
     type_pain_checkin: true,
     type_workout_reminder: true,
-    reminder_time: '09:00'
+    reminder_time: '09:00',
+    timezone: 'UTC'
   };
 
   async getPreferences(userId) {
@@ -188,8 +189,8 @@ class NotificationDAO {
            (user_id, in_app_enabled, push_enabled,
             type_session_completed, type_achievement_unlocked, type_streak_active,
             type_streak_broken, type_progress_milestone, type_pain_checkin,
-            type_workout_reminder, reminder_time)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            type_workout_reminder, reminder_time, timezone)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
            in_app_enabled = VALUES(in_app_enabled),
            push_enabled = VALUES(push_enabled),
@@ -200,7 +201,8 @@ class NotificationDAO {
            type_progress_milestone = VALUES(type_progress_milestone),
            type_pain_checkin = VALUES(type_pain_checkin),
            type_workout_reminder = VALUES(type_workout_reminder),
-           reminder_time = VALUES(reminder_time)`,
+           reminder_time = VALUES(reminder_time),
+           timezone = VALUES(timezone)`,
         [
           userId,
           prefs.in_app_enabled,
@@ -212,7 +214,8 @@ class NotificationDAO {
           prefs.type_progress_milestone,
           prefs.type_pain_checkin,
           prefs.type_workout_reminder,
-          prefs.reminder_time
+          prefs.reminder_time,
+          prefs.timezone || 'UTC'
         ]
       );
     } finally {

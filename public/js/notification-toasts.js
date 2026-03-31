@@ -144,9 +144,14 @@
     document.head.appendChild(style);
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkForNewNotifications);
-  } else {
+  function init() {
     checkForNewNotifications();
+    setInterval(checkForNewNotifications, 30000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
 })();

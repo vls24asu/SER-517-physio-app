@@ -329,7 +329,7 @@ document.querySelectorAll(".step input:not([type='hidden']):not([type='range']),
 
 document.querySelectorAll(".step select").forEach(select => {
 
-  if(!select.querySelector("option[value='']")){
+  if(!select.querySelector("option[value='']") && !select.value){
 
     const option = document.createElement("option");
     option.value = "";

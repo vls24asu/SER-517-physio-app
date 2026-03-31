@@ -86,11 +86,14 @@ class NotificationService {
     const prefs = await dao.getPreferences(userId);
     if (!prefs.in_app_enabled) return;
 
-    // Workout reminder — fires at or after the user's preferred reminder time
+    // Workout reminder — fires at or after the user's preferred reminder time (in their timezone)
     if (prefs.type_workout_reminder) {
       const [prefHour, prefMin] = prefs.reminder_time.split(':').map(Number);
-      const now = new Date();
-      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const tz = prefs.timezone || 'UTC';
+      const nowInTz = new Intl.DateTimeFormat('en-US', { timeZone: tz, hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(new Date());
+      const tzHour = Number(nowInTz.find(p => p.type === 'hour').value);
+      const tzMin  = Number(nowInTz.find(p => p.type === 'minute').value);
+      const currentMinutes = tzHour * 60 + tzMin;
       const prefMinutes = prefHour * 60 + prefMin;
 
       if (currentMinutes >= prefMinutes) {
@@ -114,7 +117,7 @@ class NotificationService {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const diffDays = Math.round((today - lastDate) / (1000 * 60 * 60 * 24));
-      if (diffDays === 2) {
+      if (diffDays >= 2) {
         await this.create(
           userId,
           'streak_broken',
@@ -125,14 +128,13 @@ class NotificationService {
     }
 
     // Pain check-in — if user has pain areas and hasn't worked out in 5+ days
-    if (prefs.type_pain_checkin) {
+    // Only fires for existing users (lastDateStr must be set — new users with no sessions are excluded)
+    if (prefs.type_pain_checkin && lastDateStr) {
       const painProfile = await dao.getUserPainProfile(userId);
       const hasPain = painProfile?.pain_status === 'yes' ||
         (painProfile?.pain_areas && painProfile.pain_areas !== 'none' && painProfile.pain_areas !== '[]');
       if (hasPain) {
-        const daysSinceLast = lastDateStr
-          ? Math.round((new Date().setHours(0, 0, 0, 0) - new Date(lastDateStr)) / (1000 * 60 * 60 * 24))
-          : 999;
+        const daysSinceLast = Math.round((new Date().setHours(0, 0, 0, 0) - new Date(lastDateStr)) / (1000 * 60 * 60 * 24));
         if (daysSinceLast >= 5) {
           await this.create(
             userId,
