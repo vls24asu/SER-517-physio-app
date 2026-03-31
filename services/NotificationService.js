@@ -111,7 +111,7 @@ class NotificationService {
 
     const lastDateStr = await dao.getLastSessionDate(userId);
 
-    // Streak broken — fires the day after a streak ends (last session was exactly 2 days ago)
+    // Streak broken — fires when the user had a streak and missed at least one day
     if (prefs.type_streak_broken && currentStreak === 0 && lastDateStr) {
       const lastDate = new Date(lastDateStr);
       const today = new Date();
@@ -127,8 +127,7 @@ class NotificationService {
       }
     }
 
-    // Pain check-in — if user has pain areas and hasn't worked out in 5+ days
-    // Only fires for existing users (lastDateStr must be set — new users with no sessions are excluded)
+    // Pain check-in — only for existing users (has at least one session) who haven't worked out in 5+ days
     if (prefs.type_pain_checkin && lastDateStr) {
       const painProfile = await dao.getUserPainProfile(userId);
       const hasPain = painProfile?.pain_status === 'yes' ||
