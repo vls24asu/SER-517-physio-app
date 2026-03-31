@@ -14,15 +14,14 @@ const getDashboard = async (req, res) => {
     // Runs fire-and-forget so a notification error never breaks the dashboard load.
     notifService.triggerDashboardNotifications(userId, stats.streak).catch(console.error);
 
-    // Fetch next upcoming scheduled session
-    const [scheduled] = await db.query(
+    // Fetch all upcoming scheduled sessions
+    const [scheduledSessions] = await db.query(
       `SELECT id, routine_id, routine_name, scheduled_at
        FROM Scheduled_Session
        WHERE user_id = ? AND scheduled_at >= NOW()
-       ORDER BY scheduled_at ASC LIMIT 1`,
+       ORDER BY scheduled_at ASC`,
       [userId]
     );
-    const nextSession = scheduled.length ? scheduled[0] : null;
 
     // Get greeting based on time of day
     const hour = new Date().getHours();
@@ -39,7 +38,7 @@ const getDashboard = async (req, res) => {
       greeting,
       stats,
       user: req.session.user,
-      nextSession
+      scheduledSessions
     });
   } catch (err) {
     console.error(err);
