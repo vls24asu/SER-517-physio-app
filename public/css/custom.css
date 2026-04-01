@@ -1747,6 +1747,61 @@ main {
   text-transform: capitalize;
 }
 
+/* Body check-in card */
+.body-checkin-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid rgba(0,0,0,0.04);
+  margin-top: 16px;
+}
+
+.body-checkin-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 14px;
+}
+
+.body-checkin-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.body-checkin-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.body-checkin-emoji {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.body-checkin-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000;
+  flex: 1;
+}
+
+.body-checkin-status {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.body-checkin-status--improving {
+  color: #F5A623;
+}
+
+.body-checkin-status--stable {
+  color: #F5A623;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .dashboard-container,
