@@ -2,14 +2,12 @@
   const categoryLabelMap = {
     strengthen: 'Strengthen',
     stretch: 'Stretch',
-    avoid: 'Avoid',
     stability: 'Stability'
   };
 
   const categoryEmojiMap = {
     strengthen: '💪',
     stretch: '🧘',
-    avoid: '⚠️',
     stability: '🏃'
   };
 %>
@@ -59,7 +57,7 @@
       const list  = document.getElementById('searchSuggestions');
       let debounceTimer;
 
-      const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️', stability: '🏃' };
+      const categoryEmoji = { strengthen: '💪', stretch: '🧘', stability: '🏃' };
 
       input.addEventListener('input', function () {
         clearTimeout(debounceTimer);
@@ -99,7 +97,6 @@
     <a href="/library?category=all" class="library-filter-tab <%= activeCategory === 'all' ? 'active' : '' %>">All</a>
     <a href="/library?category=strengthen" class="library-filter-tab <%= activeCategory === 'strengthen' ? 'active' : '' %>">Strengthen</a>
     <a href="/library?category=stretch" class="library-filter-tab <%= activeCategory === 'stretch' ? 'active' : '' %>">Stretch</a>
-    <a href="/library?category=avoid" class="library-filter-tab <%= activeCategory === 'avoid' ? 'active' : '' %>">Avoid</a>
     <a href="/library?category=stability" class="library-filter-tab <%= activeCategory === 'stability' ? 'active' : '' %>">Stability</a>
   </div>
 
