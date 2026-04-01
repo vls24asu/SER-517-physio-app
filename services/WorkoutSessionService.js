@@ -36,16 +36,16 @@ class WorkoutSessionService {
     };
   }
 
-  async getChartData(userId, period) {
-    return this.#dao.getChartData(userId, period);
+  async getChartData(userId, period, timezone = 'UTC') {
+    return this.#dao.getChartData(userId, period, timezone);
   }
 
-  async getSessionCountForPeriod(userId, period) {
-    return this.#dao.getSessionCountForPeriod(userId, period);
+  async getSessionCountForPeriod(userId, period, timezone = 'UTC') {
+    return this.#dao.getSessionCountForPeriod(userId, period, timezone);
   }
 
-  async getExercisesForPeriod(userId, period) {
-    return this.#dao.getExercisesForPeriod(userId, period);
+  async getExercisesForPeriod(userId, period, timezone = 'UTC') {
+    return this.#dao.getExercisesForPeriod(userId, period, timezone);
   }
 }
 

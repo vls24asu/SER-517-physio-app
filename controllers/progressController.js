@@ -11,12 +11,13 @@ const getProgress = async (req, res) => {
       ? req.query.period
       : 'week';
 
+    const timezone = res.locals.userTimezone || 'UTC';
     const [stats, sessions, chartData, exercises, periodStats] = await Promise.all([
       statsService.getUserStats(userId),
       sessionService.getHistory(userId),
-      sessionService.getChartData(userId, period),
-      sessionService.getExercisesForPeriod(userId, period),
-      sessionService.getSessionCountForPeriod(userId, period)
+      sessionService.getChartData(userId, period, timezone),
+      sessionService.getExercisesForPeriod(userId, period, timezone),
+      sessionService.getSessionCountForPeriod(userId, period, timezone)
     ]);
 
     const now = new Date();

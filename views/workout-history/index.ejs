@@ -22,7 +22,7 @@
                 <span class="history-tag <%= i % 2 === 1 ? 'history-tag--yellow' : '' %>"><%= tag %></span>
               <% }) %>
             </div>
-            <p class="history-card-date"><%= s.sessionDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) %>, <%= s.sessionDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %></p>
+            <p class="history-card-date" data-date-short="<%= s.sessionDate.toISOString() %>"></p>
           </div>
           <div class="history-card-emoji"><%= s.emoji %></div>
         </a>

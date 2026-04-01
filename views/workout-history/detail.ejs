@@ -17,9 +17,7 @@
         </div>
       <% } %>
       <p class="history-card-date">
-        <%= session.sessionDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) %>
-        &bull;
-        <%= session.sessionDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) %>
+        <span data-date="<%= session.sessionDate.toISOString() %>"></span>
       </p>
     </div>
     <div class="history-card-emoji"><%= session.emoji %></div>
