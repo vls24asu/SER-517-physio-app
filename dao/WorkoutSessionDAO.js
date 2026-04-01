@@ -1,5 +1,22 @@
 const ConnectionManager = require('./ConnectionManager');
 
+// Convert IANA timezone name to a MySQL-compatible UTC offset string e.g. "+05:30"
+function utcOffsetString(timezone) {
+  try {
+    const now = new Date();
+    const tzDate = new Date(now.toLocaleString('en-US', { timeZone: timezone }));
+    const utcDate = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
+    const offsetMin = Math.round((tzDate - utcDate) / 60000);
+    const sign = offsetMin >= 0 ? '+' : '-';
+    const abs = Math.abs(offsetMin);
+    const h = String(Math.floor(abs / 60)).padStart(2, '0');
+    const m = String(abs % 60).padStart(2, '0');
+    return `${sign}${h}:${m}`;
+  } catch (e) {
+    return '+00:00';
+  }
+}
+
 class WorkoutSessionDAO {
   #connectionManager;
 
@@ -51,16 +68,17 @@ class WorkoutSessionDAO {
     }
   }
 
-  async getChartData(userId, period) {
+  async getChartData(userId, period, timezone = 'UTC') {
     const conn = await this.#connectionManager.getConnection();
+    const tz = utcOffsetString(timezone);
     try {
       if (period === 'week') {
         const [rows] = await conn.execute(
-          `SELECT DAYOFWEEK(session_date) as dow, COUNT(*) as cnt
+          `SELECT DAYOFWEEK(CONVERT_TZ(session_date, '+00:00', ?)) as dow, COUNT(*) as cnt
            FROM Workout_Session
-           WHERE user_id = ? AND YEARWEEK(session_date, 1) = YEARWEEK(CURDATE(), 1)
+           WHERE user_id = ? AND YEARWEEK(CONVERT_TZ(session_date, '+00:00', ?), 1) = YEARWEEK(CONVERT_TZ(NOW(), '+00:00', ?), 1)
            GROUP BY dow`,
-          [userId]
+          [tz, userId, tz, tz]
         );
         const dowMap = {};
         rows.forEach(r => { dowMap[r.dow] = Number(r.cnt); });
@@ -72,15 +90,15 @@ class WorkoutSessionDAO {
 
       if (period === 'month') {
         const [rows] = await conn.execute(
-          `SELECT FLOOR((DAYOFMONTH(session_date) - 1) / 7) + 1 AS week_num,
+          `SELECT FLOOR((DAYOFMONTH(CONVERT_TZ(session_date, '+00:00', ?)) - 1) / 7) + 1 AS week_num,
                   COUNT(*) AS cnt
            FROM Workout_Session
            WHERE user_id = ?
-             AND YEAR(session_date)  = YEAR(CURDATE())
-             AND MONTH(session_date) = MONTH(CURDATE())
+             AND YEAR(CONVERT_TZ(session_date, '+00:00', ?))  = YEAR(CONVERT_TZ(NOW(), '+00:00', ?))
+             AND MONTH(CONVERT_TZ(session_date, '+00:00', ?)) = MONTH(CONVERT_TZ(NOW(), '+00:00', ?))
            GROUP BY week_num
            ORDER BY week_num`,
-          [userId]
+          [tz, userId, tz, tz, tz, tz]
         );
         const weekMap = {};
         rows.forEach(r => { weekMap[r.week_num] = Number(r.cnt); });
@@ -89,11 +107,11 @@ class WorkoutSessionDAO {
 
       // year
       const [rows] = await conn.execute(
-        `SELECT MONTH(session_date) AS month_num, COUNT(*) AS cnt
+        `SELECT MONTH(CONVERT_TZ(session_date, '+00:00', ?)) AS month_num, COUNT(*) AS cnt
          FROM Workout_Session
-         WHERE user_id = ? AND YEAR(session_date) = YEAR(CURDATE())
+         WHERE user_id = ? AND YEAR(CONVERT_TZ(session_date, '+00:00', ?)) = YEAR(CONVERT_TZ(NOW(), '+00:00', ?))
          GROUP BY month_num`,
-        [userId]
+        [tz, userId, tz, tz]
       );
       const monthMap = {};
       rows.forEach(r => { monthMap[r.month_num] = Number(r.cnt); });
@@ -104,16 +122,17 @@ class WorkoutSessionDAO {
     }
   }
 
-  async getSessionCountForPeriod(userId, period) {
+  async getSessionCountForPeriod(userId, period, timezone = 'UTC') {
     const conn = await this.#connectionManager.getConnection();
+    const tz = utcOffsetString(timezone);
     try {
       let where;
       if (period === 'week') {
-        where = `AND YEARWEEK(session_date, 1) = YEARWEEK(CURDATE(), 1)`;
+        where = `AND YEARWEEK(CONVERT_TZ(session_date, '+00:00', '${tz}'), 1) = YEARWEEK(CONVERT_TZ(NOW(), '+00:00', '${tz}'), 1)`;
       } else if (period === 'month') {
-        where = `AND YEAR(session_date) = YEAR(CURDATE()) AND MONTH(session_date) = MONTH(CURDATE())`;
+        where = `AND YEAR(CONVERT_TZ(session_date, '+00:00', '${tz}')) = YEAR(CONVERT_TZ(NOW(), '+00:00', '${tz}')) AND MONTH(CONVERT_TZ(session_date, '+00:00', '${tz}')) = MONTH(CONVERT_TZ(NOW(), '+00:00', '${tz}'))`;
       } else {
-        where = `AND YEAR(session_date) = YEAR(CURDATE())`;
+        where = `AND YEAR(CONVERT_TZ(session_date, '+00:00', '${tz}')) = YEAR(CONVERT_TZ(NOW(), '+00:00', '${tz}'))`;
       }
       const [rows] = await conn.execute(
         `SELECT COUNT(*) AS cnt, COALESCE(SUM(duration_min), 0) AS total_min
@@ -127,16 +146,17 @@ class WorkoutSessionDAO {
     }
   }
 
-  async getExercisesForPeriod(userId, period) {
+  async getExercisesForPeriod(userId, period, timezone = 'UTC') {
     const conn = await this.#connectionManager.getConnection();
+    const tz = utcOffsetString(timezone);
     try {
       let where;
       if (period === 'week') {
-        where = `AND YEARWEEK(ws.session_date, 1) = YEARWEEK(CURDATE(), 1)`;
+        where = `AND YEARWEEK(CONVERT_TZ(ws.session_date, '+00:00', '${tz}'), 1) = YEARWEEK(CONVERT_TZ(NOW(), '+00:00', '${tz}'), 1)`;
       } else if (period === 'month') {
-        where = `AND YEAR(ws.session_date) = YEAR(CURDATE()) AND MONTH(ws.session_date) = MONTH(CURDATE())`;
+        where = `AND YEAR(CONVERT_TZ(ws.session_date, '+00:00', '${tz}')) = YEAR(CONVERT_TZ(NOW(), '+00:00', '${tz}')) AND MONTH(CONVERT_TZ(ws.session_date, '+00:00', '${tz}')) = MONTH(CONVERT_TZ(NOW(), '+00:00', '${tz}'))`;
       } else {
-        where = `AND YEAR(ws.session_date) = YEAR(CURDATE())`;
+        where = `AND YEAR(CONVERT_TZ(ws.session_date, '+00:00', '${tz}')) = YEAR(CONVERT_TZ(NOW(), '+00:00', '${tz}'))`;
       }
       const [rows] = await conn.execute(
         `SELECT DISTINCT wse.name, wse.category

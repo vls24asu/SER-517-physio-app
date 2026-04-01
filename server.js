@@ -10,6 +10,7 @@ const routes = require('./routes');
 const db = require('./config/db');
 const ensureSchema = require('./config/ensureSchema');
 const passport = require('./config/passport');
+const attachTimezone = require('./middleware/timezone');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -55,6 +56,9 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+// Attach user's timezone to res.locals for all views
+app.use(attachTimezone);
 
 // EJS setup with layouts
 app.use(expressLayouts);

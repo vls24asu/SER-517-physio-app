@@ -9,15 +9,9 @@
   </div>
 
   <% if (scheduledSessions.length > 0) { %>
-  <% const today = new Date(); %>
-  <% scheduledSessions.forEach(function(s) {
-    const sat = new Date(s.scheduled_at);
-    const isToday = sat.toDateString() === today.toDateString();
-    const timeStr = sat.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-    const dateLabel = isToday ? timeStr : sat.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' · ' + timeStr;
-  %>
+  <% scheduledSessions.forEach(function(s) { %>
   <div class="scheduled-session-card mb-4">
-    <p class="scheduled-label">SCHEDULED FOR <%= dateLabel.toUpperCase() %></p>
+    <p class="scheduled-label" data-date-scheduled="<%= new Date(s.scheduled_at).toISOString() %>">SCHEDULED</p>
     <h2 class="scheduled-name"><%= s.routine_name %></h2>
     <div class="scheduled-actions">
       <a href="/routines/saved/<%= s.routine_id %>/preview" class="scheduled-start-btn">Start now</a>
