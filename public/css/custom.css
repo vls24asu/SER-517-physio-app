@@ -1757,11 +1757,117 @@ main {
   margin-top: 16px;
 }
 
+.body-checkin-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
 .body-checkin-title {
   font-size: 1.1rem;
   font-weight: 700;
   color: #000;
-  margin: 0 0 14px;
+  margin: 0 0 2px;
+}
+
+.body-checkin-subtitle {
+  font-size: 0.82rem;
+  color: #888;
+  margin: 0;
+}
+
+.body-checkin-add-btn {
+  flex-shrink: 0;
+  background: #F5A623;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.body-checkin-add-btn:hover {
+  background: #e09610;
+}
+
+/* Focus area modal */
+.focus-area-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.focus-area-overlay--visible {
+  display: flex;
+}
+
+.focus-area-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.focus-area-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.focus-area-modal-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.focus-area-close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #888;
+}
+
+.focus-area-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.focus-area-option {
+  background: #faf9f7;
+  border: 1px solid #f0ede8;
+  border-radius: 12px;
+  padding: 13px 16px;
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: #000;
+}
+
+.focus-area-option:hover {
+  background: #fff4e0;
+  border-color: #F5A623;
 }
 
 .body-checkin-item {
