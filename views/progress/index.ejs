@@ -41,26 +41,6 @@
       </div>
     </div>
 
-    <!-- Exercises section -->
-    <div class="progress-exercises-card">
-      <h2 class="progress-exercises-title">Exercises <%= periodExercisesLabel %></h2>
-
-      <% if (exercises.length === 0) { %>
-        <p class="progress-no-exercises">No exercises logged for this period yet.<br>Complete a session to see them here.</p>
-      <% } else { %>
-        <% const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' }; %>
-        <% exercises.forEach(function(ex) { %>
-          <div class="progress-exercise-item">
-            <span class="progress-exercise-emoji"><%= categoryEmoji[ex.category] || '🏋️' %></span>
-            <div class="progress-exercise-info">
-              <span class="progress-exercise-name"><%= ex.name %></span>
-              <span class="progress-exercise-cat"><%= ex.category %></span>
-            </div>
-          </div>
-        <% }); %>
-      <% } %>
-    </div>
-
   <% } %>
 
 </div>

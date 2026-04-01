@@ -1,3 +1,4 @@
 {
-  "locust.autoSetup": "never"
+  "locust.autoSetup": "never",
+  "css.validate": false
 }
