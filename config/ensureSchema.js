@@ -173,6 +173,24 @@ async function ensureLowercaseExerciseTables() {
   await addIndexIfMissing('exercise', 'idx_exercise_skill_level', 'INDEX `idx_exercise_skill_level` (skill_level)');
   await addIndexIfMissing('exercise', 'idx_exercise_difficulty', 'INDEX `idx_exercise_difficulty` (difficulty)');
   await addIndexIfMissing('exercise', 'idx_exercise_gym_only', 'INDEX `idx_exercise_gym_only` (is_gym_only)');
+
+  // Expand category ENUM to include 'stability'
+  await db.query(
+    `ALTER TABLE exercise MODIFY COLUMN category ENUM('strengthen','stretch','avoid','stability') NOT NULL`
+  );
+
+  // New columns for injury/body-part data from Excel
+  await addColumnIfMissing('exercise', 'body_part', 'body_part VARCHAR(100) NULL');
+  await addColumnIfMissing('exercise', 'injury', 'injury VARCHAR(255) NULL');
+  await addColumnIfMissing('exercise', 'contraction_type', 'contraction_type VARCHAR(100) NULL');
+  await addColumnIfMissing('exercise', 'bilateral', "bilateral ENUM('Bilateral','Unilateral','Both') NULL");
+  await addColumnIfMissing('exercise', 'tendon_used', 'tendon_used VARCHAR(255) NULL');
+  await addColumnIfMissing('exercise', 'ligament_used', 'ligament_used VARCHAR(255) NULL');
+  await addIndexIfMissing('exercise', 'idx_exercise_body_part', 'INDEX `idx_exercise_body_part` (body_part)');
+  await addIndexIfMissing('exercise', 'idx_exercise_injury', 'INDEX `idx_exercise_injury` (injury)');
+
+  // Add role to exercise_muscle_group so we can distinguish targeted vs secondary vs all muscles
+  await addColumnIfMissing('exercise_muscle_group', 'role', "role ENUM('targeted','secondary','all') NOT NULL DEFAULT 'targeted'");
 }
 
 async function ensureUserProfileSchema() {
@@ -323,6 +341,19 @@ async function ensureScheduledSessionSchema() {
   );
 }
 
+async function ensureInjuryTable() {
+  await db.query(
+    `CREATE TABLE IF NOT EXISTS \`Injury\` (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      name VARCHAR(255) NOT NULL UNIQUE,
+      body_part VARCHAR(100) NOT NULL,
+      common_causes TEXT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`
+  );
+  await addIndexIfMissing('Injury', 'idx_injury_body_part', 'INDEX `idx_injury_body_part` (body_part)');
+}
+
 async function ensureSchema() {
   await ensureLowercaseExerciseTables();
   await ensureUserAuthSchema();
@@ -331,6 +362,7 @@ async function ensureSchema() {
   await ensureWorkoutSessionSchema();
   await ensureNotificationSchema();
   await ensureScheduledSessionSchema();
+  await ensureInjuryTable();
 }
 
 module.exports = ensureSchema;
