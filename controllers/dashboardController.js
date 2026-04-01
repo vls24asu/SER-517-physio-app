@@ -1,5 +1,6 @@
 const StatsService = require('../services/StatsService');
 const NotificationService = require('../services/NotificationService');
+const db = require('../config/db');
 
 const statsService = new StatsService();
 const notifService = new NotificationService();
@@ -12,7 +13,16 @@ const getDashboard = async (req, res) => {
     // Trigger time-based notifications (workout reminder, streak broken, pain check-in).
     // Runs fire-and-forget so a notification error never breaks the dashboard load.
     notifService.triggerDashboardNotifications(userId, stats.streak).catch(console.error);
-    
+
+    // Fetch all upcoming scheduled sessions
+    const [scheduledSessions] = await db.query(
+      `SELECT id, routine_id, routine_name, scheduled_at
+       FROM Scheduled_Session
+       WHERE user_id = ? AND scheduled_at >= NOW()
+       ORDER BY scheduled_at ASC`,
+      [userId]
+    );
+
     // Get greeting based on time of day
     const hour = new Date().getHours();
     let greeting;
@@ -27,7 +37,8 @@ const getDashboard = async (req, res) => {
     res.render('dashboard/index', {
       greeting,
       stats,
-      user: req.session.user
+      user: req.session.user,
+      scheduledSessions
     });
   } catch (err) {
     console.error(err);

@@ -1,8 +1,33 @@
 <div class="dashboard-container">
   <div class="greeting-section mb-4">
     <h1 class="greeting-text"><%= greeting %>, <%= user.fullName %></h1>
-    <p class="greeting-subtitle">What do you want to do today?</p>
+    <% if (scheduledSessions.length > 0) { %>
+      <p class="greeting-subtitle">You have <%= scheduledSessions.length %> session<%= scheduledSessions.length > 1 ? 's' : '' %> scheduled</p>
+    <% } else { %>
+      <p class="greeting-subtitle">What do you want to do today?</p>
+    <% } %>
   </div>
+
+  <% if (scheduledSessions.length > 0) { %>
+  <% const today = new Date(); %>
+  <% scheduledSessions.forEach(function(s) {
+    const sat = new Date(s.scheduled_at);
+    const isToday = sat.toDateString() === today.toDateString();
+    const timeStr = sat.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    const dateLabel = isToday ? timeStr : sat.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) + ' · ' + timeStr;
+  %>
+  <div class="scheduled-session-card mb-4">
+    <p class="scheduled-label">SCHEDULED FOR <%= dateLabel.toUpperCase() %></p>
+    <h2 class="scheduled-name"><%= s.routine_name %></h2>
+    <div class="scheduled-actions">
+      <a href="/routines/saved/<%= s.routine_id %>/preview" class="scheduled-start-btn">Start now</a>
+      <form method="POST" action="/routines/schedule/<%= s.id %>/cancel" style="margin:0;">
+        <button type="submit" class="scheduled-cancel-btn">Cancel</button>
+      </form>
+    </div>
+  </div>
+  <% }) %>
+  <% } %>
 
   <div class="start-session-btn-wrapper mb-4">
     <a href="/routines/saved" class="btn btn-start-session">

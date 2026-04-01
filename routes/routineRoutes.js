@@ -355,7 +355,7 @@ router.get('/saved/:id/session', isAuthenticated, requireOnboardingComplete, asy
     }
   });
 
-  res.render('routines/session', { stepsJson: JSON.stringify(steps), routineId });
+  res.render('routines/session', { stepsJson: JSON.stringify(steps), routineId, routineName: routine.name });
 });
 
 // Log a completed session
@@ -464,6 +464,14 @@ router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
     console.error('Notification error after session log:', notifErr);
   }
 
+  // Remove the earliest scheduled entry for this routine now that it's been completed
+  await db.query(
+    `DELETE FROM Scheduled_Session
+     WHERE user_id = ? AND routine_id = ?
+     ORDER BY scheduled_at ASC LIMIT 1`,
+    [userId, routineId]
+  );
+
   res.json({ ok: true });
 });
 
@@ -513,6 +521,36 @@ router.post('/save-recommended', isAuthenticated, requireOnboardingComplete, asy
 
   req.flash('success', `"${routineName}" saved to your routines!`);
   res.redirect('/routines/saved');
+});
+
+// Schedule a session for a saved routine
+router.post('/saved/:id/schedule', isAuthenticated, requireOnboardingComplete, async (req, res) => {
+  const userId = req.session.user.id;
+  const routineId = parseInt(req.params.id);
+  const { scheduled_at } = req.body;
+
+  if (!scheduled_at) {
+    req.flash('error', 'Please select a date and time.');
+    return res.redirect('/routines/saved');
+  }
+
+  const [rows] = await db.query(`SELECT name FROM Saved_Routine WHERE id = ? AND user_id = ?`, [routineId, userId]);
+  if (!rows.length) return res.redirect('/routines/saved');
+
+  await db.query(
+    `INSERT INTO Scheduled_Session (user_id, routine_id, routine_name, scheduled_at) VALUES (?, ?, ?, ?)`,
+    [userId, routineId, rows[0].name, new Date(scheduled_at)]
+  );
+
+  req.flash('success', `Session scheduled!`);
+  res.redirect('/routines/saved');
+});
+
+// Cancel a scheduled session
+router.post('/schedule/:id/cancel', isAuthenticated, async (req, res) => {
+  const userId = req.session.user.id;
+  await db.query(`DELETE FROM Scheduled_Session WHERE id = ? AND user_id = ?`, [req.params.id, userId]);
+  res.redirect('/dashboard');
 });
 
 module.exports = router;

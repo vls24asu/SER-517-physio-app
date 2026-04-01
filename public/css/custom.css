@@ -2439,3 +2439,72 @@ main {
 .ex-rest-skip-btn:hover {
   opacity: 0.85;
 }
+
+/* ── Scheduled Session Card (Dashboard) ── */
+.scheduled-session-card {
+  background: #F5A623;
+  border-radius: 20px;
+  padding: 20px;
+  color: #000;
+}
+.scheduled-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(0,0,0,0.6);
+  margin: 0 0 4px;
+}
+.scheduled-name {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 16px;
+}
+.scheduled-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.scheduled-start-btn {
+  flex: 1;
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 999px;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.scheduled-cancel-btn {
+  background: none;
+  border: none;
+  color: rgba(0,0,0,0.55);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+/* ── Schedule Session Button (Saved Routines) ── */
+.saved-routine-schedule-btn {
+  width: 100%;
+  background: none;
+  border: 1.5px solid #F5A623;
+  color: #F5A623;
+  border-radius: 999px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+.saved-routine-schedule-btn:hover {
+  background: #F5A623;
+  color: #fff;
+}
