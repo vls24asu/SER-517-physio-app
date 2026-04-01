@@ -136,31 +136,50 @@
   <div style="background:#fff; border-radius:20px; padding:28px 24px; width:100%; max-width:380px;">
     <h2 style="font-size:20px; font-weight:700; margin:0 0 4px;">Schedule session</h2>
     <p id="scheduleModalName" style="color:#888; font-size:14px; margin:0 0 20px;"></p>
-    <form id="scheduleForm" method="POST">
-      <label style="font-size:13px; font-weight:600; color:#555; display:block; margin-bottom:6px;">Date &amp; Time</label>
-      <input type="datetime-local" name="scheduled_at" id="scheduleInput"
-        style="width:100%; border:1.5px solid #e8e8e8; border-radius:12px; padding:12px 14px; font-size:15px; font-family:inherit; box-sizing:border-box; margin-bottom:20px; outline:none;"
-        required/>
-      <button type="submit"
-        style="width:100%; background:#F5A623; border:none; border-radius:999px; padding:14px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; margin-bottom:10px;">
-        Confirm
-      </button>
-      <button type="button" onclick="closeScheduleModal()"
-        style="width:100%; background:none; border:none; font-size:15px; color:#888; cursor:pointer; font-family:inherit;">
-        Cancel
-      </button>
+    <form id="scheduleForm" method="POST" onsubmit="buildScheduledAt('scheduleDate','scheduleHour','scheduleMin','scheduleAmpm','scheduleHidden'); return true;">
+      <input type="hidden" name="scheduled_at" id="scheduleHidden"/>
+      <label style="font-size:13px; font-weight:600; color:#555; display:block; margin-bottom:6px;">Date</label>
+      <input type="date" id="scheduleDate" required
+        style="width:100%; border:1.5px solid #e8e8e8; border-radius:12px; padding:11px 14px; font-size:15px; font-family:inherit; box-sizing:border-box; margin-bottom:14px; outline:none;"/>
+      <label style="font-size:13px; font-weight:600; color:#555; display:block; margin-bottom:6px;">Time</label>
+      <div style="display:flex; gap:8px; margin-bottom:20px;">
+        <select id="scheduleHour" style="flex:1; border:1.5px solid #e8e8e8; border-radius:12px; padding:11px 10px; font-size:15px; font-family:inherit; outline:none;">
+          <% for(var h=1; h<=12; h++) { %><option value="<%=h%>"><%=h%></option><% } %>
+        </select>
+        <select id="scheduleMin" style="flex:1; border:1.5px solid #e8e8e8; border-radius:12px; padding:11px 10px; font-size:15px; font-family:inherit; outline:none;">
+          <option value="00">00</option><option value="15">15</option><option value="30">30</option><option value="45">45</option>
+        </select>
+        <select id="scheduleAmpm" style="flex:1; border:1.5px solid #e8e8e8; border-radius:12px; padding:11px 10px; font-size:15px; font-family:inherit; outline:none;">
+          <option value="AM">AM</option><option value="PM">PM</option>
+        </select>
+      </div>
+      <button type="submit" style="width:100%; background:#F5A623; border:none; border-radius:999px; padding:14px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; margin-bottom:10px;">Confirm</button>
+      <button type="button" onclick="closeScheduleModal()" style="width:100%; background:none; border:none; font-size:15px; color:#888; cursor:pointer; font-family:inherit;">Cancel</button>
     </form>
   </div>
 </div>
 
 <script>
+  function buildScheduledAt(dateId, hourId, minId, ampmId, hiddenId) {
+    var date = document.getElementById(dateId).value;
+    var hour = parseInt(document.getElementById(hourId).value);
+    var min  = document.getElementById(minId).value;
+    var ampm = document.getElementById(ampmId).value;
+    if (ampm === 'AM' && hour === 12) hour = 0;
+    if (ampm === 'PM' && hour !== 12) hour += 12;
+    var pad = function(n){ return String(n).padStart(2,'0'); };
+    document.getElementById(hiddenId).value = date + 'T' + pad(hour) + ':' + min + ':00';
+  }
+
   function openScheduleModal(routineId, routineName) {
     document.getElementById('scheduleModalName').textContent = routineName;
     document.getElementById('scheduleForm').action = '/routines/saved/' + routineId + '/schedule';
-    // Default to tomorrow at 9am
-    var d = new Date(); d.setDate(d.getDate() + 1); d.setHours(9, 0, 0, 0);
+    var d = new Date(); d.setDate(d.getDate() + 1);
     var pad = function(n){ return String(n).padStart(2,'0'); };
-    document.getElementById('scheduleInput').value = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + 'T09:00';
+    document.getElementById('scheduleDate').value = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+    document.getElementById('scheduleHour').value = '9';
+    document.getElementById('scheduleMin').value = '00';
+    document.getElementById('scheduleAmpm').value = 'AM';
     document.getElementById('scheduleModal').style.display = 'flex';
   }
   function closeScheduleModal() {

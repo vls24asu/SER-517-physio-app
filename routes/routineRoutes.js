@@ -464,6 +464,14 @@ router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
     console.error('Notification error after session log:', notifErr);
   }
 
+  // Remove the earliest scheduled entry for this routine now that it's been completed
+  await db.query(
+    `DELETE FROM Scheduled_Session
+     WHERE user_id = ? AND routine_id = ?
+     ORDER BY scheduled_at ASC LIMIT 1`,
+    [userId, routineId]
+  );
+
   res.json({ ok: true });
 });
 
