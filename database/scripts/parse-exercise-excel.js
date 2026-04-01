@@ -32,8 +32,9 @@ function mapCategory(raw) {
   const v = raw.toLowerCase();
   if (v.includes('stretch') && v.includes('strength')) return 'stretch';
   if (v.includes('stretch') || v.includes('fascia')) return 'stretch';
-  if (v.includes('strengthen') || v.includes('strength') || v.includes('agility') || v.includes('plyometric')) return 'strengthen';
-  if (v.includes('mobility')) return 'strengthen';
+  if (v === 'mobility' || v === 'plyometric') return 'stability';
+  if (v.includes('strengthen') || v.includes('strength') || v.includes('agility')) return 'strengthen';
+  if (v.includes('mobility')) return 'stability';
   return 'strengthen';
 }
 
