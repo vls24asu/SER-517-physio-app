@@ -2,13 +2,15 @@
   const categoryLabelMap = {
     strengthen: 'Strengthen',
     stretch: 'Stretch',
-    avoid: 'Avoid'
+    avoid: 'Avoid',
+    stability: 'Stability'
   };
 
   const categoryEmojiMap = {
     strengthen: '💪',
     stretch: '🧘',
-    avoid: '⚠️'
+    avoid: '⚠️',
+    stability: '🏃'
   };
 
   const displayCategory = categoryLabelMap[exercise.category] || exercise.category || 'General';
@@ -21,6 +23,9 @@
     .filter(Boolean)
     .join(' • ') || 'Not specified';
   const locationLabel = Number(exercise.is_gym_only) === 1 ? 'Gym only' : 'Home friendly';
+
+  const targetedMuscles = (muscles || []).filter(m => m.role === 'targeted');
+  const secondaryMuscles = (muscles || []).filter(m => m.role === 'secondary');
 %>
 
 <div class="library-detail-container">
@@ -39,6 +44,7 @@
       <span class="library-pill library-pill--category"><%= displayCategory %></span>
       <span class="library-pill"><%= difficulty %></span>
       <span class="library-pill"><%= locationLabel %></span>
+      <% if (exercise.body_part) { %><span class="library-pill"><%= exercise.body_part %></span><% } %>
     </div>
   </div>
 
@@ -65,12 +71,52 @@
         <p class="library-stat-label">Position</p>
         <p class="library-stat-value"><%= position %></p>
       </div>
+      <% if (exercise.contraction_type) { %>
       <div class="library-stat-tile">
-        <p class="library-stat-label">Category</p>
-        <p class="library-stat-value"><%= displayCategory %></p>
+        <p class="library-stat-label">Contraction</p>
+        <p class="library-stat-value"><%= exercise.contraction_type %></p>
       </div>
+      <% } %>
+      <% if (exercise.bilateral) { %>
+      <div class="library-stat-tile">
+        <p class="library-stat-label">Movement</p>
+        <p class="library-stat-value"><%= exercise.bilateral %></p>
+      </div>
+      <% } %>
+      <% if (exercise.injury) { %>
+      <div class="library-stat-tile" style="grid-column: 1 / -1;">
+        <p class="library-stat-label">For injury</p>
+        <p class="library-stat-value"><%= exercise.injury %></p>
+      </div>
+      <% } %>
     </div>
   </div>
+
+  <% if (targetedMuscles.length > 0 || secondaryMuscles.length > 0) { %>
+  <div class="library-detail-card">
+    <h3 class="library-detail-section-title">Muscles used</h3>
+    <% if (targetedMuscles.length > 0) { %>
+    <div class="library-detail-info-block">
+      <p class="library-detail-info-heading">Primary</p>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
+        <% targetedMuscles.forEach(m => { %>
+          <span class="library-pill" style="background:#FFF0D9; color:#C87010; font-size:12px;"><%= m.name %></span>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+    <% if (secondaryMuscles.length > 0) { %>
+    <div class="library-detail-info-block">
+      <p class="library-detail-info-heading">Secondary</p>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
+        <% secondaryMuscles.forEach(m => { %>
+          <span class="library-pill" style="font-size:12px;"><%= m.name %></span>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+  </div>
+  <% } %>
 
   <div class="library-detail-card">
     <h3 class="library-detail-section-title">How to perform</h3>

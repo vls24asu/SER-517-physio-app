@@ -2,13 +2,15 @@
   const categoryLabelMap = {
     strengthen: 'Strengthen',
     stretch: 'Stretch',
-    avoid: 'Avoid'
+    avoid: 'Avoid',
+    stability: 'Stability'
   };
 
   const categoryEmojiMap = {
     strengthen: '💪',
     stretch: '🧘',
-    avoid: '⚠️'
+    avoid: '⚠️',
+    stability: '🏃'
   };
 %>
 
@@ -57,7 +59,7 @@
       const list  = document.getElementById('searchSuggestions');
       let debounceTimer;
 
-      const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' };
+      const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️', stability: '🏃' };
 
       input.addEventListener('input', function () {
         clearTimeout(debounceTimer);
@@ -94,28 +96,31 @@
   </script>
 
   <div class="library-filter-tabs" role="tablist" aria-label="Exercise categories">
-    <a
-      href="/library?category=all"
-      class="library-filter-tab <%= activeCategory === 'all' ? 'active' : '' %>"
-      aria-current="<%= activeCategory === 'all' ? 'page' : 'false' %>"
-    >
-      All
-    </a>
-    <a
-      href="/library?category=strengthen"
-      class="library-filter-tab <%= activeCategory === 'strengthen' ? 'active' : '' %>"
-      aria-current="<%= activeCategory === 'strengthen' ? 'page' : 'false' %>"
-    >
-      Upper body
-    </a>
-    <a
-      href="/library?category=stretch"
-      class="library-filter-tab <%= activeCategory === 'stretch' ? 'active' : '' %>"
-      aria-current="<%= activeCategory === 'stretch' ? 'page' : 'false' %>"
-    >
-      Lower body
-    </a>
+    <a href="/library?category=all" class="library-filter-tab <%= activeCategory === 'all' ? 'active' : '' %>">All</a>
+    <a href="/library?category=strengthen" class="library-filter-tab <%= activeCategory === 'strengthen' ? 'active' : '' %>">Strengthen</a>
+    <a href="/library?category=stretch" class="library-filter-tab <%= activeCategory === 'stretch' ? 'active' : '' %>">Stretch</a>
+    <a href="/library?category=avoid" class="library-filter-tab <%= activeCategory === 'avoid' ? 'active' : '' %>">Avoid</a>
+    <a href="/library?category=stability" class="library-filter-tab <%= activeCategory === 'stability' ? 'active' : '' %>">Stability</a>
   </div>
+
+  <% if (bodyParts && bodyParts.length > 0) { %>
+  <form action="/library" method="GET" class="library-filter-row" style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+    <% if (activeCategory && activeCategory !== 'all') { %><input type="hidden" name="category" value="<%= activeCategory %>"><% } %>
+    <% if (searchQuery) { %><input type="hidden" name="search" value="<%= searchQuery %>"><% } %>
+    <select name="bodyPart" class="library-filter-select" onchange="this.form.submit()">
+      <option value="all" <%= activeBodyPart === 'all' ? 'selected' : '' %>>All body parts</option>
+      <% bodyParts.forEach(bp => { %>
+        <option value="<%= bp %>" <%= activeBodyPart === bp ? 'selected' : '' %>><%= bp %></option>
+      <% }) %>
+    </select>
+    <select name="injury" class="library-filter-select" onchange="this.form.submit()">
+      <option value="all" <%= activeInjury === 'all' ? 'selected' : '' %>>All injuries</option>
+      <% injuries.forEach(inj => { %>
+        <option value="<%= inj.name %>" <%= activeInjury === inj.name ? 'selected' : '' %>><%= inj.name %></option>
+      <% }) %>
+    </select>
+  </form>
+  <% } %>
 
   <% if (searchQuery) { %>
     <p class="library-results-meta">
@@ -148,10 +153,8 @@
           <div class="exercise-card-content">
             <h3 class="exercise-card-title"><%= exercise.name %></h3>
             <p class="exercise-card-meta">
-              <%= exercise.sets || 0 %> sets
-              <% if (exercise.skill_level) { %>
-                • <%= exercise.skill_level %>
-              <% } %>
+              <% if (exercise.body_part) { %><%= exercise.body_part %> • <% } %>
+              <%= exercise.skill_level || 'Beginner' %>
             </p>
           </div>
         </a>

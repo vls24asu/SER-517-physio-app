@@ -9,19 +9,29 @@ const exerciseService = new ExerciseService();
  */
 const getLibrary = async (req, res) => {
   try {
-    const { category, difficulty, search } = req.query;
+    const { category, difficulty, search, bodyPart, injury } = req.query;
 
     const filters = {};
     if (category && category !== 'all') filters.category = category;
     if (difficulty) filters.difficulty = difficulty;
     if (search) filters.search = search;
+    if (bodyPart && bodyPart !== 'all') filters.bodyPart = bodyPart;
+    if (injury && injury !== 'all') filters.injury = injury;
 
-    const exercises = await exerciseService.getAllExercises(filters);
+    const [exercises, bodyParts, injuries] = await Promise.all([
+      exerciseService.getAllExercises(filters),
+      exerciseService.getAllBodyParts(),
+      exerciseService.getAllInjuries()
+    ]);
 
     res.render('library/index', {
       exercises,
       activeCategory: category || 'all',
-      searchQuery: search || ''
+      searchQuery: search || '',
+      bodyParts,
+      injuries,
+      activeBodyPart: bodyPart || 'all',
+      activeInjury: injury || 'all'
     });
   } catch (err) {
     console.error(err);
@@ -44,12 +54,12 @@ const getExerciseDetail = async (req, res) => {
     }
 
     const userId = req.session.user.id;
-    const [savedRoutines] = await db.query(
-      `SELECT id, name FROM Saved_Routine WHERE user_id = ? ORDER BY name ASC`,
-      [userId]
-    );
+    const [savedRoutines, muscles] = await Promise.all([
+      db.query(`SELECT id, name FROM Saved_Routine WHERE user_id = ? ORDER BY name ASC`, [userId]).then(([r]) => r),
+      exerciseService.getMusclesForExercise(req.params.id)
+    ]);
 
-    res.render('library/detail', { exercise, savedRoutines });
+    res.render('library/detail', { exercise, savedRoutines, muscles });
   } catch (err) {
     console.error(err);
     req.flash('error', 'Failed to load exercise details');
