@@ -45,21 +45,82 @@
 
   <!-- Body check-in section -->
   <div class="body-checkin-card">
-    <h2 class="body-checkin-title">Body check-in</h2>
-
-    <div class="body-checkin-item">
-      <span class="body-checkin-emoji">🖐️</span>
-      <span class="body-checkin-name">Wrist</span>
-      <span class="body-checkin-status body-checkin-status--improving">Improving →</span>
+    <div class="body-checkin-header">
+      <div>
+        <h2 class="body-checkin-title">Body check-in</h2>
+        <p class="body-checkin-subtitle">Track how you're feeling today</p>
+      </div>
+      <button class="body-checkin-add-btn" id="openFocusAreaModal">+ Add Focus Area</button>
     </div>
 
-    <div class="body-checkin-item">
-      <span class="body-checkin-emoji">🧍</span>
-      <span class="body-checkin-name">Back</span>
-      <span class="body-checkin-status body-checkin-status--stable">Stable →</span>
+    <div id="focusAreaList">
+      <div class="body-checkin-item">
+        <span class="body-checkin-emoji">🖐️</span>
+        <span class="body-checkin-name">Wrist</span>
+      </div>
+      <div class="body-checkin-item">
+        <span class="body-checkin-emoji">🧍</span>
+        <span class="body-checkin-name">Back</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Focus Area Modal -->
+  <div class="focus-area-overlay" id="focusAreaOverlay">
+    <div class="focus-area-modal">
+      <div class="focus-area-modal-header">
+        <h3>Select a Focus Area</h3>
+        <button class="focus-area-close" id="closeFocusAreaModal">&times;</button>
+      </div>
+      <div class="focus-area-list">
+        <button class="focus-area-option" data-area="Neck" data-emoji="🫶">🫶 Neck</button>
+        <button class="focus-area-option" data-area="Back" data-emoji="🧍">🧍 Back</button>
+        <button class="focus-area-option" data-area="Shoulders" data-emoji="💪">💪 Shoulders</button>
+        <button class="focus-area-option" data-area="Knees" data-emoji="🦵">🦵 Knees</button>
+        <button class="focus-area-option" data-area="Hips" data-emoji="🕺">🕺 Hips</button>
+        <button class="focus-area-option" data-area="Ankles" data-emoji="🦶">🦶 Ankles</button>
+        <button class="focus-area-option" data-area="Wrist" data-emoji="🖐️">🖐️ Wrist</button>
+        <button class="focus-area-option" data-area="Elbow" data-emoji="💪">💪 Elbow</button>
+        <button class="focus-area-option" data-area="Core" data-emoji="🎯">🎯 Core</button>
+      </div>
     </div>
   </div>
 
 </div>
 
 <%- include('../partials/bottomNav') %>
+
+<script>
+  (function () {
+    const openBtn   = document.getElementById('openFocusAreaModal');
+    const closeBtn  = document.getElementById('closeFocusAreaModal');
+    const overlay   = document.getElementById('focusAreaOverlay');
+    const list      = document.getElementById('focusAreaList');
+
+    openBtn.addEventListener('click', () => overlay.classList.add('focus-area-overlay--visible'));
+    closeBtn.addEventListener('click', () => overlay.classList.remove('focus-area-overlay--visible'));
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.remove('focus-area-overlay--visible');
+    });
+
+    document.querySelectorAll('.focus-area-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const area  = btn.dataset.area;
+        const emoji = btn.dataset.emoji;
+
+        // Prevent duplicates
+        const existing = [...list.querySelectorAll('.body-checkin-name')].map(el => el.textContent);
+        if (existing.includes(area)) {
+          overlay.classList.remove('focus-area-overlay--visible');
+          return;
+        }
+
+        const item = document.createElement('div');
+        item.className = 'body-checkin-item';
+        item.innerHTML = `<span class="body-checkin-emoji">${emoji}</span><span class="body-checkin-name">${area}</span>`;
+        list.appendChild(item);
+        overlay.classList.remove('focus-area-overlay--visible');
+      });
+    });
+  })();
+</script>
