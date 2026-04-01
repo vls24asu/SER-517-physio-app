@@ -106,7 +106,7 @@ injuryRows.forEach(r => {
 let injurySql = `-- Injury seed data (auto-generated from Exercise database.xlsx)
 -- Run once against the database
 
-INSERT INTO Injury (name, body_part, common_causes) VALUES\n`;
+INSERT INTO Injury_Reference (name, body_part, common_causes) VALUES\n`;
 const injuryEntries = Object.entries(injuryMap);
 injurySql += injuryEntries
   .map(([name, { bodyPart, causes }]) => `  (${esc(name)}, ${esc(bodyPart)}, ${esc(causes)})`)
@@ -141,8 +141,14 @@ function processRow(r, isGym) {
   const bilateral = mapBilateral(str(r['Bilateral / Unilateral']));
   const tempo = str(r['Tempo / Hold Time']) || null;
   const skillLevel = mapSkillLevel(str(r['Skill Level']));
-  const sets = r['Sets'] != null ? r['Sets'] : null;
-  const reps = r['Reps'] != null ? str(r['Reps']) : null;
+  const rawSets = r['Sets'];
+  const setsNum = rawSets != null ? parseFloat(String(rawSets)) : null;
+  // Treat values > 20 as invalid (Excel date serials or data entry error)
+  const sets = (setsNum !== null && !isNaN(setsNum) && setsNum <= 20) ? setsNum : null;
+  const rawReps = r['Reps'];
+  // Filter out Excel date serials (large numbers > 1000) stored as reps due to date cell formatting
+  const repsNum = rawReps != null ? parseInt(String(rawReps), 10) : NaN;
+  const reps = rawReps != null && !(repsNum > 1000) ? str(rawReps) : null;
   const restSec = parseRestSec(r['Rest Time']);
   const tendon = str(r['Tendon Used']) || null;
   const ligament = str(r['Ligaments Used']) || null;

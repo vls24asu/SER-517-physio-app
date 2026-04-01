@@ -1,7 +1,7 @@
 -- Injury seed data (auto-generated from Exercise database.xlsx)
 -- Run once against the database
 
-INSERT INTO Injury (name, body_part, common_causes) VALUES
+INSERT INTO Injury_Reference (name, body_part, common_causes) VALUES
   ('Hip Pain', 'Hip', 'Overuse, poor hip mechanics, weak glutes'),
   ('Ankle Sprain', 'Ankle', 'Rolling ankle inward during sports, uneven ground'),
   ('Knee Pain', 'Knee', 'Overuse, weak VMO'),

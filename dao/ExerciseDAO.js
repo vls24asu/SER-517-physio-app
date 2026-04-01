@@ -161,7 +161,7 @@ class ExerciseDAO {
     const conn = await this.#connectionManager.getConnection();
     try {
       const [rows] = await conn.execute(
-        'SELECT * FROM Injury ORDER BY body_part ASC, name ASC'
+        'SELECT * FROM Injury_Reference ORDER BY body_part ASC, name ASC'
       );
       return rows;
     } finally {

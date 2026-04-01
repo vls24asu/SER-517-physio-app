@@ -343,7 +343,7 @@ async function ensureScheduledSessionSchema() {
 
 async function ensureInjuryTable() {
   await db.query(
-    `CREATE TABLE IF NOT EXISTS \`Injury\` (
+    `CREATE TABLE IF NOT EXISTS \`Injury_Reference\` (
       id INT PRIMARY KEY AUTO_INCREMENT,
       name VARCHAR(255) NOT NULL UNIQUE,
       body_part VARCHAR(100) NOT NULL,
@@ -351,7 +351,7 @@ async function ensureInjuryTable() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`
   );
-  await addIndexIfMissing('Injury', 'idx_injury_body_part', 'INDEX `idx_injury_body_part` (body_part)');
+  await addIndexIfMissing('Injury_Reference', 'idx_injury_ref_body_part', 'INDEX `idx_injury_ref_body_part` (body_part)');
 }
 
 async function ensureSchema() {
