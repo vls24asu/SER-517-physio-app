@@ -12,11 +12,10 @@ const getProgress = async (req, res) => {
       : 'week';
 
     const timezone = res.locals.userTimezone || 'UTC';
-    const [stats, sessions, chartData, exercises, periodStats] = await Promise.all([
+    const [stats, sessions, chartData, periodStats] = await Promise.all([
       statsService.getUserStats(userId),
       sessionService.getHistory(userId),
       sessionService.getChartData(userId, period, timezone),
-      sessionService.getExercisesForPeriod(userId, period, timezone),
       sessionService.getSessionCountForPeriod(userId, period, timezone)
     ]);
 
@@ -32,22 +31,14 @@ const getProgress = async (req, res) => {
       ? `${(totalMin / 60).toFixed(1)} hours total`
       : `${totalMin} minutes total`;
 
-    const periodExercisesLabel = period === 'week'
-      ? 'this week'
-      : period === 'month'
-        ? 'this month'
-        : 'this year';
-
     res.render('progress/index', {
       period,
       stats,
       sessions,
       chartData,
-      exercises,
       sessionCount: periodStats.count,
       totalTimeLabel,
-      periodLabel,
-      periodExercisesLabel
+      periodLabel
     });
   } catch (err) {
     console.error(err);
