@@ -309,6 +309,20 @@ async function ensureNotificationSchema() {
   await addColumnIfMissing('Notification_Preferences', 'timezone', "timezone VARCHAR(50) NOT NULL DEFAULT 'UTC'");
 }
 
+async function ensureScheduledSessionSchema() {
+  await db.query(
+    `CREATE TABLE IF NOT EXISTS \`Scheduled_Session\` (
+      id INT PRIMARY KEY AUTO_INCREMENT,
+      user_id INT NOT NULL,
+      routine_id INT NOT NULL,
+      routine_name VARCHAR(200) NOT NULL,
+      scheduled_at DATETIME NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
+    )`
+  );
+}
+
 async function ensureSchema() {
   await ensureLowercaseExerciseTables();
   await ensureUserAuthSchema();
@@ -316,6 +330,7 @@ async function ensureSchema() {
   await ensureSavedRoutineSchema();
   await ensureWorkoutSessionSchema();
   await ensureNotificationSchema();
+  await ensureScheduledSessionSchema();
 }
 
 module.exports = ensureSchema;
