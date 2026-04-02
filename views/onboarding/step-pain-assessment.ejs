@@ -18,24 +18,34 @@
     </div>
   </div>
 
-  <p class="field-label mt-3">Where does it hurt?</p>
-  <div class="select-grid multi">
-    <div class="select-card" data-name="pain_areas" data-value="neck">
-      <span>🛠️</span>
-      <span>Neck</span>
+  <!-- Pain detail section — hidden when "No pain" selected -->
+  <div id="painDetails" style="display:none; margin-top:20px;">
+
+    <p class="field-label">Which body parts are affected? <span style="color:#aaa; font-weight:400;">(select all that apply)</span></p>
+    <div id="bodyPartPills" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px;">
+      <% bodyParts.forEach(bp => { %>
+        <label style="cursor:pointer;">
+          <input type="checkbox" name="pain_areas[]" value="<%= bp %>" style="display:none;" class="pain-area-cb">
+          <span class="pain-pill"><%= bp %></span>
+        </label>
+      <% }) %>
     </div>
-    <div class="select-card" data-name="pain_areas" data-value="back">
-      <span>🧍</span>
-      <span>Back</span>
+
+    <p class="field-label">Specific injuries or conditions? <span style="color:#aaa; font-weight:400;">(optional, select all that apply)</span></p>
+    <div style="position:relative; margin-bottom:8px;">
+      <input
+        type="text"
+        id="injurySearch"
+        placeholder="Search injuries..."
+        autocomplete="off"
+        data-no-validate
+        style="width:100%; padding:10px 14px; border:1.5px solid #E0D3BE; border-radius:12px; font-size:14px; font-family:inherit; outline:none;"
+      >
+      <ul id="injurySuggestions" style="display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #E0D3BE; border-radius:12px; margin-top:4px; padding:4px 0; list-style:none; z-index:200; max-height:200px; overflow-y:auto; box-shadow:0 4px 16px rgba(0,0,0,0.08);"></ul>
     </div>
-    <div class="select-card" data-name="pain_areas" data-value="shoulders">
-      <span>💪</span>
-      <span>Shoulders</span>
-    </div>
-    <div class="select-card" data-name="pain_areas" data-value="knees">
-      <span>🦵</span>
-      <span>Knees</span>
-    </div>
+    <div id="selectedInjuryPills" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
+    <!-- Hidden inputs for selected injuries are added dynamically -->
+
   </div>
 
   <div class="btn-row">
@@ -44,3 +54,125 @@
   </div>
 </div>
 
+<style>
+.pain-pill {
+  display: inline-block;
+  padding: 7px 14px;
+  border: 1.5px solid #E0D3BE;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #3D2C1E;
+  background: #fff;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  user-select: none;
+}
+.pain-area-cb:checked + .pain-pill {
+  background: #FFF0D9;
+  border-color: #F7B32B;
+  color: #C87010;
+  font-weight: 700;
+}
+.injury-selected-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #FFF0D9;
+  border: 1.5px solid #F7B32B;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #C87010;
+}
+.injury-selected-pill button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #C87010;
+  font-size: 15px;
+  line-height: 1;
+  padding: 0;
+}
+</style>
+
+<script>
+(function () {
+  const allInjuries = <%- JSON.stringify(injuries) %>;
+  const selectedInjuries = new Set();
+
+  // ── Show/hide pain details based on pain_status selection ──
+  document.addEventListener('click', function (e) {
+    const card = e.target.closest('[data-name="pain_status"]');
+    if (!card) return;
+    const val = card.dataset.value;
+    document.getElementById('painDetails').style.display = val === 'yes' ? 'block' : 'none';
+    if (val === 'no') {
+      // Clear all selections when switching to no pain
+      document.querySelectorAll('.pain-area-cb').forEach(cb => cb.checked = false);
+      selectedInjuries.clear();
+      renderInjuryPills();
+    }
+  });
+
+  // ── Injury search autocomplete ──
+  const searchInput = document.getElementById('injurySearch');
+  const suggestionList = document.getElementById('injurySuggestions');
+
+  searchInput.addEventListener('input', function () {
+    const q = this.value.toLowerCase().trim();
+    suggestionList.innerHTML = '';
+    if (!q) { suggestionList.style.display = 'none'; return; }
+
+    const matches = allInjuries.filter(inj => inj.toLowerCase().includes(q) && !selectedInjuries.has(inj));
+    if (matches.length === 0) { suggestionList.style.display = 'none'; return; }
+
+    matches.slice(0, 8).forEach(inj => {
+      const li = document.createElement('li');
+      li.textContent = inj;
+      li.style.cssText = 'padding:10px 16px; cursor:pointer; font-size:14px;';
+      li.addEventListener('mousedown', () => {
+        selectedInjuries.add(inj);
+        searchInput.value = '';
+        suggestionList.style.display = 'none';
+        renderInjuryPills();
+      });
+      li.addEventListener('mouseover', () => li.style.background = '#FAF6EE');
+      li.addEventListener('mouseout',  () => li.style.background = '');
+      suggestionList.appendChild(li);
+    });
+    suggestionList.style.display = 'block';
+  });
+
+  document.addEventListener('click', e => {
+    if (!searchInput.contains(e.target)) suggestionList.style.display = 'none';
+  });
+
+  // ── Render selected injury pills + hidden inputs ──
+  function renderInjuryPills() {
+    const container = document.getElementById('selectedInjuryPills');
+    // Remove old hidden inputs
+    document.querySelectorAll('input[name="selected_injuries[]"]').forEach(el => el.remove());
+
+    container.innerHTML = '';
+    selectedInjuries.forEach(inj => {
+      // Pill
+      const pill = document.createElement('span');
+      pill.className = 'injury-selected-pill';
+      pill.innerHTML = `${inj} <button type="button" aria-label="Remove">&times;</button>`;
+      pill.querySelector('button').addEventListener('click', () => {
+        selectedInjuries.delete(inj);
+        renderInjuryPills();
+      });
+      container.appendChild(pill);
+
+      // Hidden input
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'selected_injuries[]';
+      input.value = inj;
+      document.querySelector('form').appendChild(input);
+    });
+  }
+})();
+</script>

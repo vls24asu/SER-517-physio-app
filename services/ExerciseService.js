@@ -54,6 +54,18 @@ class ExerciseService {
     await this.#dao.incrementSessionCount(id);
   }
 
+  async getAllBodyParts() {
+    return await this.#dao.getAllBodyParts();
+  }
+
+  async getAllInjuries() {
+    return await this.#dao.getAllInjuries();
+  }
+
+  async getMusclesForExercise(id) {
+    return await this.#dao.getMusclesForExercise(id);
+  }
+
   /**
    * Get all muscle groups
    * @returns {Promise<Array>}

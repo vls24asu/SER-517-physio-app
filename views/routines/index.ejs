@@ -9,12 +9,52 @@
 
   <div class="library-detail-card">
     <form method="POST" action="/routines/add">
-      <select id="exerciseSelect" name="exercise_id" required class="routines-select">
-        <option value="">Select exercise...</option>
-        <% exercises.forEach(ex => { %>
-          <option value="<%= ex.id %>"><%= ex.name %> (<%= ex.category %>)</option>
+
+      <!-- Filters -->
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+        <select id="filterCategory" class="library-filter-select" style="min-width:120px;">
+          <option value="">All categories</option>
+          <option value="strengthen">Strengthen</option>
+          <option value="stretch">Stretch</option>
+          <option value="stability">Stability</option>
+        </select>
+        <select id="filterBodyPart" class="library-filter-select" style="min-width:130px;">
+          <option value="">All body parts</option>
+          <% bodyParts.forEach(bp => { %>
+            <option value="<%= bp %>"><%= bp %></option>
+          <% }) %>
+        </select>
+        <select id="filterLocation" class="library-filter-select" style="min-width:120px;">
+          <option value="">Home & Gym</option>
+          <option value="home">Home only</option>
+          <option value="gym">Gym only</option>
+        </select>
+        <input id="filterSearch" type="text" placeholder="Search exercises..." class="library-filter-select" style="flex:2; min-width:140px; border-radius:999px;">
+      </div>
+
+      <input type="hidden" id="exerciseSelect" name="exercise_id" required>
+
+      <div id="exerciseList" style="max-height:280px; overflow-y:auto; border:1.5px solid #E0D3BE; border-radius:14px; background:#fff;">
+        <% const catEmoji = { strengthen:'💪', stretch:'🧘', stability:'🏃' }; %>
+        <% exercises.forEach((ex, i) => { %>
+          <div
+            class="routine-ex-row"
+            data-id="<%= ex.id %>"
+            data-category="<%= ex.category %>"
+            data-bodypart="<%= ex.body_part || '' %>"
+            data-name="<%= ex.name.toLowerCase() %>"
+            data-gymonly="<%= ex.is_gym_only ? '1' : '0' %>"
+            style="display:flex; align-items:center; gap:12px; padding:11px 14px; cursor:pointer; border-bottom:<%= i < exercises.length-1 ? '1px solid #F0EAE0' : 'none' %>; transition:background 0.12s;"
+          >
+            <span style="font-size:20px; flex-shrink:0;"><%= catEmoji[ex.category] || '🏋️' %></span>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:14px; font-weight:600; color:#2D1E0F; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><%= ex.name %></div>
+              <div style="font-size:12px; color:#888; margin-top:1px;"><%= ex.body_part || ex.category %></div>
+            </div>
+            <span style="font-size:11px; font-weight:600; color:#C87010; background:#FFF0D9; border-radius:999px; padding:3px 8px; flex-shrink:0; text-transform:capitalize;"><%= ex.category %></span>
+          </div>
         <% }) %>
-      </select>
+      </div>
 
       <!-- Exercise preview card -->
       <div id="exercisePreview" style="display:none; margin-top:16px;">
@@ -50,6 +90,18 @@
             <p class="library-stat-label">Location</p>
             <p class="library-stat-value" id="previewLocation"></p>
           </div>
+          <div class="library-stat-tile" id="previewContractionTile" style="display:none;">
+            <p class="library-stat-label">Contraction</p>
+            <p class="library-stat-value" id="previewContraction"></p>
+          </div>
+          <div class="library-stat-tile" id="previewBilateralTile" style="display:none;">
+            <p class="library-stat-label">Movement</p>
+            <p class="library-stat-value" id="previewBilateral"></p>
+          </div>
+          <div class="library-stat-tile" id="previewInjuryTile" style="display:none; grid-column: 1 / -1;">
+            <p class="library-stat-label">For injury</p>
+            <p class="library-stat-value" id="previewInjury"></p>
+          </div>
         </div>
         <div id="previewTips" style="font-size:13px; color:#555; background:#f9f5ee; border-radius:10px; padding:10px 12px;"></div>
       </div>
@@ -59,14 +111,66 @@
   </div>
 
   <script>
-    const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' };
-    const categoryLabel = { strengthen: 'Strengthen', stretch: 'Stretch', avoid: 'Avoid' };
+    const categoryEmoji = { strengthen: '💪', stretch: '🧘', stability: '🏃' };
+    const categoryLabel = { strengthen: 'Strengthen', stretch: 'Stretch', stability: 'Stability' };
 
-    document.getElementById('exerciseSelect').addEventListener('change', function () {
-      const id = this.value;
+    const filterCategory = document.getElementById('filterCategory');
+    const filterBodyPart = document.getElementById('filterBodyPart');
+    const filterLocation = document.getElementById('filterLocation');
+    const filterSearch   = document.getElementById('filterSearch');
+    const hiddenInput    = document.getElementById('exerciseSelect');
+    const allRows        = Array.from(document.querySelectorAll('.routine-ex-row'));
+    let selectedRow      = null;
+
+    function applyFilters() {
+      const cat = filterCategory.value.toLowerCase();
+      const bp  = filterBodyPart.value.toLowerCase();
+      const loc = filterLocation.value;
+      const q   = filterSearch.value.toLowerCase().trim();
+
+      allRows.forEach(row => {
+        const matchCat  = !cat || row.dataset.category === cat;
+        const matchBp   = !bp  || row.dataset.bodypart.toLowerCase() === bp;
+        const matchName = !q   || row.dataset.name.includes(q);
+        const matchLoc  = !loc
+          || (loc === 'gym'  && row.dataset.gymonly === '1')
+          || (loc === 'home' && row.dataset.gymonly === '0');
+        row.style.display = (matchCat && matchBp && matchName && matchLoc) ? '' : 'none';
+      });
+
+      // Deselect if filtered out
+      if (selectedRow && selectedRow.style.display === 'none') {
+        selectedRow.style.background = '';
+        selectedRow = null;
+        hiddenInput.value = '';
+        document.getElementById('exercisePreview').style.display = 'none';
+      }
+    }
+
+    filterCategory.addEventListener('change', applyFilters);
+    filterBodyPart.addEventListener('change', applyFilters);
+    filterLocation.addEventListener('change', applyFilters);
+    filterSearch.addEventListener('input', applyFilters);
+
+    // Hover effect
+    allRows.forEach(row => {
+      row.addEventListener('mouseover', () => { if (row !== selectedRow) row.style.background = '#FAF6EE'; });
+      row.addEventListener('mouseout',  () => { if (row !== selectedRow) row.style.background = ''; });
+    });
+
+    function selectRow(row) {
+      if (selectedRow) { selectedRow.style.background = ''; selectedRow.style.borderLeft = ''; }
+      selectedRow = row;
+      row.style.background = '#FFF8EC';
+      row.style.borderLeft = '3px solid #F7B32B';
+      hiddenInput.value = row.dataset.id;
+      loadPreview(row.dataset.id);
+    }
+
+    allRows.forEach(row => row.addEventListener('click', () => selectRow(row)));
+
+    function loadPreview(id) {
       const preview = document.getElementById('exercisePreview');
-      if (!id) { preview.style.display = 'none'; return; }
-
       fetch(`/routines/exercise-info/${id}`)
         .then(r => r.json())
         .then(data => {
@@ -86,8 +190,21 @@
           document.getElementById('previewPosition').textContent = ex.position || 'Not specified';
           document.getElementById('previewLocation').textContent = Number(ex.is_gym_only) === 1 ? 'Gym only' : 'Home friendly';
 
-          const tagsEl = document.getElementById('previewTags');
-          tagsEl.innerHTML = `<span class="library-pill library-pill--category">${label}</span><span class="library-pill">${ex.skill_level || ''}</span>`;
+          const tags = `<span class="library-pill library-pill--category">${label}</span><span class="library-pill">${ex.skill_level || ''}</span>`;
+          const bodyPartTag = ex.body_part ? `<span class="library-pill">${ex.body_part}</span>` : '';
+          document.getElementById('previewTags').innerHTML = tags + bodyPartTag;
+
+          const contractionTile = document.getElementById('previewContractionTile');
+          if (ex.contraction_type) { document.getElementById('previewContraction').textContent = ex.contraction_type; contractionTile.style.display = ''; }
+          else { contractionTile.style.display = 'none'; }
+
+          const bilateralTile = document.getElementById('previewBilateralTile');
+          if (ex.bilateral) { document.getElementById('previewBilateral').textContent = ex.bilateral; bilateralTile.style.display = ''; }
+          else { bilateralTile.style.display = 'none'; }
+
+          const injuryTile = document.getElementById('previewInjuryTile');
+          if (ex.injury) { document.getElementById('previewInjury').textContent = ex.injury; injuryTile.style.display = ''; }
+          else { injuryTile.style.display = 'none'; }
 
           const tipsEl = document.getElementById('previewTips');
           tipsEl.innerHTML = ex.tips ? `<strong>Tips:</strong> ${ex.tips}` : '';
@@ -96,7 +213,7 @@
           preview.style.display = 'block';
         })
         .catch(() => { preview.style.display = 'none'; });
-    });
+    }
   </script>
 
   <!-- Step 2: Draft exercise list -->

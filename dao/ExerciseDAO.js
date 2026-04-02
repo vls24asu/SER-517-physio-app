@@ -42,6 +42,18 @@ class ExerciseDAO {
         params.push(`%${filters.search}%`);
       }
 
+      // Filter by body part
+      if (filters.bodyPart) {
+        query += ' AND body_part = ?';
+        params.push(filters.bodyPart);
+      }
+
+      // Filter by injury
+      if (filters.injury) {
+        query += ' AND injury = ?';
+        params.push(filters.injury);
+      }
+
       // Order by name
       query += ' ORDER BY name ASC';
 
@@ -120,6 +132,60 @@ class ExerciseDAO {
         'UPDATE exercise SET sessions_count = sessions_count + 1 WHERE id = ?',
         [id]
       );
+    } finally {
+      conn.release();
+    }
+  }
+
+  /**
+   * Get all distinct body parts for filter UI
+   * @returns {Promise<string[]>}
+   */
+  async getAllBodyParts() {
+    const conn = await this.#connectionManager.getConnection();
+    try {
+      const [rows] = await conn.execute(
+        'SELECT DISTINCT body_part FROM exercise WHERE body_part IS NOT NULL ORDER BY body_part ASC'
+      );
+      return rows.map(r => r.body_part);
+    } finally {
+      conn.release();
+    }
+  }
+
+  /**
+   * Get all injuries from the Injury table
+   * @returns {Promise<Array>}
+   */
+  async getAllInjuries() {
+    const conn = await this.#connectionManager.getConnection();
+    try {
+      const [rows] = await conn.execute(
+        'SELECT * FROM Injury_Reference ORDER BY body_part ASC, name ASC'
+      );
+      return rows;
+    } finally {
+      conn.release();
+    }
+  }
+
+  /**
+   * Get muscles for an exercise with their roles
+   * @param {number} exerciseId
+   * @returns {Promise<Array>}
+   */
+  async getMusclesForExercise(exerciseId) {
+    const conn = await this.#connectionManager.getConnection();
+    try {
+      const [rows] = await conn.execute(
+        `SELECT mg.name, emg.role
+         FROM exercise_muscle_group emg
+         JOIN muscle_group mg ON mg.id = emg.muscle_group_id
+         WHERE emg.exercise_id = ?
+         ORDER BY FIELD(emg.role, 'targeted', 'secondary', 'all'), mg.name ASC`,
+        [exerciseId]
+      );
+      return rows;
     } finally {
       conn.release();
     }
