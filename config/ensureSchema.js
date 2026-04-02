@@ -355,6 +355,36 @@ async function ensureInjuryTable() {
   await addIndexIfMissing('Injury_Reference', 'idx_injury_ref_body_part', 'INDEX `idx_injury_ref_body_part` (body_part)');
 }
 
+async function ensureBodyCheckinSchema() {
+  await db.query(
+    `CREATE TABLE IF NOT EXISTS \`User_Focus_Area\` (
+      id        INT PRIMARY KEY AUTO_INCREMENT,
+      user_id   INT NOT NULL,
+      area_name VARCHAR(100) NOT NULL,
+      emoji     VARCHAR(10)  NOT NULL DEFAULT '🩹',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY unique_user_area (user_id, area_name),
+      FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
+    )`
+  );
+
+  await db.query(
+    `CREATE TABLE IF NOT EXISTS \`Body_Checkin_Log\` (
+      id          INT PRIMARY KEY AUTO_INCREMENT,
+      user_id     INT NOT NULL,
+      area_name   VARCHAR(100) NOT NULL,
+      log_date    DATE NOT NULL,
+      pain_status ENUM('red', 'yellow', 'green') NOT NULL,
+      pain_scale  INT NOT NULL DEFAULT 0,
+      notes       TEXT NULL,
+      created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY unique_log (user_id, area_name, log_date),
+      FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
+    )`
+  );
+}
+
 async function ensureSchema() {
   await ensureLowercaseExerciseTables();
   await ensureUserAuthSchema();
@@ -364,6 +394,7 @@ async function ensureSchema() {
   await ensureNotificationSchema();
   await ensureScheduledSessionSchema();
   await ensureInjuryTable();
+  await ensureBodyCheckinSchema();
 }
 
 module.exports = ensureSchema;

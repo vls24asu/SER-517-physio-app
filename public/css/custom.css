@@ -1757,11 +1757,117 @@ main {
   margin-top: 16px;
 }
 
+.body-checkin-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
 .body-checkin-title {
   font-size: 1.1rem;
   font-weight: 700;
   color: #000;
-  margin: 0 0 14px;
+  margin: 0 0 2px;
+}
+
+.body-checkin-subtitle {
+  font-size: 0.82rem;
+  color: #888;
+  margin: 0;
+}
+
+.body-checkin-add-btn {
+  flex-shrink: 0;
+  background: #F5A623;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.body-checkin-add-btn:hover {
+  background: #e09610;
+}
+
+/* Focus area modal */
+.focus-area-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 3000;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.focus-area-overlay--visible {
+  display: flex;
+}
+
+.focus-area-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.focus-area-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.focus-area-modal-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.focus-area-close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #888;
+}
+
+.focus-area-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.focus-area-option {
+  background: #faf9f7;
+  border: 1px solid #f0ede8;
+  border-radius: 12px;
+  padding: 13px 16px;
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: #000;
+}
+
+.focus-area-option:hover {
+  background: #fff4e0;
+  border-color: #F5A623;
 }
 
 .body-checkin-item {
@@ -1800,6 +1906,310 @@ main {
 
 .body-checkin-status--stable {
   color: #F5A623;
+}
+
+.body-checkin-item--link {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.body-checkin-item--link:hover {
+  background: #faf9f7;
+  border-radius: 10px;
+  margin: 0 -8px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.body-checkin-arrow {
+  font-size: 1.2rem;
+  color: #bbb;
+  flex-shrink: 0;
+}
+
+.body-checkin-empty {
+  font-size: 0.88rem;
+  color: #aaa;
+  margin: 6px 0 0;
+}
+
+/* ── Check-in detail page ─────────────────────────────────────────────── */
+.checkin-page {
+  padding: 16px 16px 100px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.checkin-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.checkin-back-link {
+  font-size: 0.85rem;
+  color: #F5A623;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.checkin-page-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #000;
+  margin: 0;
+}
+
+/* Calendar card */
+.checkin-calendar-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 18px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  margin-bottom: 16px;
+}
+
+.checkin-cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.checkin-cal-nav-btn {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #555;
+  padding: 0 6px;
+}
+
+.checkin-cal-month-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+}
+
+.checkin-cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 6px;
+}
+
+.checkin-cal-weekdays span {
+  width: 36px;
+  justify-self: center;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #aaa;
+  padding: 4px 0;
+}
+
+.checkin-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-cell {
+  width: 36px;
+  height: 36px;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: #222;
+}
+
+.cal-cell--blank {
+  cursor: default;
+}
+
+.cal-cell:not(.cal-cell--blank):hover {
+  background: #f0ede8;
+}
+
+.cal-cell--today {
+  border: 2px solid #F5A623;
+  font-weight: 700;
+}
+
+.cal-cell--selected {
+  outline: 3px solid #333;
+  outline-offset: 1px;
+}
+
+.cal-cell--logged {
+  color: #fff !important;
+}
+
+/* Form card */
+.checkin-form-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.checkin-form-date-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 18px;
+}
+
+.checkin-section {
+  margin-bottom: 22px;
+}
+
+.checkin-section-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 10px;
+}
+
+.checkin-optional {
+  font-weight: 400;
+  text-transform: none;
+  color: #aaa;
+  font-size: 0.82rem;
+}
+
+/* Status buttons */
+.checkin-status-row {
+  display: flex;
+  gap: 8px;
+}
+
+.checkin-status-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 6px;
+  border: 1.5px solid #e8e5e0;
+  border-radius: 12px;
+  background: #faf9f7;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #333;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.checkin-status-btn--active {
+  border-color: #333;
+  background: #fff;
+}
+
+.checkin-status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.checkin-status-dot--green  { background: #4caf50; }
+.checkin-status-dot--yellow { background: #ffc107; }
+.checkin-status-dot--red    { background: #f44336; }
+
+/* Slider */
+.checkin-slider {
+  width: 100%;
+  accent-color: #F5A623;
+  height: 6px;
+  cursor: pointer;
+}
+
+.checkin-scale-value {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #F5A623;
+}
+
+.checkin-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-top: 4px;
+}
+
+/* Notes */
+.checkin-notes {
+  width: 100%;
+  border: 1.5px solid #e8e5e0;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 0.9rem;
+  resize: none;
+  color: #333;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.checkin-notes:focus {
+  outline: none;
+  border-color: #F5A623;
+}
+
+/* Action buttons */
+.checkin-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.checkin-btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.checkin-btn--primary {
+  background: #F5A623;
+  color: #fff;
+}
+
+.checkin-btn--primary:hover {
+  background: #e09610;
+}
+
+.checkin-btn--secondary {
+  background: #f0ede8;
+  color: #333;
+}
+
+.checkin-btn--secondary:hover {
+  background: #e5e0d8;
+}
+
+.checkin-save-msg {
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-top: 10px;
 }
 
 /* Responsive adjustments */
