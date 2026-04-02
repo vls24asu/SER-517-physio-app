@@ -24,6 +24,11 @@
             <option value="<%= bp %>"><%= bp %></option>
           <% }) %>
         </select>
+        <select id="filterLocation" class="library-filter-select" style="min-width:120px;">
+          <option value="">Home & Gym</option>
+          <option value="home">Home only</option>
+          <option value="gym">Gym only</option>
+        </select>
         <input id="filterSearch" type="text" placeholder="Search exercises..." class="library-filter-select" style="flex:2; min-width:140px; border-radius:999px;">
       </div>
 
@@ -38,6 +43,7 @@
             data-category="<%= ex.category %>"
             data-bodypart="<%= ex.body_part || '' %>"
             data-name="<%= ex.name.toLowerCase() %>"
+            data-gymonly="<%= ex.is_gym_only ? '1' : '0' %>"
             style="display:flex; align-items:center; gap:12px; padding:11px 14px; cursor:pointer; border-bottom:<%= i < exercises.length-1 ? '1px solid #F0EAE0' : 'none' %>; transition:background 0.12s;"
           >
             <span style="font-size:20px; flex-shrink:0;"><%= catEmoji[ex.category] || '🏋️' %></span>
@@ -110,6 +116,7 @@
 
     const filterCategory = document.getElementById('filterCategory');
     const filterBodyPart = document.getElementById('filterBodyPart');
+    const filterLocation = document.getElementById('filterLocation');
     const filterSearch   = document.getElementById('filterSearch');
     const hiddenInput    = document.getElementById('exerciseSelect');
     const allRows        = Array.from(document.querySelectorAll('.routine-ex-row'));
@@ -118,13 +125,17 @@
     function applyFilters() {
       const cat = filterCategory.value.toLowerCase();
       const bp  = filterBodyPart.value.toLowerCase();
+      const loc = filterLocation.value;
       const q   = filterSearch.value.toLowerCase().trim();
 
       allRows.forEach(row => {
         const matchCat  = !cat || row.dataset.category === cat;
         const matchBp   = !bp  || row.dataset.bodypart.toLowerCase() === bp;
         const matchName = !q   || row.dataset.name.includes(q);
-        row.style.display = (matchCat && matchBp && matchName) ? '' : 'none';
+        const matchLoc  = !loc
+          || (loc === 'gym'  && row.dataset.gymonly === '1')
+          || (loc === 'home' && row.dataset.gymonly === '0');
+        row.style.display = (matchCat && matchBp && matchName && matchLoc) ? '' : 'none';
       });
 
       // Deselect if filtered out
@@ -138,6 +149,7 @@
 
     filterCategory.addEventListener('change', applyFilters);
     filterBodyPart.addEventListener('change', applyFilters);
+    filterLocation.addEventListener('change', applyFilters);
     filterSearch.addEventListener('input', applyFilters);
 
     // Hover effect

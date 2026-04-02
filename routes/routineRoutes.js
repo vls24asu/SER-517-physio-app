@@ -20,7 +20,7 @@ router.get('/', isAuthenticated, requireOnboardingComplete, async (req, res) => 
   const userId = req.session.user.id;
 
   const [[exercises], [routine], [bodyPartRows]] = await Promise.all([
-    db.query(`SELECT id, name, category, body_part, injury, skill_level FROM exercise ORDER BY name ASC`),
+    db.query(`SELECT id, name, category, body_part, injury, skill_level, is_gym_only FROM exercise ORDER BY name ASC`),
     db.query(
       `SELECT re.id, re.sort_order,
               e.id AS exercise_id, e.name, e.category

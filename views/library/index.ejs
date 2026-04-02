@@ -116,6 +116,11 @@
         <option value="<%= inj.name %>" <%= activeInjury === inj.name ? 'selected' : '' %>><%= inj.name %></option>
       <% }) %>
     </select>
+    <select name="location" class="library-filter-select" onchange="this.form.submit()">
+      <option value="all" <%= activeLocation === 'all' ? 'selected' : '' %>>Home & Gym</option>
+      <option value="home" <%= activeLocation === 'home' ? 'selected' : '' %>>Home only</option>
+      <option value="gym"  <%= activeLocation === 'gym'  ? 'selected' : '' %>>Gym only</option>
+    </select>
   </form>
   <% } %>
 
