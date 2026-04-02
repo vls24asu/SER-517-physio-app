@@ -170,8 +170,17 @@ const postGoals = async (req, res) => {
 // GET /settings/pain-management
 const getPainManagement = async (req, res) => {
   try {
-    const profile = await profileService.getProfile(req.session.user.id);
-    res.render('settings/pain-management', { profile });
+    const db = require('../config/db');
+    const [profile, [bodyPartRows], [injuryRows]] = await Promise.all([
+      profileService.getProfile(req.session.user.id),
+      db.query(`SELECT DISTINCT body_part FROM exercise WHERE body_part IS NOT NULL ORDER BY body_part ASC`),
+      db.query(`SELECT name FROM Injury_Reference ORDER BY name ASC`)
+    ]);
+    res.render('settings/pain-management', {
+      profile,
+      bodyParts: bodyPartRows.map(r => r.body_part),
+      injuries: injuryRows.map(r => r.name)
+    });
   } catch (err) {
     console.error(err);
     req.flash('error', 'Something went wrong.');
@@ -183,12 +192,15 @@ const getPainManagement = async (req, res) => {
 const postPainManagement = async (req, res) => {
   try {
     const { pain_status, pain_intensity } = req.body;
-    const rawAreas = req.body.pain_areas;
+    const rawAreas = req.body['pain_areas[]'] || req.body.pain_areas;
     const painAreas = Array.isArray(rawAreas) ? rawAreas.join(',') : (rawAreas || null);
+    const rawInjuries = req.body['selected_injuries[]'] || req.body.selected_injuries;
+    const selectedInjuries = Array.isArray(rawInjuries) ? rawInjuries.join(',') : (rawInjuries || null);
     await profileService.updatePainAreas(req.session.user.id, {
       painAreas,
       painStatus: pain_status || null,
-      painIntensity: pain_intensity !== undefined ? pain_intensity : null
+      painIntensity: pain_intensity !== undefined ? pain_intensity : null,
+      selectedInjuries
     });
     req.flash('success', 'Pain management updated.');
     res.redirect('/settings/pain-management');
