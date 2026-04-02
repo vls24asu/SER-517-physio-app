@@ -322,7 +322,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let currentStep = 0;
 
 // ADD THIS
-document.querySelectorAll(".step input:not([type='hidden']):not([type='range']), .step select")
+document.querySelectorAll(".step input:not([type='hidden']):not([type='range']):not([data-no-validate]), .step select")
 .forEach(el => {
   el.setAttribute("required","required");
 });
@@ -356,8 +356,9 @@ document.querySelectorAll(".step select").forEach(select => {
     return false;
   }
 
-  // check required inputs
+  // check required inputs (skip inputs inside hidden containers)
   for (let input of requiredInputs) {
+    if (input.offsetParent === null) continue;
     if (!input.value) {
       alert("Please fill all required fields.");
       return false;
