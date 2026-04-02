@@ -19,21 +19,23 @@ const statsService = new StatsService();
 router.get('/', isAuthenticated, requireOnboardingComplete, async (req, res) => {
   const userId = req.session.user.id;
 
-  const [exercises] = await db.query(
-    `SELECT id, name, category FROM exercise ORDER BY name ASC`
-  );
+  const [[exercises], [routine], [bodyPartRows]] = await Promise.all([
+    db.query(`SELECT id, name, category, body_part, injury, skill_level FROM exercise ORDER BY name ASC`),
+    db.query(
+      `SELECT re.id, re.sort_order,
+              e.id AS exercise_id, e.name, e.category
+       FROM Routine_Entry re
+       JOIN exercise e ON e.id = re.exercise_id
+       WHERE re.user_id = ?
+       ORDER BY re.sort_order ASC, re.created_at DESC`,
+      [userId]
+    ),
+    db.query(`SELECT DISTINCT body_part FROM exercise WHERE body_part IS NOT NULL ORDER BY body_part ASC`)
+  ]);
 
-  const [routine] = await db.query(
-    `SELECT re.id, re.sort_order,
-            e.id AS exercise_id, e.name, e.category
-     FROM Routine_Entry re
-     JOIN exercise e ON e.id = re.exercise_id
-     WHERE re.user_id = ?
-     ORDER BY re.sort_order ASC, re.created_at DESC`,
-    [userId]
-  );
+  const bodyParts = bodyPartRows.map(r => r.body_part);
 
-  res.render('routines/index', { exercises, routine });
+  res.render('routines/index', { exercises, routine, bodyParts });
 });
 
 // Add exercise to draft
@@ -121,7 +123,8 @@ router.post('/save', isAuthenticated, requireOnboardingComplete, async (req, res
 router.get('/exercise-info/:id', isAuthenticated, async (req, res) => {
   const [rows] = await db.query(
     `SELECT id, name, category, skill_level, equipment_needed, position,
-            tempo, \`sets\`, reps, is_gym_only, tips, common_mistakes
+            tempo, \`sets\`, reps, is_gym_only, tips, common_mistakes,
+            body_part, injury, contraction_type, bilateral
      FROM exercise WHERE id = ?`,
     [req.params.id]
   );

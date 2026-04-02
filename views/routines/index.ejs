@@ -9,10 +9,32 @@
 
   <div class="library-detail-card">
     <form method="POST" action="/routines/add">
-      <select id="exerciseSelect" name="exercise_id" required class="routines-select">
-        <option value="">Select exercise...</option>
+
+      <!-- Filters -->
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+        <select id="filterCategory" class="library-filter-select" style="min-width:120px;">
+          <option value="">All categories</option>
+          <option value="strengthen">Strengthen</option>
+          <option value="stretch">Stretch</option>
+          <option value="stability">Stability</option>
+        </select>
+        <select id="filterBodyPart" class="library-filter-select" style="min-width:130px;">
+          <option value="">All body parts</option>
+          <% bodyParts.forEach(bp => { %>
+            <option value="<%= bp %>"><%= bp %></option>
+          <% }) %>
+        </select>
+        <input id="filterSearch" type="text" placeholder="Search exercises..." class="library-filter-select" style="flex:2; min-width:140px; border-radius:999px;">
+      </div>
+
+      <select id="exerciseSelect" name="exercise_id" required class="routines-select" size="6" style="height:auto; border-radius:12px; padding:8px;">
         <% exercises.forEach(ex => { %>
-          <option value="<%= ex.id %>"><%= ex.name %> (<%= ex.category %>)</option>
+          <option
+            value="<%= ex.id %>"
+            data-category="<%= ex.category %>"
+            data-bodypart="<%= ex.body_part || '' %>"
+            data-name="<%= ex.name.toLowerCase() %>"
+          ><%= ex.name %><% if (ex.body_part) { %> · <%= ex.body_part %><% } %> (<%= ex.category %>)</option>
         <% }) %>
       </select>
 
@@ -50,6 +72,18 @@
             <p class="library-stat-label">Location</p>
             <p class="library-stat-value" id="previewLocation"></p>
           </div>
+          <div class="library-stat-tile" id="previewContractionTile" style="display:none;">
+            <p class="library-stat-label">Contraction</p>
+            <p class="library-stat-value" id="previewContraction"></p>
+          </div>
+          <div class="library-stat-tile" id="previewBilateralTile" style="display:none;">
+            <p class="library-stat-label">Movement</p>
+            <p class="library-stat-value" id="previewBilateral"></p>
+          </div>
+          <div class="library-stat-tile" id="previewInjuryTile" style="display:none; grid-column: 1 / -1;">
+            <p class="library-stat-label">For injury</p>
+            <p class="library-stat-value" id="previewInjury"></p>
+          </div>
         </div>
         <div id="previewTips" style="font-size:13px; color:#555; background:#f9f5ee; border-radius:10px; padding:10px 12px;"></div>
       </div>
@@ -59,10 +93,40 @@
   </div>
 
   <script>
-    const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' };
-    const categoryLabel = { strengthen: 'Strengthen', stretch: 'Stretch', avoid: 'Avoid' };
+    const categoryEmoji = { strengthen: '💪', stretch: '🧘', stability: '🏃' };
+    const categoryLabel = { strengthen: 'Strengthen', stretch: 'Stretch', stability: 'Stability' };
 
-    document.getElementById('exerciseSelect').addEventListener('change', function () {
+    const filterCategory = document.getElementById('filterCategory');
+    const filterBodyPart = document.getElementById('filterBodyPart');
+    const filterSearch   = document.getElementById('filterSearch');
+    const select         = document.getElementById('exerciseSelect');
+    const allOptions     = Array.from(select.options);
+
+    function applyFilters() {
+      const cat  = filterCategory.value.toLowerCase();
+      const bp   = filterBodyPart.value.toLowerCase();
+      const q    = filterSearch.value.toLowerCase().trim();
+
+      allOptions.forEach(opt => {
+        const matchCat  = !cat || opt.dataset.category === cat;
+        const matchBp   = !bp  || opt.dataset.bodypart.toLowerCase() === bp;
+        const matchName = !q   || opt.dataset.name.includes(q);
+        opt.hidden = !(matchCat && matchBp && matchName);
+      });
+
+      // Clear preview if selected option is now hidden
+      const selected = select.options[select.selectedIndex];
+      if (selected && selected.hidden) {
+        select.value = '';
+        document.getElementById('exercisePreview').style.display = 'none';
+      }
+    }
+
+    filterCategory.addEventListener('change', applyFilters);
+    filterBodyPart.addEventListener('change', applyFilters);
+    filterSearch.addEventListener('input', applyFilters);
+
+    select.addEventListener('change', function () {
       const id = this.value;
       const preview = document.getElementById('exercisePreview');
       if (!id) { preview.style.display = 'none'; return; }
@@ -86,8 +150,33 @@
           document.getElementById('previewPosition').textContent = ex.position || 'Not specified';
           document.getElementById('previewLocation').textContent = Number(ex.is_gym_only) === 1 ? 'Gym only' : 'Home friendly';
 
-          const tagsEl = document.getElementById('previewTags');
-          tagsEl.innerHTML = `<span class="library-pill library-pill--category">${label}</span><span class="library-pill">${ex.skill_level || ''}</span>`;
+          const tags = `<span class="library-pill library-pill--category">${label}</span><span class="library-pill">${ex.skill_level || ''}</span>`;
+          const bodyPartTag = ex.body_part ? `<span class="library-pill">${ex.body_part}</span>` : '';
+          document.getElementById('previewTags').innerHTML = tags + bodyPartTag;
+
+          const contractionTile = document.getElementById('previewContractionTile');
+          if (ex.contraction_type) {
+            document.getElementById('previewContraction').textContent = ex.contraction_type;
+            contractionTile.style.display = '';
+          } else {
+            contractionTile.style.display = 'none';
+          }
+
+          const bilateralTile = document.getElementById('previewBilateralTile');
+          if (ex.bilateral) {
+            document.getElementById('previewBilateral').textContent = ex.bilateral;
+            bilateralTile.style.display = '';
+          } else {
+            bilateralTile.style.display = 'none';
+          }
+
+          const injuryTile = document.getElementById('previewInjuryTile');
+          if (ex.injury) {
+            document.getElementById('previewInjury').textContent = ex.injury;
+            injuryTile.style.display = '';
+          } else {
+            injuryTile.style.display = 'none';
+          }
 
           const tipsEl = document.getElementById('previewTips');
           tipsEl.innerHTML = ex.tips ? `<strong>Tips:</strong> ${ex.tips}` : '';
