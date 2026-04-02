@@ -83,8 +83,16 @@ router.post('/logout', isAuthenticated, authController.logout);
 
 // Onboarding Page
 
-router.get('/onboarding', isAuthenticated, (req, res) => {
-  res.render('onboarding/index');
+router.get('/onboarding', isAuthenticated, async (req, res) => {
+  const db = require('../config/db');
+  const [[bodyPartRows], [injuryRows]] = await Promise.all([
+    db.query(`SELECT DISTINCT body_part FROM exercise WHERE body_part IS NOT NULL ORDER BY body_part ASC`),
+    db.query(`SELECT name FROM Injury_Reference ORDER BY name ASC`)
+  ]);
+  res.render('onboarding/index', {
+    bodyParts: bodyPartRows.map(r => r.body_part),
+    injuries: injuryRows.map(r => r.name)
+  });
 });
 // Complete Onboarding
 router.post('/onboarding/complete', isAuthenticated, authController.completeOnboarding);

@@ -144,7 +144,8 @@ const sessionStatus = (req, res) => {
    ONBOARDING COMPLETE
 ========================= */
 
-const VALID_PAIN_AREAS = ['neck', 'back', 'shoulders', 'knees'];
+// Pain areas are now free-form body parts from the DB — just sanitize length
+const MAX_PAIN_AREA_LEN = 100;
 
 const GENDER_MAP = {
   male: 'male',
@@ -204,10 +205,15 @@ const completeOnboarding = async (req, res) => {
       ? rawEquipment.join(',')
       : (rawEquipment || null);
 
-    // Pain areas — whitelist validated
+    // Pain areas — body parts selected on onboarding
     const rawAreas = body['pain_areas[]'] || body.pain_areas;
     const areasArray = Array.isArray(rawAreas) ? rawAreas : (rawAreas ? [rawAreas] : []);
-    const painAreas = areasArray.filter(a => VALID_PAIN_AREAS.includes(a)).join(',') || null;
+    const painAreas = areasArray.map(a => String(a).slice(0, MAX_PAIN_AREA_LEN)).join(',') || null;
+
+    // Selected injuries
+    const rawInjuries = body['selected_injuries[]'] || body.selected_injuries;
+    const injuriesArray = Array.isArray(rawInjuries) ? rawInjuries : (rawInjuries ? [rawInjuries] : []);
+    const selectedInjuries = injuriesArray.map(i => String(i).slice(0, 255)).join(',') || null;
 
     // Pain status & intensity
     const painStatus = body.pain_status === 'yes' || body.pain_status === 'no'
@@ -223,7 +229,7 @@ const completeOnboarding = async (req, res) => {
       goals,
       availableEquipment
     });
-    await profileService.updatePainAreas(userId, { painAreas, painStatus, painIntensity });
+    await profileService.updatePainAreas(userId, { painAreas, painStatus, painIntensity, selectedInjuries });
 
     await userService.markOnboardingComplete(userId);
     return res.redirect('/dashboard');

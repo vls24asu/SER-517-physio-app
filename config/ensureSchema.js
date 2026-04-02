@@ -206,6 +206,7 @@ async function ensureUserProfileSchema() {
   await addColumnIfMissing('User_Profile', 'pain_areas', 'pain_areas TEXT NULL');
   await addColumnIfMissing('User_Profile', 'pain_status', "pain_status ENUM('yes', 'no') NULL");
   await addColumnIfMissing('User_Profile', 'pain_intensity', 'pain_intensity INT NULL');
+  await addColumnIfMissing('User_Profile', 'selected_injuries', 'selected_injuries TEXT NULL');
 }
 
 async function ensureUserAuthSchema() {
