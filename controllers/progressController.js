@@ -14,12 +14,13 @@ const getProgress = async (req, res) => {
       : 'week';
 
     const timezone = res.locals.userTimezone || 'UTC';
-    const [stats, sessions, chartData, periodStats, focusAreas] = await Promise.all([
+    const [stats, sessions, chartData, periodStats, focusAreas, areaOptions] = await Promise.all([
       statsService.getUserStats(userId),
       sessionService.getHistory(userId),
       sessionService.getChartData(userId, period, timezone),
       sessionService.getSessionCountForPeriod(userId, period, timezone),
-      checkinDAO.getFocusAreas(userId)
+      checkinDAO.getFocusAreas(userId),
+      checkinDAO.getAreaOptions()
     ]);
 
     const now = new Date();
@@ -42,7 +43,8 @@ const getProgress = async (req, res) => {
       sessionCount: periodStats.count,
       totalTimeLabel,
       periodLabel,
-      focusAreas
+      focusAreas,
+      areaOptions
     });
   } catch (err) {
     console.error(err);

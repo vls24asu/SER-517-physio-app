@@ -7,6 +7,20 @@ class BodyCheckinDAO {
     this.#cm = ConnectionManager.getInstance();
   }
 
+  // ── Focus Area Options (the selectable list) ─────────────────────────────
+
+  async getAreaOptions() {
+    const conn = await this.#cm.getConnection();
+    try {
+      const [rows] = await conn.execute(
+        `SELECT name, emoji FROM Focus_Area_Option ORDER BY sort_order ASC`
+      );
+      return rows;
+    } finally {
+      conn.release();
+    }
+  }
+
   // ── Focus Areas ──────────────────────────────────────────────────────────
 
   async getFocusAreas(userId) {
