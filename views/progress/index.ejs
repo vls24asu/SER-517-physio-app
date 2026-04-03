@@ -77,20 +77,20 @@
       <button id="closeFocusAreaModal" class="focus-area-close">&times;</button>
     </div>
     <div class="focus-area-list">
-      <button class="focus-area-option" data-area="Neck"      data-emoji="🫶">🫶 Neck</button>
-      <button class="focus-area-option" data-area="Back"      data-emoji="🧍">🧍 Back</button>
-      <button class="focus-area-option" data-area="Shoulders" data-emoji="💪">💪 Shoulders</button>
-      <button class="focus-area-option" data-area="Knees"     data-emoji="🦵">🦵 Knees</button>
-      <button class="focus-area-option" data-area="Hips"      data-emoji="🕺">🕺 Hips</button>
-      <button class="focus-area-option" data-area="Ankles"    data-emoji="🦶">🦶 Ankles</button>
-      <button class="focus-area-option" data-area="Wrist"     data-emoji="🖐️">🖐️ Wrist</button>
-      <button class="focus-area-option" data-area="Elbow"     data-emoji="💪">💪 Elbow</button>
-      <button class="focus-area-option" data-area="Core"      data-emoji="🎯">🎯 Core</button>
+      <% areaOptions.forEach(function(opt) { %>
+        <button class="focus-area-option"
+                data-area="<%= opt.name %>"
+                data-emoji="<%= opt.emoji %>">
+          <%= opt.emoji %> <%= opt.name %>
+        </button>
+      <% }); %>
     </div>
   </div>
 </div>
 
 <%- include('../partials/bottomNav') %>
+
+<script type="application/json" id="savedAreasData"><%- JSON.stringify(focusAreas.map(function(f){ return f.area_name; })) %></script>
 
 <script>
   (function () {
@@ -101,7 +101,7 @@
 
     if (!openBtn || !overlay) return;
 
-    var savedAreas = <%- JSON.stringify(focusAreas.map(function(f){ return f.area_name; })) %>;
+    var savedAreas = JSON.parse(document.getElementById('savedAreasData').textContent || '[]');
 
     function showOverlay() { overlay.style.display = 'flex'; }
     function hideOverlay() { overlay.style.display = 'none'; }

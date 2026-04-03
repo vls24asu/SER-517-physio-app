@@ -1935,9 +1935,11 @@ main {
 
 /* ── Check-in detail page ─────────────────────────────────────────────── */
 .checkin-page {
-  padding: 16px 16px 100px;
-  max-width: 480px;
+  width: 100%;
+  max-width: 600px;
   margin: 0 auto;
+  padding: 20px;
+  padding-bottom: 100px;
 }
 
 .checkin-page-header {
@@ -2222,7 +2224,8 @@ main {
   .history-container,
   .library-container,
   .library-detail-container,
-  .progress-page-container {
+  .progress-page-container,
+  .checkin-page {
     padding: 16px;
     padding-bottom: 100px;
   }
