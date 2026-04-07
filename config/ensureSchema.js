@@ -383,6 +383,16 @@ async function ensureBodyCheckinSchema() {
       FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
     )`
   );
+
+  // Add feeling column for daily check-in state (good / not_good)
+  await addColumnIfMissing('Body_Checkin_Log', 'feeling', "feeling VARCHAR(10) NULL");
+}
+
+async function ensureCheckinFlowSchema() {
+  // Track once-per-day check-in enforcement
+  await addColumnIfMissing('User', 'last_checkin_date', 'last_checkin_date DATE NULL');
+  // Store workout environment preference from injury flow
+  await addColumnIfMissing('User_Profile', 'workout_environment', 'workout_environment VARCHAR(20) NULL');
 }
 
 async function ensureSchema() {
@@ -395,6 +405,7 @@ async function ensureSchema() {
   await ensureScheduledSessionSchema();
   await ensureInjuryTable();
   await ensureBodyCheckinSchema();
+  await ensureCheckinFlowSchema();
 }
 
 module.exports = ensureSchema;
