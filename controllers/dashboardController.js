@@ -10,6 +10,22 @@ const getDashboard = async (req, res) => {
     const userId = req.session.user.id;
     const stats = await statsService.getUserStats(userId);
 
+    // Load today's check-in log to show status on dashboard
+    const today = new Date().toISOString().split('T')[0];
+    let todayCheckin = null;
+    try {
+      const [rows] = await db.query(
+        `SELECT feeling, pain_scale, area_name, pain_status
+         FROM Body_Checkin_Log
+         WHERE user_id = ? AND log_date = ?
+         ORDER BY created_at DESC LIMIT 1`,
+        [userId, today]
+      );
+      todayCheckin = rows[0] || null;
+    } catch (e) {
+      // column may not exist on older DBs — silently ignore
+    }
+
     // Trigger time-based notifications (workout reminder, streak broken, pain check-in).
     // Runs fire-and-forget so a notification error never breaks the dashboard load.
     notifService.triggerDashboardNotifications(userId, stats.streak).catch(console.error);
@@ -38,7 +54,8 @@ const getDashboard = async (req, res) => {
       greeting,
       stats,
       user: req.session.user,
-      scheduledSessions
+      scheduledSessions,
+      todayCheckin
     });
   } catch (err) {
     console.error(err);

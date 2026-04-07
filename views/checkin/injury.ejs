@@ -1,0 +1,163 @@
+<%- include('../partials/navbar') %>
+
+<div class="container py-4" style="max-width: 560px;">
+
+  <div class="mb-3">
+    <a href="/checkin/not-good" class="text-muted small"><i class="bi bi-arrow-left"></i> Back</a>
+  </div>
+
+  <div class="text-center mb-4">
+    <div style="font-size: 2rem;">🩹</div>
+    <h4 class="fw-bold mt-2">Tell us more about how you feel</h4>
+    <p class="text-muted small">We'll build a safe routine matched to your condition.</p>
+  </div>
+
+  <form method="POST" action="/checkin/injury" id="injuryForm">
+
+    <!-- Step 1: Body Area -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-3">
+      <h6 class="fw-bold mb-3"><span class="badge rounded-pill me-2" style="background:#ff9800;">1</span>Where is the discomfort?</h6>
+      <div class="row g-2">
+        <% bodyAreas.forEach(area => { %>
+        <div class="col-6">
+          <input type="radio" class="btn-check" name="body_area" id="area_<%= area.value %>" value="<%= area.value %>" required>
+          <label class="btn btn-outline-secondary w-100 rounded-3 d-flex align-items-center gap-2" for="area_<%= area.value %>">
+            <span><%= area.emoji %></span> <%= area.label %>
+          </label>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Step 2: Pain Level -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-3">
+      <h6 class="fw-bold mb-3"><span class="badge rounded-pill me-2" style="background:#ff9800;">2</span>Pain level right now</h6>
+      <div class="d-flex justify-content-between small text-muted mb-1">
+        <span>No pain</span><span>Worst pain</span>
+      </div>
+      <input type="range" class="form-range" min="0" max="10" step="1"
+             name="pain_level" id="painSlider" value="3">
+      <div class="text-center mt-2">
+        <span class="badge rounded-pill fs-6 px-4 py-2" id="painLabel"
+              style="background:#ff9800; color:#fff;">3 / 10</span>
+      </div>
+    </div>
+
+    <!-- Step 3: Symptom Type -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-3">
+      <h6 class="fw-bold mb-3"><span class="badge rounded-pill me-2" style="background:#ff9800;">3</span>What does it feel like?</h6>
+      <div class="d-flex flex-wrap gap-2">
+        <% symptomTypes.forEach(symptom => { %>
+        <div>
+          <input type="radio" class="btn-check" name="symptom_type"
+                 id="symptom_<%= symptom %>" value="<%= symptom.toLowerCase() %>" required>
+          <label class="btn btn-outline-secondary rounded-pill" for="symptom_<%= symptom %>">
+            <%= symptom %>
+          </label>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Step 4: Goal -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-3">
+      <h6 class="fw-bold mb-3"><span class="badge rounded-pill me-2" style="background:#ff9800;">4</span>What do you want help with?</h6>
+      <div class="row g-2">
+        <% goals.forEach(goal => { %>
+        <div class="col-6">
+          <input type="radio" class="btn-check" name="goal"
+                 id="goal_<%= goal.value %>" value="<%= goal.value %>" required>
+          <label class="btn btn-outline-secondary w-100 rounded-3 d-flex align-items-center gap-2"
+                 for="goal_<%= goal.value %>">
+            <span><%= goal.emoji %></span> <%= goal.label %>
+          </label>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Step 5: Environment -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-3">
+      <h6 class="fw-bold mb-3"><span class="badge rounded-pill me-2" style="background:#ff9800;">5</span>Where are you working out?</h6>
+      <div class="d-grid gap-2">
+        <% environments.forEach(env => { %>
+        <div>
+          <input type="radio" class="btn-check" name="environment"
+                 id="env_<%= env.value %>" value="<%= env.value %>"
+                 data-gym="<%= env.gymOnly %>" required>
+          <label class="btn btn-outline-secondary w-100 text-start rounded-3 px-3 py-2"
+                 for="env_<%= env.value %>"><%= env.label %></label>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Step 6: Equipment (shown dynamically) -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" id="equipmentSection" style="display:none!important;">
+      <h6 class="fw-bold mb-3"><span class="badge rounded-pill me-2" style="background:#ff9800;">6</span>What equipment do you have?</h6>
+      <div id="homeEquipment" class="d-flex flex-wrap gap-2" style="display:none!important;">
+        <% homeEquipment.forEach(eq => { %>
+        <div>
+          <input type="checkbox" class="btn-check" name="equipment"
+                 id="heq_<%= eq.value %>" value="<%= eq.value %>">
+          <label class="btn btn-outline-secondary rounded-pill" for="heq_<%= eq.value %>">
+            <%= eq.label %>
+          </label>
+        </div>
+        <% }) %>
+      </div>
+      <div id="gymEquipment" class="d-flex flex-wrap gap-2" style="display:none!important;">
+        <% gymEquipment.forEach(eq => { %>
+        <div>
+          <input type="checkbox" class="btn-check" name="equipment"
+                 id="geq_<%= eq.value %>" value="<%= eq.value %>">
+          <label class="btn btn-outline-secondary rounded-pill" for="geq_<%= eq.value %>">
+            <%= eq.label %>
+          </label>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="d-grid">
+      <button type="submit" class="btn btn-lg rounded-4 fw-semibold"
+              style="background:#ff9800; color:#fff;">
+        Find my routine <i class="bi bi-arrow-right ms-1"></i>
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<%- include('../partials/bottomNav') %>
+
+<script>
+  // Pain slider label
+  const slider = document.getElementById('painSlider');
+  const label = document.getElementById('painLabel');
+  slider.addEventListener('input', () => {
+    const v = parseInt(slider.value);
+    label.textContent = v + ' / 10';
+    label.style.background = v >= 7 ? '#f44336' : v >= 4 ? '#ff9800' : '#4caf50';
+  });
+
+  // Show/hide equipment based on environment
+  const envInputs = document.querySelectorAll('input[name="environment"]');
+  const equipSection = document.getElementById('equipmentSection');
+  const homeEq = document.getElementById('homeEquipment');
+  const gymEq = document.getElementById('gymEquipment');
+
+  envInputs.forEach(input => {
+    input.addEventListener('change', () => {
+      const isGym = input.dataset.gym === 'true';
+      equipSection.style.cssText = 'display:block!important;';
+      if (isGym) {
+        homeEq.style.cssText = 'display:none!important;';
+        gymEq.style.cssText = 'display:flex!important; flex-wrap:wrap; gap:0.5rem;';
+      } else {
+        gymEq.style.cssText = 'display:none!important;';
+        homeEq.style.cssText = 'display:flex!important; flex-wrap:wrap; gap:0.5rem;';
+      }
+    });
+  });
+</script>
