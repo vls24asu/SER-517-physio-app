@@ -265,9 +265,12 @@ const getRecommend = async (req, res) => {
       routineTitle = `${areaLabel} — ${goalLabel}`;
       routineEmoji = BODY_AREAS.find(a => a.value === checkin.body_area)?.emoji || '🩹';
 
-      // Primary: scoring engine
+      // Primary: scoring engine with check-in context
       try {
-        const result = await generateRecommendedRoutine(userId);
+        const result = await generateRecommendedRoutine(userId, {
+          bodyArea: checkin.body_area,
+          goal: checkin.goal
+        });
         if (result && result.exercises && result.exercises.length > 0) {
           exercises = result.exercises;
           routineReason = result.reason || null;
@@ -292,9 +295,11 @@ const getRecommend = async (req, res) => {
       routineTitle = `${typeLabels[type] || 'Recovery'} routine`;
       routineEmoji = type === 'recovery' ? '🛌' : type === 'mobility' ? '🔄' : '🤸';
 
-      // Primary: scoring engine
+      // Primary: scoring engine with recovery context
       try {
-        const result = await generateRecommendedRoutine(userId);
+        const result = await generateRecommendedRoutine(userId, {
+          recoveryType: type
+        });
         if (result && result.exercises && result.exercises.length > 0) {
           exercises = result.exercises;
           routineReason = result.reason || null;
