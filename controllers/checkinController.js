@@ -1,4 +1,5 @@
 const CheckinDAO = require('../dao/CheckinDAO');
+const { generateRecommendedRoutine } = require('../services/RecommendationService');
 
 const dao = new CheckinDAO();
 
@@ -251,32 +252,61 @@ const getRecommend = async (req, res) => {
   if (!req.session.checkin) return res.redirect('/checkin');
 
   const checkin = req.session.checkin;
+  const userId = req.session.user.id;
   let exercises = [];
   let routineTitle = 'Your recommended routine for today';
   let routineEmoji = '🏥';
+  let routineReason = null;
 
   try {
     if (checkin.body_area) {
-      // Injury-based recommendation
-      exercises = await dao.getInjuryExercises({
-        bodyArea: checkin.body_area,
-        goal: checkin.goal,
-        isGymOnly: checkin.isGymOnly,
-        equipment: checkin.equipment || []
-      });
-
       const areaLabel = checkin.body_area.charAt(0).toUpperCase() + checkin.body_area.slice(1);
       const goalLabel = GOALS.find(g => g.value === checkin.goal)?.label || checkin.goal;
       routineTitle = `${areaLabel} — ${goalLabel}`;
       routineEmoji = BODY_AREAS.find(a => a.value === checkin.body_area)?.emoji || '🩹';
-    } else {
-      // Recovery-based recommendation
-      const type = checkin.recovery_type || 'stretch';
-      exercises = await dao.getRecoveryExercises(type);
 
+      // Primary: scoring engine
+      try {
+        const result = await generateRecommendedRoutine(userId);
+        if (result && result.exercises && result.exercises.length > 0) {
+          exercises = result.exercises;
+          routineReason = result.reason || null;
+        }
+      } catch (e) {
+        console.error('Scoring engine error:', e);
+      }
+
+      // Fallback: SQL filter
+      if (exercises.length === 0) {
+        exercises = await dao.getInjuryExercises({
+          bodyArea: checkin.body_area,
+          goal: checkin.goal,
+          isGymOnly: checkin.isGymOnly,
+          equipment: checkin.equipment || []
+        });
+      }
+    } else {
+      // Recovery path
+      const type = checkin.recovery_type || 'stretch';
       const typeLabels = { recovery: 'Recovery', mobility: 'Mobility', stretch: 'Stretch' };
       routineTitle = `${typeLabels[type] || 'Recovery'} routine`;
       routineEmoji = type === 'recovery' ? '🛌' : type === 'mobility' ? '🔄' : '🤸';
+
+      // Primary: scoring engine
+      try {
+        const result = await generateRecommendedRoutine(userId);
+        if (result && result.exercises && result.exercises.length > 0) {
+          exercises = result.exercises;
+          routineReason = result.reason || null;
+        }
+      } catch (e) {
+        console.error('Scoring engine error:', e);
+      }
+
+      // Fallback: recovery SQL query
+      if (exercises.length === 0) {
+        exercises = await dao.getRecoveryExercises(type);
+      }
     }
   } catch (err) {
     console.error('Error fetching recommended exercises:', err);
@@ -288,6 +318,7 @@ const getRecommend = async (req, res) => {
     exercises,
     routineTitle,
     routineEmoji,
+    routineReason,
     checkin
   });
 };

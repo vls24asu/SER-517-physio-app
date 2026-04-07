@@ -6,7 +6,7 @@
   <div class="text-center mb-4">
     <div style="font-size: 2.5rem;"><%= routineEmoji %></div>
     <h4 class="fw-bold mt-2"><%= routineTitle %></h4>
-    <p class="text-muted small">Here is your recommended routine for today based on how you feel.</p>
+    <p class="text-muted small"><%= routineReason || 'Here is your recommended routine for today based on how you feel.' %></p>
   </div>
 
   <% if (exercises.length === 0) { %>
