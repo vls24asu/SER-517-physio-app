@@ -31,6 +31,7 @@ const workoutHistoryRoutes = require('./workoutHistoryRoutes');
 const progressRoutes = require('./progressRoutes');
 const helpRoutes = require('./helpRoutes');
 const notificationRoutes = require('./notificationRoutes');
+const checkinRoutes = require('./checkinRoutes');
 
 router.use('/', authRoutes);
 router.use('/', userRoutes);
@@ -46,6 +47,7 @@ router.use('/workout-history', workoutHistoryRoutes);
 router.use('/progress', progressRoutes);
 router.use('/help', helpRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/checkin', checkinRoutes);
 // router.use('/physio', physioRoutes);
 
 module.exports = router;

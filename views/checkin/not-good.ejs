@@ -1,0 +1,81 @@
+<div class="container py-5" style="max-width: 480px;">
+
+  <div class="mb-4">
+    <a href="/checkin" class="text-muted small"><i class="bi bi-arrow-left"></i> Back</a>
+  </div>
+
+  <div class="text-center mb-4">
+    <div style="font-size: 2.5rem;">🩺</div>
+    <h4 class="fw-bold mt-2">What is bothering you today?</h4>
+    <p class="text-muted small">We'll find the right routine based on how you feel.</p>
+  </div>
+
+  <form method="POST" action="/checkin/not-good">
+    <div class="d-grid gap-3">
+
+      <button type="submit" name="issue_type" value="same_issue"
+        class="btn btn-lg rounded-4 d-flex align-items-center gap-3 px-4 py-3 border"
+        style="background:#fff8f0; border-color:#ff9800!important;">
+        <span style="font-size:1.6rem;">🔁</span>
+        <div class="text-start">
+          <div class="fw-semibold">Same issue as before</div>
+          <div class="small text-muted">Continuing problem I've had</div>
+        </div>
+      </button>
+
+      <button type="submit" name="issue_type" value="something_new"
+        class="btn btn-lg rounded-4 d-flex align-items-center gap-3 px-4 py-3 border"
+        style="background:#fff8f0; border-color:#ff9800!important;">
+        <span style="font-size:1.6rem;">🆕</span>
+        <div class="text-start">
+          <div class="fw-semibold">Something new</div>
+          <div class="small text-muted">A new pain or discomfort</div>
+        </div>
+      </button>
+
+      <button type="submit" name="issue_type" value="general_soreness"
+        class="btn btn-lg rounded-4 d-flex align-items-center gap-3 px-4 py-3 border"
+        style="background:#f3f4f6; border-color:#9e9e9e!important;">
+        <span style="font-size:1.6rem;">😣</span>
+        <div class="text-start">
+          <div class="fw-semibold">General soreness</div>
+          <div class="small text-muted">Muscles are sore from last workout</div>
+        </div>
+      </button>
+
+      <button type="submit" name="issue_type" value="low_energy"
+        class="btn btn-lg rounded-4 d-flex align-items-center gap-3 px-4 py-3 border"
+        style="background:#f3f4f6; border-color:#9e9e9e!important;">
+        <span style="font-size:1.6rem;">😴</span>
+        <div class="text-start">
+          <div class="fw-semibold">Low energy</div>
+          <div class="small text-muted">Tired, need a lighter session</div>
+        </div>
+      </button>
+
+      <button type="submit" name="issue_type" value="swelling"
+        class="btn btn-lg rounded-4 d-flex align-items-center gap-3 px-4 py-3 border"
+        style="background:#f3f4f6; border-color:#9e9e9e!important;">
+        <span style="font-size:1.6rem;">🫧</span>
+        <div class="text-start">
+          <div class="fw-semibold">Swelling</div>
+          <div class="small text-muted">Noticeable swelling in an area</div>
+        </div>
+      </button>
+
+      <button type="submit" name="issue_type" value="stiffness"
+        class="btn btn-lg rounded-4 d-flex align-items-center gap-3 px-4 py-3 border"
+        style="background:#f3f4f6; border-color:#9e9e9e!important;">
+        <span style="font-size:1.6rem;">🧊</span>
+        <div class="text-start">
+          <div class="fw-semibold">Stiffness</div>
+          <div class="small text-muted">Joints or muscles feel stiff</div>
+        </div>
+      </button>
+
+    </div>
+  </form>
+
+</div>
+
+<%- include('../partials/bottomNav') %>

@@ -1,0 +1,58 @@
+<div class="container py-5" style="max-width: 480px;">
+
+  <!-- Greeting -->
+  <div class="text-center mb-5">
+    <div style="font-size: 3rem;">👋</div>
+    <h2 class="fw-bold mt-2">Good <span id="timeOfDay"></span>, <%= user.fullName.split(' ')[0] %></h2>
+    <p class="text-muted mt-1">Let's make sure today's plan fits how you're feeling.</p>
+  </div>
+
+  <!-- Question -->
+  <div class="card border-0 shadow-sm rounded-4 p-4">
+    <h5 class="fw-semibold text-center mb-4">How are you feeling today?</h5>
+
+    <form method="POST" action="/checkin">
+      <div class="d-grid gap-3">
+
+        <!-- Good -->
+        <button type="submit" name="feeling" value="good"
+          class="btn btn-lg rounded-4 d-flex align-items-center gap-3 px-4 py-3"
+          style="background:#e8f5e9; border: 2px solid #4caf50; color:#2e7d32;">
+          <span style="font-size:1.8rem;">😊</span>
+          <div class="text-start">
+            <div class="fw-bold">Feeling good</div>
+            <div class="small text-muted">Ready for a regular workout</div>
+          </div>
+        </button>
+
+        <!-- Not Good -->
+        <button type="submit" name="feeling" value="not_good"
+          class="btn btn-lg rounded-4 d-flex align-items-center gap-3 px-4 py-3"
+          style="background:#fff3e0; border: 2px solid #ff9800; color:#e65100;">
+          <span style="font-size:1.8rem;">😔</span>
+          <div class="text-start">
+            <div class="fw-bold">Not feeling great</div>
+            <div class="small text-muted">Pain, soreness, or discomfort</div>
+          </div>
+        </button>
+
+      </div>
+    </form>
+  </div>
+
+  <!-- Skip -->
+  <div class="text-center mt-4">
+    <a href="/dashboard" class="text-muted small">Skip for now</a>
+  </div>
+
+</div>
+
+<%- include('../partials/bottomNav') %>
+
+<script>
+  const hour = new Date().getHours();
+  const timeEl = document.getElementById('timeOfDay');
+  if (hour < 12) timeEl.textContent = 'morning';
+  else if (hour < 17) timeEl.textContent = 'afternoon';
+  else timeEl.textContent = 'evening';
+</script>

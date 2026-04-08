@@ -173,13 +173,24 @@ function estimateExerciseTimeSec(ex) {
 
 // ── Routine Assembly ──────────────────────────────────────────────────────────
 
+// Maps goal → preferred category for check-in context override
+const GOAL_TO_CATEGORY = {
+  strengthen:    'strengthen',
+  stability:     'stability',
+  stretch:       'stretch',
+  eliminate_pain: 'stretch',
+  mobility:      'stretch',
+  recovery:      'stretch',
+};
+
 /**
  * generateRecommendedRoutine — Main entry point.
  *
  * @param {number} userId
+ * @param {{ bodyArea?: string, goal?: string, recoveryType?: string, issueType?: string }} [checkinContext]
  * @returns {{ exercises, totalEstMin, reason, fitnessLevel, preference, painAreas }}
  */
-async function generateRecommendedRoutine(userId) {
+async function generateRecommendedRoutine(userId, checkinContext = {}) {
   const [profile, injuries, exercises, recentHistory] = await Promise.all([
     dao.getUserProfile(userId),
     dao.getUserInjuries(userId),
@@ -192,12 +203,23 @@ async function generateRecommendedRoutine(userId) {
   }
 
   const fitnessLevel     = profile.fitness_level        || 'beginner';
-  const preference       = profile.exercise_preference  || 'both';
   const userEquipment    = parseCSV(profile.available_equipment);
   const profilePainAreas = parseCSV(profile.pain_areas);
   const injuryAreas      = injuries.map(i => i.body_part.toLowerCase().trim());
-  const allPainAreas     = [...new Set([...profilePainAreas, ...injuryAreas])];
-  const targetSec        = (profile.workout_duration_min || 30) * 60;
+
+  // Merge check-in body area with stored pain areas so scoring targets today's complaint
+  const checkinAreas = checkinContext.bodyArea && checkinContext.bodyArea !== 'other'
+    ? [checkinContext.bodyArea.toLowerCase()]
+    : [];
+  const allPainAreas = [...new Set([...checkinAreas, ...profilePainAreas, ...injuryAreas])];
+
+  // Determine effective category preference from check-in context or user profile
+  const contextGoal = checkinContext.goal || checkinContext.recoveryType;
+  const preference  = contextGoal
+    ? (GOAL_TO_CATEGORY[contextGoal] || profile.exercise_preference || 'both')
+    : (profile.exercise_preference || 'both');
+
+  const targetSec = (profile.workout_duration_min || 30) * 60;
 
   // ── Score every exercise ──
   const scored = exercises
@@ -252,9 +274,13 @@ async function generateRecommendedRoutine(userId) {
 
   const totalEstMin = Math.max(1, Math.round(totalSec / 60));
 
+  // Build a descriptive reason line
   let reason;
-  if (allPainAreas.length > 0) {
-    const areaLabels = allPainAreas.slice(0, 3).join(', ');
+  if (checkinAreas.length > 0) {
+    const areaLabel = checkinAreas[0].charAt(0).toUpperCase() + checkinAreas[0].slice(1);
+    reason = `Tailored for your ${areaLabel} · ${fitnessLevel} level · ${preference} focus`;
+  } else if (allPainAreas.length > 0) {
+    const areaLabels = allPainAreas.slice(0, 2).join(', ');
     reason = `Tailored for your ${areaLabels} recovery · ${fitnessLevel} level`;
   } else {
     reason = `Based on your ${fitnessLevel} fitness level · ${preference === 'both' ? 'balanced mix' : preference + ' focus'}`;

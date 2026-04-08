@@ -1,0 +1,87 @@
+<div class="container py-4" style="max-width: 600px;">
+
+  <!-- Header -->
+  <div class="text-center mb-4">
+    <div style="font-size: 2.5rem;"><%= routineEmoji %></div>
+    <h4 class="fw-bold mt-2"><%= routineTitle %></h4>
+    <p class="text-muted small"><%= routineReason || 'Here is your recommended routine for today based on how you feel.' %></p>
+  </div>
+
+  <% if (exercises.length === 0) { %>
+  <!-- No exercises found -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 text-center mb-4">
+    <div style="font-size:2rem;">🔍</div>
+    <p class="mt-2 text-muted">No exercises found matching your exact filters.</p>
+    <a href="/checkin/injury" class="btn btn-outline-secondary rounded-3 mt-2">Adjust options</a>
+  </div>
+
+  <% } else { %>
+
+  <!-- Exercise count badge -->
+  <div class="text-center mb-3">
+    <span class="badge rounded-pill px-3 py-2" style="background:#fff3e0; color:#e65100;">
+      <%= exercises.length %> exercises • estimated <%= Math.ceil(exercises.length * 3) %> min
+    </span>
+  </div>
+
+  <!-- Exercise list -->
+  <div class="d-flex flex-column gap-3 mb-4">
+    <% exercises.forEach((ex, i) => { %>
+    <div class="card border-0 shadow-sm rounded-4 p-3">
+      <div class="d-flex align-items-start gap-3">
+        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+             style="width:48px; height:48px; background:#fff3e0; font-size:1.4rem;">
+          <%= ex.emoji || '💪' %>
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-semibold"><%= ex.name %></div>
+          <div class="small text-muted mb-1">
+            <% if (ex.sets) { %><span class="me-2"><i class="bi bi-arrow-repeat"></i> <%= ex.sets %> sets</span><% } %>
+            <% if (ex.reps) { %><span class="me-2"><i class="bi bi-123"></i> <%= ex.reps %> reps</span><% } %>
+            <% if (ex.hold_time_sec) { %><span><i class="bi bi-clock"></i> <%= ex.hold_time_sec %>s hold</span><% } %>
+          </div>
+          <% if (ex.tips) { %>
+          <div class="small" style="color:#666;">
+            <i class="bi bi-lightbulb text-warning me-1"></i><%= ex.tips.split('.')[0] %>.
+          </div>
+          <% } %>
+          <% if (ex.equipment_needed) { %>
+          <div class="mt-1">
+            <span class="badge rounded-pill" style="background:#f3f4f6; color:#555; font-size:0.7rem;">
+              <i class="bi bi-box-seam me-1"></i><%= ex.equipment_needed %>
+            </span>
+          </div>
+          <% } %>
+        </div>
+        <div class="text-muted small flex-shrink-0">#<%= i + 1 %></div>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="d-grid gap-2">
+    <form method="POST" action="/checkin/save-and-start">
+      <input type="hidden" name="exercise_ids" value="<%= JSON.stringify(exercises.map(e => e.id)) %>">
+      <button type="submit" class="btn btn-lg rounded-4 fw-semibold w-100"
+              style="background:#ff9800; color:#fff;">
+        <i class="bi bi-play-fill me-1"></i> Save &amp; Start this routine
+      </button>
+    </form>
+    <% if (checkin && checkin.body_area) { %>
+    <a href="/checkin/injury" class="btn btn-outline-secondary rounded-4">
+      <i class="bi bi-sliders me-1"></i> Adjust options
+    </a>
+    <% } else { %>
+    <a href="/checkin/recovery" class="btn btn-outline-secondary rounded-4">
+      <i class="bi bi-arrow-left me-1"></i> Choose different routine
+    </a>
+    <% } %>
+    <a href="/dashboard" class="btn btn-link text-muted">Go to dashboard</a>
+  </div>
+
+  <% } %>
+
+</div>
+
+<%- include('../partials/bottomNav') %>

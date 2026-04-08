@@ -95,6 +95,12 @@ const postLogin = async (req, res) => {
       return res.redirect('/onboarding');
     }
 
+    // Route returning users through daily check-in if they haven't done it today
+    const today = new Date().toISOString().split('T')[0];
+    if (user.last_checkin_date !== today) {
+      return res.redirect('/checkin');
+    }
+
     return res.redirect('/dashboard');
 
   } catch (err) {
