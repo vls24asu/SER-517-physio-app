@@ -63,10 +63,13 @@
 
   <!-- Action buttons -->
   <div class="d-grid gap-2">
-    <a href="/routines/saved" class="btn btn-lg rounded-4 fw-semibold"
-       style="background:#ff9800; color:#fff;">
-      <i class="bi bi-play-fill me-1"></i> Start workout from my routines
-    </a>
+    <form method="POST" action="/checkin/save-and-start">
+      <input type="hidden" name="exercise_ids" value="<%= JSON.stringify(exercises.map(e => e.id)) %>">
+      <button type="submit" class="btn btn-lg rounded-4 fw-semibold w-100"
+              style="background:#ff9800; color:#fff;">
+        <i class="bi bi-play-fill me-1"></i> Save &amp; Start this routine
+      </button>
+    </form>
     <% if (checkin && checkin.body_area) { %>
     <a href="/checkin/injury" class="btn btn-outline-secondary rounded-4">
       <i class="bi bi-sliders me-1"></i> Adjust options

@@ -22,4 +22,7 @@ router.post('/recovery', isAuthenticated, checkinController.postRecovery);
 // Filtered exercise recommendation
 router.get('/recommend', isAuthenticated, checkinController.getRecommend);
 
+// Save recommended routine and go straight to its preview/start page
+router.post('/save-and-start', isAuthenticated, checkinController.saveAndStart);
+
 module.exports = router;

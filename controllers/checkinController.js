@@ -328,6 +328,43 @@ const getRecommend = async (req, res) => {
   });
 };
 
+// ── POST /checkin/save-and-start ─────────────────────────────────────────────
+
+const saveAndStart = async (req, res) => {
+  const userId = req.session.user.id;
+  const db = require('../config/db');
+
+  let exerciseIds;
+  try {
+    exerciseIds = JSON.parse(req.body.exercise_ids || '[]');
+    if (!Array.isArray(exerciseIds) || exerciseIds.length === 0) throw new Error('empty');
+  } catch {
+    req.flash('error', 'Could not start routine.');
+    return res.redirect('/checkin/recommend');
+  }
+
+  const checkin = req.session.checkin || {};
+  const label = checkin.body_area
+    ? checkin.body_area.charAt(0).toUpperCase() + checkin.body_area.slice(1)
+    : (checkin.recovery_type || 'Recovery');
+  const routineName = `${label} routine – ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+
+  const [result] = await db.query(
+    `INSERT INTO Saved_Routine (user_id, name) VALUES (?, ?)`,
+    [userId, routineName]
+  );
+  const routineId = result.insertId;
+
+  for (let i = 0; i < exerciseIds.length; i++) {
+    await db.query(
+      `INSERT INTO Saved_Routine_Entry (routine_id, exercise_id, sort_order) VALUES (?, ?, ?)`,
+      [routineId, Number(exerciseIds[i]), i + 1]
+    );
+  }
+
+  res.redirect(`/routines/saved/${routineId}/preview`);
+};
+
 module.exports = {
   getCheckin,
   postCheckin,
@@ -337,5 +374,6 @@ module.exports = {
   postInjury,
   getRecovery,
   postRecovery,
-  getRecommend
+  getRecommend,
+  saveAndStart
 };
