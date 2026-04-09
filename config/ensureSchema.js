@@ -395,6 +395,23 @@ async function ensureCheckinFlowSchema() {
   await addColumnIfMissing('User_Profile', 'workout_environment', 'workout_environment VARCHAR(20) NULL');
 }
 
+async function ensureWorkoutFeedbackSchema() {
+  await db.query(
+    `CREATE TABLE IF NOT EXISTS \`Workout_Feedback\` (
+      id          INT PRIMARY KEY AUTO_INCREMENT,
+      session_id  INT NOT NULL,
+      overall_pain TINYINT NOT NULL DEFAULT 0,
+      difficulty  TINYINT NOT NULL DEFAULT 3,
+      felt_after  ENUM('great','good','okay','tired','pain') NOT NULL DEFAULT 'okay',
+      unsafe_flag TINYINT(1) NOT NULL DEFAULT 0,
+      notes       TEXT NULL,
+      created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (session_id) REFERENCES Workout_Session(id) ON DELETE CASCADE
+    )`
+  );
+  await addColumnIfMissing('Workout_Session', 'unsafe_flag', 'unsafe_flag TINYINT(1) NOT NULL DEFAULT 0');
+}
+
 async function ensureSchema() {
   await ensureLowercaseExerciseTables();
   await ensureUserAuthSchema();
@@ -406,6 +423,7 @@ async function ensureSchema() {
   await ensureInjuryTable();
   await ensureBodyCheckinSchema();
   await ensureCheckinFlowSchema();
+  await ensureWorkoutFeedbackSchema();
 }
 
 module.exports = ensureSchema;
