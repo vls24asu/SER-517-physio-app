@@ -84,15 +84,53 @@
 
 </div>
 
-<!-- Session complete overlay -->
-<div id="sessionCompleteOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#FCF7EE; z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center;">
-  <div style="width:72px;height:72px;background:#F5A623;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:28px;">
-    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#000" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+<!-- Step 1: Feedback questions overlay -->
+<div id="feedbackOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#FCF7EE; z-index:9999; flex-direction:column; padding:40px 24px; overflow-y:auto;">
+  <h1 style="font-size:22px; font-weight:700; margin-bottom:4px;">How did that feel?</h1>
+  <p style="color:#888; font-size:14px; margin-bottom:28px;">Takes 10 seconds — helps us personalise your next session.</p>
+
+  <div style="background:#fff; border-radius:16px; padding:18px 20px; margin-bottom:14px; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+    <label style="font-size:13px; font-weight:700; color:#555; display:block; margin-bottom:10px;">Overall pain level: <span id="fbPainVal">0</span>/10</label>
+    <input type="range" id="fbPain" min="0" max="10" value="0" style="width:100%; accent-color:#E7B04A;">
   </div>
-  <h1 style="font-size:28px;font-weight:700;margin-bottom:8px;">Nice work, <span><%= currentUser ? currentUser.fullName.split(' ')[0] : 'User' %></span>.</h1>
-  <p style="color:#7A7A7A;font-size:15px;margin-bottom:48px;">You trained for <span id="completeMinutes">0</span> minutes today.</p>
-  <button id="doneBtn" style="width:100%;max-width:400px;background:#F5A623;border:none;border-radius:999px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:16px;">Done</button>
-  <button type="button" onclick="openSessionScheduleModal()" style="background:none;border:none;color:#F5A623;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">Schedule this session</button>
+
+  <div style="background:#fff; border-radius:16px; padding:18px 20px; margin-bottom:14px; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+    <label style="font-size:13px; font-weight:700; color:#555; display:block; margin-bottom:10px;">How hard was it?</label>
+    <div style="display:flex; gap:8px;">
+      <% ['1','2','3','4','5'].forEach(function(v) { %>
+        <button type="button" class="fb-diff-btn" data-val="<%= v %>"
+          style="flex:1; padding:10px 0; border:1.5px solid #e8e8e8; border-radius:12px; background:#fff; font-size:0.9rem; font-weight:700; cursor:pointer; font-family:inherit; transition:background 0.15s;">
+          <%= v %>
+        </button>
+      <% }) %>
+    </div>
+    <div style="display:flex; justify-content:space-between; margin-top:4px;">
+      <span style="font-size:0.7rem; color:#aaa;">Easy</span>
+      <span style="font-size:0.7rem; color:#aaa;">Hard</span>
+    </div>
+  </div>
+
+  <div style="background:#fff; border-radius:16px; padding:18px 20px; margin-bottom:14px; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+    <label style="font-size:13px; font-weight:700; color:#555; display:block; margin-bottom:10px;">How do you feel now?</label>
+    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      <% [['great','Great 😄'],['good','Good 😊'],['okay','Okay 😐'],['tired','Tired 😓'],['pain','In pain 😣']].forEach(function(opt) { %>
+        <button type="button" class="fb-feel-btn" data-val="<%= opt[0] %>"
+          style="padding:9px 14px; border:1.5px solid #e8e8e8; border-radius:999px; background:#fff; font-size:0.85rem; font-weight:600; cursor:pointer; font-family:inherit; transition:background 0.15s;">
+          <%= opt[1] %>
+        </button>
+      <% }) %>
+    </div>
+  </div>
+
+  <div style="background:#fff; border-radius:16px; padding:18px 20px; margin-bottom:14px; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+    <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+      <input type="checkbox" id="fbUnsafe" style="width:18px; height:18px; accent-color:#e53935;">
+      <span style="font-size:0.9rem; font-weight:600; color:#333;">Something felt unsafe or painful</span>
+    </label>
+  </div>
+
+  <button id="fbSubmitBtn" style="width:100%; background:#E7B04A; border:none; border-radius:999px; padding:14px; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; margin-bottom:10px;">Submit & See Summary</button>
+  <button id="fbSkipBtn" style="width:100%; background:none; border:none; color:#aaa; font-size:14px; cursor:pointer; font-family:inherit;">Skip</button>
 </div>
 
 <!-- Schedule modal -->
@@ -123,14 +161,16 @@
   </div>
 </div>
 
-<!-- Session complete overlay -->
+<!-- Step 2: Session summary overlay -->
 <div id="sessionCompleteOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#FCF7EE; z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center;">
   <div style="width:72px;height:72px;background:#F5A623;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:28px;">
     <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#000" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
   </div>
-  <h1 style="font-size:28px;font-weight:700;margin-bottom:8px;">Nice work, <span id="completeName"><%= currentUser ? currentUser.fullName.split(' ')[0] : 'User' %></span>.</h1>
-  <p style="color:#7A7A7A;font-size:15px;margin-bottom:48px;">You trained for <span id="completeMinutes">0</span> minutes today.</p>
-  <button id="doneBtn" style="width:100%;max-width:400px;background:#F5A623;border:none;border-radius:999px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;">Done</button>
+  <h1 style="font-size:28px;font-weight:700;margin-bottom:8px;">Nice work, <span><%= currentUser ? currentUser.fullName.split(' ')[0] : 'User' %></span>.</h1>
+  <p style="color:#7A7A7A;font-size:15px;margin-bottom:8px;">You trained for <span id="completeMinutes">0</span> minutes today.</p>
+  <p id="completeUnsafeMsg" style="display:none; color:#e53935; font-size:13px; font-weight:600; margin-bottom:16px;">We've flagged this session for your physiotherapist to review.</p>
+  <button id="doneBtn" style="width:100%;max-width:400px;background:#F5A623;border:none;border-radius:999px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:16px;">Done</button>
+  <button type="button" onclick="openSessionScheduleModal()" style="background:none;border:none;color:#F5A623;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">Schedule this session</button>
 </div>
 
 <script>
@@ -183,15 +223,80 @@
     arc.style.strokeDashoffset = ARC_LEN * (1 - fraction);
   }
 
-  function showCompleteScreen() {
+  var completedSessionId = null;
+  var fbDifficulty = 3;
+  var fbFeltAfter = 'okay';
+
+  // Difficulty picker
+  document.querySelectorAll('.fb-diff-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.fb-diff-btn').forEach(function(b) {
+        b.style.background = '#fff'; b.style.color = '#333'; b.style.borderColor = '#e8e8e8';
+      });
+      btn.style.background = '#E7B04A'; btn.style.color = '#000'; btn.style.borderColor = '#E7B04A';
+      fbDifficulty = parseInt(btn.dataset.val);
+    });
+  });
+
+  // Feeling picker
+  document.querySelectorAll('.fb-feel-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.fb-feel-btn').forEach(function(b) {
+        b.style.background = '#fff'; b.style.color = '#333'; b.style.borderColor = '#e8e8e8';
+      });
+      btn.style.background = '#E7B04A'; btn.style.color = '#000'; btn.style.borderColor = '#E7B04A';
+      fbFeltAfter = btn.dataset.val;
+    });
+  });
+
+  // Pain slider label
+  document.getElementById('fbPain').addEventListener('input', function() {
+    document.getElementById('fbPainVal').textContent = this.value;
+  });
+
+  function showCompleteScreen(unsafe) {
     clearInterval(timerInterval);
     clearInterval(restInterval);
     var elapsedMin = Math.max(1, Math.round((Date.now() - sessionStartTime) / 60000));
     document.getElementById('completeMinutes').textContent = elapsedMin;
+    if (unsafe) document.getElementById('completeUnsafeMsg').style.display = 'block';
+    document.getElementById('feedbackOverlay').style.display = 'none';
     var overlay = document.getElementById('sessionCompleteOverlay');
     overlay.style.setProperty('display', 'flex', 'important');
   }
 
+  function submitFeedback(callback) {
+    var payload = {
+      sessionId:   completedSessionId,
+      overallPain: parseInt(document.getElementById('fbPain').value) || 0,
+      difficulty:  fbDifficulty,
+      feltAfter:   fbFeltAfter,
+      unsafeFlag:  document.getElementById('fbUnsafe').checked,
+      notes:       null
+    };
+    fetch('/routines/saved/<%= routineId %>/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .catch(function() {})
+      .finally(function() { callback(payload.unsafeFlag); });
+  }
+
+  document.getElementById('fbSubmitBtn').addEventListener('click', function() {
+    submitFeedback(function(unsafe) { showCompleteScreen(unsafe); });
+  });
+
+  document.getElementById('fbSkipBtn').addEventListener('click', function() {
+    showCompleteScreen(false);
+  });
+
+  function logAndRedirect() {
+    fetch('/routines/saved/<%= routineId %>/log-session', { method: 'POST' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data && data.sessionId) completedSessionId = data.sessionId;
+      })
   function saveCurrentInputs(skipped) {
     exerciseLog[currentStep].setsCompleted = parseInt(document.getElementById('trackSets').value) || null;
     exerciseLog[currentStep].repsCompleted = parseInt(document.getElementById('trackReps').value) || null;
@@ -215,7 +320,11 @@
       body: JSON.stringify({ exerciseLog })
     })
       .catch(function() {})
-      .finally(showCompleteScreen);
+      .finally(function() {
+        clearInterval(timerInterval);
+        clearInterval(restInterval);
+        document.getElementById('feedbackOverlay').style.setProperty('display', 'flex', 'important');
+      });
   }
 
   document.getElementById('doneBtn').addEventListener('click', function() {

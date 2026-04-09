@@ -556,7 +556,43 @@ router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
     [userId, routineId]
   );
 
-  res.json({ ok: true });
+  res.json({ ok: true, sessionId });
+});
+
+// Save post-workout feedback
+router.post('/saved/:id/feedback', isAuthenticated, async (req, res) => {
+  const userId = req.session.user.id;
+  const { sessionId, overallPain, difficulty, feltAfter, unsafeFlag, notes } = req.body;
+
+  if (!sessionId) return res.json({ ok: false, error: 'sessionId required' });
+
+  const unsafe = unsafeFlag ? 1 : 0;
+
+  try {
+    await db.query(
+      `INSERT INTO Workout_Feedback (session_id, overall_pain, difficulty, felt_after, unsafe_flag, notes)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         overall_pain = VALUES(overall_pain),
+         difficulty   = VALUES(difficulty),
+         felt_after   = VALUES(felt_after),
+         unsafe_flag  = VALUES(unsafe_flag),
+         notes        = VALUES(notes)`,
+      [sessionId, overallPain || 0, difficulty || 3, feltAfter || 'okay', unsafe, notes || null]
+    );
+
+    if (unsafe) {
+      await db.query(
+        `UPDATE Workout_Session SET unsafe_flag = 1 WHERE id = ? AND user_id = ?`,
+        [sessionId, userId]
+      );
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('Feedback error:', err);
+    res.json({ ok: false });
+  }
 });
 
 // Delete a saved routine
