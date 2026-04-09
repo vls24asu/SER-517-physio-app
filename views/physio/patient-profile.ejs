@@ -1,0 +1,123 @@
+<%
+  const initials = patient.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+  const feelingEmoji = { great:'😄', good:'😊', okay:'😐', tired:'😓', pain:'😣' };
+  const painStatusColor = { red:'#e53935', yellow:'#ff9800', green:'#4caf50' };
+%>
+
+<div style="max-width:900px; margin:0 auto; padding:24px 16px;">
+
+  <!-- Header -->
+  <div style="display:flex; align-items:center; gap:4px; margin-bottom:20px;">
+    <a href="/physio/patients" style="color:#888; text-decoration:none; font-size:1.1rem;">‹</a>
+    <span style="color:#ccc; margin:0 8px;">|</span>
+    <h1 style="font-size:1.3rem; font-weight:700; margin:0;"><%= patient.full_name %></h1>
+  </div>
+
+  <!-- Vitals + stats row -->
+  <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
+    <div style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); flex:1; min-width:160px;">
+      <div style="font-size:0.75rem; color:#888; font-weight:600; text-transform:uppercase; margin-bottom:8px;">Vitals</div>
+      <div style="font-size:0.88rem; color:#333;"><% if(patient.age) { %>Age: <strong><%= patient.age %></strong><br><% } %><% if(patient.weight_kg) { %>Weight: <strong><%= patient.weight_kg %> kg</strong><br><% } %><% if(patient.height_cm) { %>Height: <strong><%= patient.height_cm %> cm</strong><% } %></div>
+    </div>
+    <div style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); text-align:center; min-width:100px;">
+      <div style="font-size:1.6rem; font-weight:700; color:#E7B04A;"><%= actStats.total_sessions %></div>
+      <div style="font-size:0.75rem; color:#888;">Total sessions</div>
+    </div>
+    <div style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); text-align:center; min-width:100px;">
+      <div style="font-size:1.6rem; font-weight:700; color:#E7B04A;"><%= Math.round(actStats.total_minutes / 60 * 10) / 10 %></div>
+      <div style="font-size:0.75rem; color:#888;">Total hours</div>
+    </div>
+    <div style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); text-align:center; min-width:100px;">
+      <div style="font-size:1.6rem; font-weight:700; color:#E7B04A;"><%= actStats.sessions_this_week %></div>
+      <div style="font-size:0.75rem; color:#888;">This week</div>
+    </div>
+  </div>
+
+  <!-- Pain area chips -->
+  <% if (painAreas.length > 0) { %>
+  <div style="margin-bottom:20px;">
+    <div style="font-size:0.78rem; font-weight:600; color:#888; text-transform:uppercase; margin-bottom:8px;">Pain areas (onboarding)</div>
+    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      <% painAreas.forEach(function(area) { %>
+        <span style="background:#ffebee; color:#e53935; font-size:0.8rem; font-weight:600; padding:4px 12px; border-radius:999px;"><%= area %></span>
+      <% }) %>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Recent workouts -->
+  <div style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); margin-bottom:16px;">
+    <h2 style="font-size:1rem; font-weight:700; margin:0 0 14px;">Recent Workouts</h2>
+    <% if (recentWorkouts.length === 0) { %>
+      <p style="color:#aaa; font-size:0.88rem;">No workouts yet.</p>
+    <% } else { %>
+      <% recentWorkouts.forEach(function(w) { %>
+        <div style="padding:10px 0; border-bottom:1px solid #f5f5f5;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+              <div style="font-size:0.92rem; font-weight:600; color:#222;">
+                <%= w.title %>
+                <% if (w.unsafe_flag) { %><span style="font-size:0.7rem; color:#e53935; font-weight:700; margin-left:6px;">⚠ FLAGGED</span><% } %>
+              </div>
+              <div style="font-size:0.78rem; color:#888; margin-top:2px;">
+                <%= new Date(w.session_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) %>
+                &nbsp;•&nbsp; <%= w.duration_min %> min &nbsp;•&nbsp; <%= w.exercise_count %> exercises
+              </div>
+              <% if (w.overall_pain != null) { %>
+              <div style="font-size:0.78rem; color:#888; margin-top:2px;">
+                Pain: <strong><%= w.overall_pain %>/10</strong>
+                <% if (w.difficulty) { %>&nbsp;•&nbsp; Difficulty: <strong><%= w.difficulty %>/5</strong><% } %>
+                <% if (w.felt_after) { %>&nbsp;•&nbsp; <%= feelingEmoji[w.felt_after] || '' %> <%= w.felt_after %><% } %>
+              </div>
+              <% } %>
+              <% if (w.notes) { %>
+              <div style="font-size:0.8rem; color:#555; margin-top:4px; background:#f9f5ee; border-radius:8px; padding:6px 10px;"><%= w.notes %></div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+
+  <!-- Daily check-in log -->
+  <div style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); margin-bottom:16px;">
+    <h2 style="font-size:1rem; font-weight:700; margin:0 0 14px;">Daily Check-in Log</h2>
+    <% if (checkinLog.length === 0) { %>
+      <p style="color:#aaa; font-size:0.88rem;">No check-ins recorded.</p>
+    <% } else { %>
+      <% checkinLog.forEach(function(c) { %>
+        <%
+          const sc = painStatusColor[c.pain_status] || '#888';
+          const fe = c.feeling === 'good' ? '😊' : c.pain_status === 'red' ? '😣' : '😔';
+        %>
+        <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #f5f5f5;">
+          <span><%= fe %></span>
+          <div style="flex:1; font-size:0.85rem; color:#333;">
+            <%= new Date(c.log_date).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'}) %>
+            <% if (c.area_name) { %>&nbsp;— <%= c.area_name %><% } %>
+          </div>
+          <% if (c.pain_scale) { %><span style="font-size:0.78rem; color:#888;">Pain: <%= c.pain_scale %>/10</span><% } %>
+          <span style="font-size:0.72rem; font-weight:700; padding:2px 8px; border-radius:999px; background:<%= sc %>20; color:<%= sc %>;">
+            <%= c.pain_status ? c.pain_status.toUpperCase() : 'OK' %>
+          </span>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+
+  <!-- Body check-in focus areas -->
+  <% if (focusAreas.length > 0) { %>
+  <div style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+    <h2 style="font-size:1rem; font-weight:700; margin:0 0 14px;">Body Check-in Focus Areas</h2>
+    <div style="display:flex; flex-wrap:wrap; gap:10px;">
+      <% focusAreas.forEach(function(fa) { %>
+        <span style="background:#FCF7EE; border:1.5px solid #E7B04A; border-radius:999px; padding:6px 16px; font-size:0.85rem; font-weight:600;">
+          <%= fa.emoji %> <%= fa.area_name %>
+        </span>
+      <% }) %>
+    </div>
+  </div>
+  <% } %>
+
+</div>

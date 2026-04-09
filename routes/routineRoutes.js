@@ -19,6 +19,12 @@ const statsService = new StatsService();
 router.get('/', isAuthenticated, requireOnboardingComplete, async (req, res) => {
   const userId = req.session.user.id;
 
+  // Persist filter state across add-exercise POST via query string
+  const filterCategory = req.query.filterCategory || '';
+  const filterBodyPart = req.query.filterBodyPart || '';
+  const filterLocation = req.query.filterLocation || '';
+  const filterSearch   = req.query.filterSearch   || '';
+
   const [[exercises], [routine], [bodyPartRows]] = await Promise.all([
     db.query(`SELECT id, name, category, body_part, injury, skill_level, is_gym_only FROM exercise ORDER BY name ASC`),
     db.query(
@@ -35,7 +41,15 @@ router.get('/', isAuthenticated, requireOnboardingComplete, async (req, res) => 
 
   const bodyParts = bodyPartRows.map(r => r.body_part);
 
-  res.render('routines/index', { exercises, routine, bodyParts });
+  res.render('routines/index', {
+    exercises,
+    routine,
+    bodyParts,
+    filterCategory,
+    filterBodyPart,
+    filterLocation,
+    filterSearch
+  });
 });
 
 // Add exercise to draft
@@ -43,9 +57,22 @@ router.post('/add', isAuthenticated, requireOnboardingComplete, async (req, res)
   const userId = req.session.user.id;
   const exerciseId = Number(req.body.exercise_id);
 
+  // Preserve filter state through the POST redirect
+  const filterCategory = req.body.filterCategory || '';
+  const filterBodyPart = req.body.filterBodyPart || '';
+  const filterLocation = req.body.filterLocation || '';
+  const filterSearch   = req.body.filterSearch   || '';
+
+  const params = new URLSearchParams();
+  if (filterCategory) params.set('filterCategory', filterCategory);
+  if (filterBodyPart) params.set('filterBodyPart', filterBodyPart);
+  if (filterLocation) params.set('filterLocation', filterLocation);
+  if (filterSearch)   params.set('filterSearch',   filterSearch);
+  const qs = params.toString() ? '?' + params.toString() : '';
+
   if (!exerciseId) {
     req.flash('error', 'Please select an exercise.');
-    return res.redirect('/routines');
+    return res.redirect('/routines' + qs);
   }
 
   const [[row]] = await db.query(
@@ -59,7 +86,7 @@ router.post('/add', isAuthenticated, requireOnboardingComplete, async (req, res)
     [userId, exerciseId, sortOrder]
   );
 
-  res.redirect('/routines');
+  res.redirect('/routines' + qs);
 });
 
 // Remove exercise from draft
@@ -137,22 +164,30 @@ router.get('/exercise-info/:id', isAuthenticated, async (req, res) => {
 // List all saved routines (+ AI-generated recommendation)
 router.get('/saved', isAuthenticated, requireOnboardingComplete, async (req, res) => {
   const userId = req.session.user.id;
+  const validTypes = ['custom', 'injury', 'fitness', 'lifestyle', 'activity'];
+  const activeTab = validTypes.includes(req.query.type) ? req.query.type : 'all';
 
   // Run routine fetch and AI recommendation in parallel for speed
   const recommendationPromise = generateRecommendedRoutine(userId).catch(() => null);
 
+  const whereClause = activeTab === 'all'
+    ? 'WHERE sr.user_id = ?'
+    : "WHERE sr.user_id = ? AND COALESCE(sr.routine_type, 'custom') = ?";
+  const queryParams = activeTab === 'all' ? [userId] : [userId, activeTab];
+
   const [routines] = await db.query(
     `SELECT sr.id, sr.name, sr.created_at,
+            COALESCE(sr.routine_type, 'custom') AS routine_type,
             COUNT(sre.id) AS exercise_count,
             COALESCE(SUM(COALESCE(e.hold_time_sec, 0) + COALESCE(e.rest_time_sec, 0)), 0) AS total_seconds,
             GROUP_CONCAT(DISTINCT e.category ORDER BY e.category SEPARATOR ',') AS categories
      FROM Saved_Routine sr
      LEFT JOIN Saved_Routine_Entry sre ON sre.routine_id = sr.id
      LEFT JOIN exercise e ON e.id = sre.exercise_id
-     WHERE sr.user_id = ?
+     ${whereClause}
      GROUP BY sr.id
      ORDER BY sr.created_at DESC`,
-    [userId]
+    queryParams
   );
 
   const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' };
@@ -170,7 +205,7 @@ router.get('/saved', isAuthenticated, requireOnboardingComplete, async (req, res
 
   const recommendation = await recommendationPromise;
 
-  res.render('routines/saved', { routines: formatted, recommendation });
+  res.render('routines/saved', { routines: formatted, recommendation, activeTab });
 });
 
 // ── Preview & Edit Saved Routine ───────────────────────────────────────────
@@ -406,11 +441,57 @@ router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
      ORDER BY sre.sort_order ASC`,
     [routineId]
   );
-  for (const ex of exercises) {
+
+  // Per-exercise log submitted from session player (indexed by step, not exercise)
+  // Multiple steps per exercise (sets) — pick the last step for each exercise index
+  const exerciseLog = Array.isArray(req.body.exerciseLog) ? req.body.exerciseLog : [];
+
+  // Build a map: exerciseIndex -> aggregated log entry (last set's data)
+  const logByExercise = {};
+  if (exerciseLog.length > 0) {
+    exerciseLog.forEach((entry, stepIdx) => {
+      const step = JSON.parse(JSON.stringify(entry)); // clone
+      // Find which exercise this step belongs to by matching against steps order
+      // We use sort_order (0-based exercise index) from exercises array
+      // steps are ordered: ex0-set1, ex0-set2, ex1-set1, ... so we need to map back
+      logByExercise[stepIdx] = step;
+    });
+  }
+
+  // Map step indices back to exercise indices
+  const stepToExercise = [];
+  exercises.forEach((ex, exIdx) => {
+    const numSets = Math.max(1, Math.round(Number(ex.sets) || 1));
+    for (let s = 0; s < numSets; s++) stepToExercise.push(exIdx);
+  });
+
+  // Aggregate per exercise: use last set's data, sum sets_completed
+  const aggregated = {};
+  stepToExercise.forEach((exIdx, stepIdx) => {
+    const entry = exerciseLog[stepIdx] || {};
+    if (!aggregated[exIdx]) aggregated[exIdx] = { setsCompleted: 0, repsCompleted: null, weightUsed: null, painDuring: 0, skipped: true };
+    if (!entry.skipped) aggregated[exIdx].skipped = false;
+    if (entry.setsCompleted) aggregated[exIdx].setsCompleted += (entry.setsCompleted || 1);
+    if (entry.repsCompleted != null) aggregated[exIdx].repsCompleted = entry.repsCompleted;
+    if (entry.weightUsed != null) aggregated[exIdx].weightUsed = entry.weightUsed;
+    if (entry.painDuring != null && entry.painDuring > aggregated[exIdx].painDuring) aggregated[exIdx].painDuring = entry.painDuring;
+  });
+
+  for (const [exIdx, ex] of exercises.entries()) {
+    const log = aggregated[exIdx] || {};
     await db.query(
-      `INSERT INTO Workout_Session_Exercise (session_id, exercise_id, name, category, \`sets\`, reps, hold_time_sec, sort_order)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [sessionId, ex.id, ex.name, ex.category, ex.sets, ex.reps, ex.hold_time_sec, ex.sort_order]
+      `INSERT INTO Workout_Session_Exercise
+         (session_id, exercise_id, name, category, \`sets\`, reps, hold_time_sec, sort_order,
+          weight_used, reps_completed, sets_completed, pain_during_exercise, skipped)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        sessionId, ex.id, ex.name, ex.category, ex.sets, ex.reps, ex.hold_time_sec, ex.sort_order,
+        log.weightUsed ?? null,
+        log.repsCompleted ?? null,
+        log.setsCompleted || null,
+        log.painDuring ?? null,
+        log.skipped ? 1 : 0
+      ]
     );
   }
 

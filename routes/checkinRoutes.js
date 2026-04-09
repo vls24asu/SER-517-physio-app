@@ -7,6 +7,9 @@ const checkinController = require('../controllers/checkinController');
 router.get('/', isAuthenticated, checkinController.getCheckin);
 router.post('/', isAuthenticated, checkinController.postCheckin);
 
+// Good path — choose how to start your session
+router.get('/good', isAuthenticated, checkinController.getGood);
+
 // Not good — "What is bothering you today?"
 router.get('/not-good', isAuthenticated, checkinController.getNotGood);
 router.post('/not-good', isAuthenticated, checkinController.postNotGood);

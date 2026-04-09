@@ -2,6 +2,8 @@
   const categoryLabel = { strengthen: 'Strength', stretch: 'Stretch', avoid: 'Avoid' };
   const categoryColor = { strengthen: 'saved-tag--yellow', stretch: 'saved-tag--blue', avoid: 'saved-tag--red' };
   const catEmoji      = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' };
+  const typeLabel     = { custom: 'Custom', injury: 'Injury', fitness: 'Fitness', lifestyle: 'Lifestyle', activity: 'Activity' };
+  const typeColor     = { custom: '#888', injury: '#e53935', fitness: '#43a047', lifestyle: '#1976d2', activity: '#f57c00' };
 %>
 
 <div class="settings-container">
@@ -10,7 +12,17 @@
     <h1 class="settings-title">Saved Routines</h1>
   </div>
 
-  <p class="settings-section-label" style="margin-bottom:16px;">Quick access to your favourite workout combinations</p>
+  <p class="settings-section-label" style="margin-bottom:12px;">Quick access to your favourite workout combinations</p>
+
+  <!-- Filter tabs -->
+  <div class="routine-filter-tabs mb-3">
+    <% ['all','injury','fitness','lifestyle','activity','custom'].forEach(function(tab) { %>
+      <a href="/routines/saved<%= tab === 'all' ? '' : '?type=' + tab %>"
+         class="routine-filter-tab <%= activeTab === tab ? 'active' : '' %>">
+        <%= tab === 'all' ? 'All' : typeLabel[tab] %>
+      </a>
+    <% }) %>
+  </div>
 
   <%
     /* ── AI Recommended Routine Section ── */
@@ -91,7 +103,12 @@
         <div class="saved-routine-card">
           <div class="saved-routine-card-top">
             <div class="saved-routine-card-info">
-              <h3 class="saved-routine-name"><%= r.name %></h3>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <h3 class="saved-routine-name" style="margin:0;"><%= r.name %></h3>
+                <span style="font-size:0.7rem; font-weight:600; padding:2px 8px; border-radius:999px; background:<%= typeColor[r.routine_type] || '#888' %>20; color:<%= typeColor[r.routine_type] || '#888' %>;">
+                  <%= typeLabel[r.routine_type] || 'Custom' %>
+                </span>
+              </div>
               <p class="saved-routine-meta">
                 <% if (r.total_min > 0) { %><%= r.total_min %> min &bull; <% } %><%= r.exercise_count %> exercise<%= r.exercise_count !== 1 ? 's' : '' %>
               </p>

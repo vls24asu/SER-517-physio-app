@@ -67,36 +67,61 @@
     </a>
   </div>
 
-  <div class="activity-cards">
-    <div class="activity-card">
-      <div class="activity-icon">💪</div>
-      <div class="activity-content">
-        <h3 class="activity-title">Build strength</h3>
-        <p class="activity-description">Controlled strength work that respects your limits.</p>
-      </div>
-    </div>
 
-    <div class="activity-card">
-      <div class="activity-icon">⚡</div>
-      <div class="activity-content">
-        <h3 class="activity-title">Work around pain</h3>
-        <p class="activity-description">Exercises designed to help you move better despite discomfort.</p>
-      </div>
+  <!-- Stats row: streak + sessions this week -->
+  <div class="dash-stats-row mb-3">
+    <div class="dash-stat-card">
+      <div class="dash-stat-value"><%= stats.streak %></div>
+      <div class="dash-stat-label">🔥 Day streak</div>
     </div>
-
-    <div class="activity-card">
-      <div class="activity-icon">🏃</div>
-      <div class="activity-content">
-        <h3 class="activity-title">Improve mobility</h3>
-        <p class="activity-description">Gentle stretches and movements to increase your range of motion.</p>
-      </div>
+    <div class="dash-stat-card">
+      <div class="dash-stat-value"><%= stats.sessionsThisWeek %></div>
+      <div class="dash-stat-label">💪 Sessions this week</div>
     </div>
   </div>
+
+  <!-- Weekly goal progress bar (target: 3 sessions/week) -->
+  <div class="dash-goal-card mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="fw-semibold" style="font-size:0.9rem;">Weekly goal</span>
+      <span style="font-size:0.82rem; color:#888;"><%= stats.sessionsThisWeek %> / 3 sessions</span>
+    </div>
+    <div class="dash-goal-bar-bg">
+      <div class="dash-goal-bar-fill" style="width:<%= Math.min(100, Math.round((stats.sessionsThisWeek / 3) * 100)) %>%;"></div>
+    </div>
+    <% if (stats.sessionsThisWeek >= 3) { %>
+      <p style="font-size:0.8rem; color:#4caf50; margin-top:6px; margin-bottom:0;">Goal reached this week!</p>
+    <% } %>
+  </div>
+
+  <!-- Last workout card -->
+  <% if (lastWorkout) { %>
+  <div class="dash-last-workout-card mb-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <div class="fw-semibold" style="font-size:0.9rem; color:#888; margin-bottom:2px;">Last workout</div>
+        <div class="fw-bold" style="font-size:1rem;"><%= lastWorkout.routine_name || 'Session' %></div>
+        <div style="font-size:0.82rem; color:#888; margin-top:2px;">
+          <%= lastWorkout.duration_min %> min
+          <% if (lastWorkout.felt_after) { %>
+            &nbsp;•&nbsp;
+            <% const feelingEmoji = {great:'😄', good:'😊', okay:'😐', tired:'😓', pain:'😣'}; %>
+            <%= feelingEmoji[lastWorkout.felt_after] || '' %> <%= lastWorkout.felt_after %>
+          <% } %>
+          <% if (lastWorkout.overall_pain != null) { %>
+            &nbsp;•&nbsp; Pain: <%= lastWorkout.overall_pain %>/10
+          <% } %>
+        </div>
+      </div>
+      <a href="/progress" style="font-size:0.82rem; color:#E7B04A; font-weight:600; text-decoration:none;">History →</a>
+    </div>
+  </div>
+  <% } %>
 
   <div class="progress-summary-card">
     <div class="progress-content">
       <p class="progress-text">
-        This week: <strong><%= stats.sessionsThisWeek %> sessions</strong> • <strong><%= stats.minutesThisWeek %> minutes</strong>
+        This week: <strong><%= stats.sessionsThisWeek %> sessions</strong> • <strong><%= stats.minutesThisWeek %> min</strong>
       </p>
     </div>
     <a href="/progress" class="progress-link">See progress →</a>

@@ -30,14 +30,31 @@ const getDashboard = async (req, res) => {
     // Runs fire-and-forget so a notification error never breaks the dashboard load.
     notifService.triggerDashboardNotifications(userId, stats.streak).catch(console.error);
 
-    // Fetch all upcoming scheduled sessions
+    // Fetch all upcoming scheduled sessions (persist card up to 2h past scheduled time)
     const [scheduledSessions] = await db.query(
       `SELECT id, routine_id, routine_name, scheduled_at
        FROM Scheduled_Session
-       WHERE user_id = ? AND scheduled_at >= NOW()
+       WHERE user_id = ? AND scheduled_at >= DATE_SUB(NOW(), INTERVAL 2 HOUR)
        ORDER BY scheduled_at ASC`,
       [userId]
     );
+
+    // Fetch last completed workout for the "last workout" card
+    let lastWorkout = null;
+    try {
+      const [lwRows] = await db.query(
+        `SELECT ws.id, ws.routine_name, ws.session_date, ws.duration_min,
+                wf.overall_pain, wf.felt_after
+         FROM Workout_Session ws
+         LEFT JOIN Workout_Feedback wf ON wf.session_id = ws.id
+         WHERE ws.user_id = ?
+         ORDER BY ws.session_date DESC LIMIT 1`,
+        [userId]
+      );
+      lastWorkout = lwRows[0] || null;
+    } catch (e) {
+      // Workout_Feedback may not exist yet — silently ignore
+    }
 
     // Get greeting based on time of day
     const hour = new Date().getHours();
@@ -55,7 +72,8 @@ const getDashboard = async (req, res) => {
       stats,
       user: req.session.user,
       scheduledSessions,
-      todayCheckin
+      todayCheckin,
+      lastWorkout
     });
   } catch (err) {
     console.error(err);
