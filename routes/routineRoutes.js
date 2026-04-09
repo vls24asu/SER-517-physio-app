@@ -441,11 +441,57 @@ router.post('/saved/:id/log-session', isAuthenticated, async (req, res) => {
      ORDER BY sre.sort_order ASC`,
     [routineId]
   );
-  for (const ex of exercises) {
+
+  // Per-exercise log submitted from session player (indexed by step, not exercise)
+  // Multiple steps per exercise (sets) — pick the last step for each exercise index
+  const exerciseLog = Array.isArray(req.body.exerciseLog) ? req.body.exerciseLog : [];
+
+  // Build a map: exerciseIndex -> aggregated log entry (last set's data)
+  const logByExercise = {};
+  if (exerciseLog.length > 0) {
+    exerciseLog.forEach((entry, stepIdx) => {
+      const step = JSON.parse(JSON.stringify(entry)); // clone
+      // Find which exercise this step belongs to by matching against steps order
+      // We use sort_order (0-based exercise index) from exercises array
+      // steps are ordered: ex0-set1, ex0-set2, ex1-set1, ... so we need to map back
+      logByExercise[stepIdx] = step;
+    });
+  }
+
+  // Map step indices back to exercise indices
+  const stepToExercise = [];
+  exercises.forEach((ex, exIdx) => {
+    const numSets = Math.max(1, Math.round(Number(ex.sets) || 1));
+    for (let s = 0; s < numSets; s++) stepToExercise.push(exIdx);
+  });
+
+  // Aggregate per exercise: use last set's data, sum sets_completed
+  const aggregated = {};
+  stepToExercise.forEach((exIdx, stepIdx) => {
+    const entry = exerciseLog[stepIdx] || {};
+    if (!aggregated[exIdx]) aggregated[exIdx] = { setsCompleted: 0, repsCompleted: null, weightUsed: null, painDuring: 0, skipped: true };
+    if (!entry.skipped) aggregated[exIdx].skipped = false;
+    if (entry.setsCompleted) aggregated[exIdx].setsCompleted += (entry.setsCompleted || 1);
+    if (entry.repsCompleted != null) aggregated[exIdx].repsCompleted = entry.repsCompleted;
+    if (entry.weightUsed != null) aggregated[exIdx].weightUsed = entry.weightUsed;
+    if (entry.painDuring != null && entry.painDuring > aggregated[exIdx].painDuring) aggregated[exIdx].painDuring = entry.painDuring;
+  });
+
+  for (const [exIdx, ex] of exercises.entries()) {
+    const log = aggregated[exIdx] || {};
     await db.query(
-      `INSERT INTO Workout_Session_Exercise (session_id, exercise_id, name, category, \`sets\`, reps, hold_time_sec, sort_order)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [sessionId, ex.id, ex.name, ex.category, ex.sets, ex.reps, ex.hold_time_sec, ex.sort_order]
+      `INSERT INTO Workout_Session_Exercise
+         (session_id, exercise_id, name, category, \`sets\`, reps, hold_time_sec, sort_order,
+          weight_used, reps_completed, sets_completed, pain_during_exercise, skipped)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        sessionId, ex.id, ex.name, ex.category, ex.sets, ex.reps, ex.hold_time_sec, ex.sort_order,
+        log.weightUsed ?? null,
+        log.repsCompleted ?? null,
+        log.setsCompleted || null,
+        log.painDuring ?? null,
+        log.skipped ? 1 : 0
+      ]
     );
   }
 

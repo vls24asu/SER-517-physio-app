@@ -2883,6 +2883,84 @@ main {
   color: #c0392b;
 }
 
+/* Per-exercise tracking card */
+.ex-tracking-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  flex-shrink: 0;
+}
+
+.ex-tracking-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ex-tracking-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ex-tracking-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ex-tracking-input {
+  width: 100%;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.ex-tracking-input:focus {
+  border-color: #E7B04A;
+}
+
+.ex-tracking-pain-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ex-tracking-slider {
+  width: 100%;
+  accent-color: #E7B04A;
+}
+
+.ex-skip-btn {
+  width: 100%;
+  padding: 12px;
+  background: none;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 16px;
+  color: #555;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.ex-skip-btn:hover {
+  border-color: #aaa;
+  color: #333;
+}
+
 /* ── Rest timer overlay ─────────────────────────────────────────── */
 .ex-rest-overlay {
   position: absolute;
