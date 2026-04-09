@@ -134,6 +134,65 @@ main {
   line-height: 1.5;
 }
 
+/* Dashboard stats row */
+.dash-stats-row {
+  display: flex;
+  gap: 12px;
+}
+
+.dash-stat-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.dash-stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #E7B04A;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.dash-stat-label {
+  font-size: 0.78rem;
+  color: #888;
+}
+
+/* Weekly goal bar */
+.dash-goal-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.dash-goal-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.dash-goal-bar-fill {
+  height: 100%;
+  background: #E7B04A;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* Last workout card */
+.dash-last-workout-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
 .progress-summary-card {
   background-color: #fff;
   border-radius: 12px;
@@ -1211,6 +1270,43 @@ main {
   color: #000;
   border-color: #F7B32B;
   box-shadow: 0 2px 8px rgba(247, 179, 43, 0.28);
+}
+
+/* Saved routines filter tabs — same style as library tabs */
+.routine-filter-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.routine-filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.routine-filter-tab {
+  flex: 0 0 auto;
+  text-decoration: none;
+  color: #666;
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.routine-filter-tab:hover {
+  color: #000;
+  border-color: #ddd;
+}
+
+.routine-filter-tab.active {
+  background: #E7B04A;
+  color: #000;
+  border-color: #E7B04A;
+  box-shadow: 0 2px 8px rgba(231, 176, 74, 0.28);
 }
 
 .library-results-meta {
@@ -2785,6 +2881,84 @@ main {
 
 .ex-end-btn:hover {
   color: #c0392b;
+}
+
+/* Per-exercise tracking card */
+.ex-tracking-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  flex-shrink: 0;
+}
+
+.ex-tracking-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ex-tracking-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ex-tracking-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ex-tracking-input {
+  width: 100%;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.ex-tracking-input:focus {
+  border-color: #E7B04A;
+}
+
+.ex-tracking-pain-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ex-tracking-slider {
+  width: 100%;
+  accent-color: #E7B04A;
+}
+
+.ex-skip-btn {
+  width: 100%;
+  padding: 12px;
+  background: none;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 16px;
+  color: #555;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.ex-skip-btn:hover {
+  border-color: #aaa;
+  color: #333;
 }
 
 /* ── Rest timer overlay ─────────────────────────────────────────── */

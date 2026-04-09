@@ -9,7 +9,7 @@ const exerciseService = new ExerciseService();
  */
 const getLibrary = async (req, res) => {
   try {
-    const { category, difficulty, search, bodyPart, injury, location } = req.query;
+    const { category, difficulty, search, bodyPart, injury, location, skillLevel } = req.query;
 
     const filters = {};
     if (category && category !== 'all') filters.category = category;
@@ -19,6 +19,8 @@ const getLibrary = async (req, res) => {
     if (injury && injury !== 'all') filters.injury = injury;
     if (location === 'home') filters.isGymOnly = false;
     if (location === 'gym') filters.isGymOnly = true;
+    const validSkillLevels = ['Beginner', 'Intermediate', 'Advanced'];
+    if (skillLevel && validSkillLevels.includes(skillLevel)) filters.difficulty = skillLevel;
 
     const [exercises, bodyParts, injuries] = await Promise.all([
       exerciseService.getAllExercises(filters),
@@ -34,7 +36,8 @@ const getLibrary = async (req, res) => {
       injuries,
       activeBodyPart: bodyPart || 'all',
       activeInjury: injury || 'all',
-      activeLocation: location || 'all'
+      activeLocation: location || 'all',
+      activeSkillLevel: skillLevel || 'all'
     });
   } catch (err) {
     console.error(err);

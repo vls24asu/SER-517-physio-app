@@ -240,6 +240,12 @@ async function ensureSavedRoutineSchema() {
       FOREIGN KEY (exercise_id) REFERENCES exercise(id) ON DELETE CASCADE
     )`
   );
+
+  await addColumnIfMissing(
+    'Saved_Routine',
+    'routine_type',
+    "routine_type ENUM('custom','injury','fitness','lifestyle','activity') NOT NULL DEFAULT 'custom'"
+  );
 }
 
 async function ensureWorkoutSessionSchema() {
@@ -278,6 +284,12 @@ async function ensureWorkoutSessionSchema() {
       FOREIGN KEY (session_id) REFERENCES Workout_Session(id) ON DELETE CASCADE
     )`
   );
+
+  await addColumnIfMissing('Workout_Session_Exercise', 'weight_used',          'weight_used DECIMAL(6,2) NULL');
+  await addColumnIfMissing('Workout_Session_Exercise', 'reps_completed',       'reps_completed INT NULL');
+  await addColumnIfMissing('Workout_Session_Exercise', 'sets_completed',       'sets_completed INT NULL');
+  await addColumnIfMissing('Workout_Session_Exercise', 'pain_during_exercise', 'pain_during_exercise TINYINT NULL');
+  await addColumnIfMissing('Workout_Session_Exercise', 'skipped',              'skipped TINYINT(1) NOT NULL DEFAULT 0');
 }
 
 async function ensureNotificationSchema() {

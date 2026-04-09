@@ -32,9 +32,32 @@
     <p id="tipsText"></p>
   </div>
 
+  <!-- Per-exercise tracking inputs -->
+  <div class="ex-tracking-card" id="trackingCard">
+    <div class="ex-tracking-row">
+      <div class="ex-tracking-field">
+        <label class="ex-tracking-label">Sets done</label>
+        <input type="number" class="ex-tracking-input" id="trackSets" min="0" max="99" placeholder="—">
+      </div>
+      <div class="ex-tracking-field">
+        <label class="ex-tracking-label">Reps done</label>
+        <input type="number" class="ex-tracking-input" id="trackReps" min="0" max="999" placeholder="—">
+      </div>
+      <div class="ex-tracking-field">
+        <label class="ex-tracking-label">Weight (kg)</label>
+        <input type="number" class="ex-tracking-input" id="trackWeight" min="0" max="999" step="0.5" placeholder="—">
+      </div>
+    </div>
+    <div class="ex-tracking-pain-row">
+      <label class="ex-tracking-label">Pain during exercise: <span id="painVal">0</span>/10</label>
+      <input type="range" id="trackPain" min="0" max="10" value="0" class="ex-tracking-slider">
+    </div>
+  </div>
+
   <!-- Mark as complete -->
   <div class="ex-complete-section">
     <button class="ex-complete-btn" id="completeBtn">Mark as Complete</button>
+    <button class="ex-skip-btn" id="skipBtn">Skip</button>
     <button class="ex-end-btn" id="endBtn">End Workout</button>
   </div>
 
@@ -123,6 +146,15 @@
   let stepTimerSec = 0;
   let restTimeLeft = 0;
 
+  // Per-exercise tracking log — one entry per step index
+  const exerciseLog = steps.map(() => ({ setsCompleted: null, repsCompleted: null, weightUsed: null, painDuring: 0, skipped: false }));
+
+  // Pain slider live label
+  document.getElementById('trackPain').addEventListener('input', function() {
+    document.getElementById('painVal').textContent = this.value;
+    exerciseLog[currentStep].painDuring = parseInt(this.value);
+  });
+
   function renderProgressBars(activeIdx) {
     const container = document.getElementById('progressBars');
     container.innerHTML = '';
@@ -160,8 +192,28 @@
     overlay.style.setProperty('display', 'flex', 'important');
   }
 
+  function saveCurrentInputs(skipped) {
+    exerciseLog[currentStep].setsCompleted = parseInt(document.getElementById('trackSets').value) || null;
+    exerciseLog[currentStep].repsCompleted = parseInt(document.getElementById('trackReps').value) || null;
+    exerciseLog[currentStep].weightUsed    = parseFloat(document.getElementById('trackWeight').value) || null;
+    exerciseLog[currentStep].painDuring    = parseInt(document.getElementById('trackPain').value) || 0;
+    exerciseLog[currentStep].skipped       = !!skipped;
+  }
+
+  function resetTrackingInputs() {
+    document.getElementById('trackSets').value   = '';
+    document.getElementById('trackReps').value   = '';
+    document.getElementById('trackWeight').value = '';
+    document.getElementById('trackPain').value   = 0;
+    document.getElementById('painVal').textContent = '0';
+  }
+
   function logAndRedirect() {
-    fetch('/routines/saved/<%= routineId %>/log-session', { method: 'POST' })
+    fetch('/routines/saved/<%= routineId %>/log-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ exerciseLog })
+    })
       .catch(function() {})
       .finally(showCompleteScreen);
   }
@@ -270,15 +322,24 @@
     }
 
     renderProgressBars(idx);
+    resetTrackingInputs();
     startTimer(step.timerSec);
   }
 
   document.getElementById('completeBtn').addEventListener('click', function() {
+    saveCurrentInputs(false);
+    clearInterval(timerInterval);
+    advance();
+  });
+
+  document.getElementById('skipBtn').addEventListener('click', function() {
+    saveCurrentInputs(true);
     clearInterval(timerInterval);
     advance();
   });
 
   document.getElementById('endBtn').addEventListener('click', function() {
+    saveCurrentInputs(false);
     clearInterval(timerInterval);
     clearInterval(restInterval);
     logAndRedirect();
