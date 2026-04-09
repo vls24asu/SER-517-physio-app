@@ -1272,6 +1272,43 @@ main {
   box-shadow: 0 2px 8px rgba(247, 179, 43, 0.28);
 }
 
+/* Saved routines filter tabs — same style as library tabs */
+.routine-filter-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.routine-filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.routine-filter-tab {
+  flex: 0 0 auto;
+  text-decoration: none;
+  color: #666;
+  background: #fff;
+  border: 1px solid #ececec;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.routine-filter-tab:hover {
+  color: #000;
+  border-color: #ddd;
+}
+
+.routine-filter-tab.active {
+  background: #E7B04A;
+  color: #000;
+  border-color: #E7B04A;
+  box-shadow: 0 2px 8px rgba(231, 176, 74, 0.28);
+}
+
 .library-results-meta {
   font-size: 0.82rem;
   color: #777;

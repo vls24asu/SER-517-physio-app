@@ -137,22 +137,30 @@ router.get('/exercise-info/:id', isAuthenticated, async (req, res) => {
 // List all saved routines (+ AI-generated recommendation)
 router.get('/saved', isAuthenticated, requireOnboardingComplete, async (req, res) => {
   const userId = req.session.user.id;
+  const validTypes = ['custom', 'injury', 'fitness', 'lifestyle', 'activity'];
+  const activeTab = validTypes.includes(req.query.type) ? req.query.type : 'all';
 
   // Run routine fetch and AI recommendation in parallel for speed
   const recommendationPromise = generateRecommendedRoutine(userId).catch(() => null);
 
+  const whereClause = activeTab === 'all'
+    ? 'WHERE sr.user_id = ?'
+    : "WHERE sr.user_id = ? AND COALESCE(sr.routine_type, 'custom') = ?";
+  const queryParams = activeTab === 'all' ? [userId] : [userId, activeTab];
+
   const [routines] = await db.query(
     `SELECT sr.id, sr.name, sr.created_at,
+            COALESCE(sr.routine_type, 'custom') AS routine_type,
             COUNT(sre.id) AS exercise_count,
             COALESCE(SUM(COALESCE(e.hold_time_sec, 0) + COALESCE(e.rest_time_sec, 0)), 0) AS total_seconds,
             GROUP_CONCAT(DISTINCT e.category ORDER BY e.category SEPARATOR ',') AS categories
      FROM Saved_Routine sr
      LEFT JOIN Saved_Routine_Entry sre ON sre.routine_id = sr.id
      LEFT JOIN exercise e ON e.id = sre.exercise_id
-     WHERE sr.user_id = ?
+     ${whereClause}
      GROUP BY sr.id
      ORDER BY sr.created_at DESC`,
-    [userId]
+    queryParams
   );
 
   const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' };
@@ -170,7 +178,7 @@ router.get('/saved', isAuthenticated, requireOnboardingComplete, async (req, res
 
   const recommendation = await recommendationPromise;
 
-  res.render('routines/saved', { routines: formatted, recommendation });
+  res.render('routines/saved', { routines: formatted, recommendation, activeTab });
 });
 
 // ── Preview & Edit Saved Routine ───────────────────────────────────────────

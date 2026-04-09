@@ -240,6 +240,12 @@ async function ensureSavedRoutineSchema() {
       FOREIGN KEY (exercise_id) REFERENCES exercise(id) ON DELETE CASCADE
     )`
   );
+
+  await addColumnIfMissing(
+    'Saved_Routine',
+    'routine_type',
+    "routine_type ENUM('custom','injury','fitness','lifestyle','activity') NOT NULL DEFAULT 'custom'"
+  );
 }
 
 async function ensureWorkoutSessionSchema() {
