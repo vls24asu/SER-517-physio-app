@@ -89,6 +89,11 @@ const postLogin = async (req, res) => {
       role: user.role
     };
 
+    // Physio accounts bypass onboarding and check-in
+    if (user.role === 'physio') {
+      return res.redirect('/physio/dashboard');
+    }
+
     // New users created after onboarding launch have onboarding_completed = 0 (false).
     // Older existing users may have null here and should go straight to dashboard.
     if (user.onboarding_completed === 0) {
