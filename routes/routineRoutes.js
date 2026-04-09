@@ -19,6 +19,12 @@ const statsService = new StatsService();
 router.get('/', isAuthenticated, requireOnboardingComplete, async (req, res) => {
   const userId = req.session.user.id;
 
+  // Persist filter state across add-exercise POST via query string
+  const filterCategory = req.query.filterCategory || '';
+  const filterBodyPart = req.query.filterBodyPart || '';
+  const filterLocation = req.query.filterLocation || '';
+  const filterSearch   = req.query.filterSearch   || '';
+
   const [[exercises], [routine], [bodyPartRows]] = await Promise.all([
     db.query(`SELECT id, name, category, body_part, injury, skill_level, is_gym_only FROM exercise ORDER BY name ASC`),
     db.query(
@@ -35,7 +41,15 @@ router.get('/', isAuthenticated, requireOnboardingComplete, async (req, res) => 
 
   const bodyParts = bodyPartRows.map(r => r.body_part);
 
-  res.render('routines/index', { exercises, routine, bodyParts });
+  res.render('routines/index', {
+    exercises,
+    routine,
+    bodyParts,
+    filterCategory,
+    filterBodyPart,
+    filterLocation,
+    filterSearch
+  });
 });
 
 // Add exercise to draft
@@ -43,9 +57,22 @@ router.post('/add', isAuthenticated, requireOnboardingComplete, async (req, res)
   const userId = req.session.user.id;
   const exerciseId = Number(req.body.exercise_id);
 
+  // Preserve filter state through the POST redirect
+  const filterCategory = req.body.filterCategory || '';
+  const filterBodyPart = req.body.filterBodyPart || '';
+  const filterLocation = req.body.filterLocation || '';
+  const filterSearch   = req.body.filterSearch   || '';
+
+  const params = new URLSearchParams();
+  if (filterCategory) params.set('filterCategory', filterCategory);
+  if (filterBodyPart) params.set('filterBodyPart', filterBodyPart);
+  if (filterLocation) params.set('filterLocation', filterLocation);
+  if (filterSearch)   params.set('filterSearch',   filterSearch);
+  const qs = params.toString() ? '?' + params.toString() : '';
+
   if (!exerciseId) {
     req.flash('error', 'Please select an exercise.');
-    return res.redirect('/routines');
+    return res.redirect('/routines' + qs);
   }
 
   const [[row]] = await db.query(
@@ -59,7 +86,7 @@ router.post('/add', isAuthenticated, requireOnboardingComplete, async (req, res)
     [userId, exerciseId, sortOrder]
   );
 
-  res.redirect('/routines');
+  res.redirect('/routines' + qs);
 });
 
 // Remove exercise from draft

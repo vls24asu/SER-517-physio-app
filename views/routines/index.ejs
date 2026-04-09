@@ -10,29 +10,36 @@
   <div class="library-detail-card">
     <form method="POST" action="/routines/add">
 
-      <!-- Filters -->
+      <!-- Filters — state persisted via hidden inputs on submit -->
       <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
         <select id="filterCategory" class="library-filter-select" style="min-width:120px;">
           <option value="">All categories</option>
-          <option value="strengthen">Strengthen</option>
-          <option value="stretch">Stretch</option>
-          <option value="stability">Stability</option>
+          <option value="strengthen" <%= filterCategory === 'strengthen' ? 'selected' : '' %>>Strengthen</option>
+          <option value="stretch"    <%= filterCategory === 'stretch'    ? 'selected' : '' %>>Stretch</option>
+          <option value="stability"  <%= filterCategory === 'stability'  ? 'selected' : '' %>>Stability</option>
         </select>
         <select id="filterBodyPart" class="library-filter-select" style="min-width:130px;">
           <option value="">All body parts</option>
           <% bodyParts.forEach(bp => { %>
-            <option value="<%= bp %>"><%= bp %></option>
+            <option value="<%= bp %>" <%= filterBodyPart === bp ? 'selected' : '' %>><%= bp %></option>
           <% }) %>
         </select>
         <select id="filterLocation" class="library-filter-select" style="min-width:120px;">
           <option value="">Home & Gym</option>
-          <option value="home">Home only</option>
-          <option value="gym">Gym only</option>
+          <option value="home" <%= filterLocation === 'home' ? 'selected' : '' %>>Home only</option>
+          <option value="gym"  <%= filterLocation === 'gym'  ? 'selected' : '' %>>Gym only</option>
         </select>
-        <input id="filterSearch" type="text" placeholder="Search exercises..." class="library-filter-select" style="flex:2; min-width:140px; border-radius:999px;">
+        <input id="filterSearch" type="text" placeholder="Search exercises..."
+               class="library-filter-select" style="flex:2; min-width:140px; border-radius:999px;"
+               value="<%= filterSearch %>">
       </div>
 
-      <input type="hidden" id="exerciseSelect" name="exercise_id" required>
+      <!-- Hidden inputs carry filter state through POST /routines/add -->
+      <input type="hidden" id="exerciseSelect"      name="exercise_id"    required>
+      <input type="hidden" id="hiddenFilterCategory" name="filterCategory" value="<%= filterCategory %>">
+      <input type="hidden" id="hiddenFilterBodyPart" name="filterBodyPart" value="<%= filterBodyPart %>">
+      <input type="hidden" id="hiddenFilterLocation" name="filterLocation" value="<%= filterLocation %>">
+      <input type="hidden" id="hiddenFilterSearch"   name="filterSearch"   value="<%= filterSearch %>">
 
       <div id="exerciseList" style="max-height:280px; overflow-y:auto; border:1.5px solid #E0D3BE; border-radius:14px; background:#fff;">
         <% const catEmoji = { strengthen:'💪', stretch:'🧘', stability:'🏃' }; %>
@@ -147,10 +154,21 @@
       }
     }
 
-    filterCategory.addEventListener('change', applyFilters);
-    filterBodyPart.addEventListener('change', applyFilters);
-    filterLocation.addEventListener('change', applyFilters);
-    filterSearch.addEventListener('input', applyFilters);
+    // Sync hidden inputs so filter state survives the POST redirect
+    function syncHiddenFilters() {
+      document.getElementById('hiddenFilterCategory').value = filterCategory.value;
+      document.getElementById('hiddenFilterBodyPart').value = filterBodyPart.value;
+      document.getElementById('hiddenFilterLocation').value = filterLocation.value;
+      document.getElementById('hiddenFilterSearch').value   = filterSearch.value;
+    }
+
+    filterCategory.addEventListener('change', function() { applyFilters(); syncHiddenFilters(); });
+    filterBodyPart.addEventListener('change', function() { applyFilters(); syncHiddenFilters(); });
+    filterLocation.addEventListener('change', function() { applyFilters(); syncHiddenFilters(); });
+    filterSearch.addEventListener('input',    function() { applyFilters(); syncHiddenFilters(); });
+
+    // Apply filters on load to restore any server-side filter state
+    applyFilters();
 
     // Hover effect
     allRows.forEach(row => {

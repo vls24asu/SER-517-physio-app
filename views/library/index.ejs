@@ -121,6 +121,12 @@
       <option value="home" <%= activeLocation === 'home' ? 'selected' : '' %>>Home only</option>
       <option value="gym"  <%= activeLocation === 'gym'  ? 'selected' : '' %>>Gym only</option>
     </select>
+    <select name="skillLevel" class="library-filter-select" onchange="this.form.submit()">
+      <option value="all" <%= activeSkillLevel === 'all' ? 'selected' : '' %>>All levels</option>
+      <option value="Beginner"     <%= activeSkillLevel === 'Beginner'     ? 'selected' : '' %>>Beginner</option>
+      <option value="Intermediate" <%= activeSkillLevel === 'Intermediate' ? 'selected' : '' %>>Intermediate</option>
+      <option value="Advanced"     <%= activeSkillLevel === 'Advanced'     ? 'selected' : '' %>>Advanced</option>
+    </select>
   </form>
   <% } %>
 
