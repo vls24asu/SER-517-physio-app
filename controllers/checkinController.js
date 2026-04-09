@@ -91,9 +91,9 @@ const postCheckin = async (req, res) => {
   req.session.checkin = { feeling, date: today };
 
   if (feeling === 'good') {
-    // Mark check-in done and go to dashboard
+    // Mark check-in done and go to routine choice screen
     await dao.updateLastCheckinDate(userId, today);
-    return res.redirect('/dashboard');
+    return res.redirect('/checkin/good');
   }
 
   // Not good → ask what's bothering them
@@ -365,9 +365,43 @@ const saveAndStart = async (req, res) => {
   res.redirect(`/routines/saved/${routineId}/preview`);
 };
 
+const db = require('../config/db');
+
+const getGood = async (req, res) => {
+  const userId = req.session.user.id;
+
+  // Fetch the most recently used saved routine
+  let lastRoutine = null;
+  try {
+    const [rows] = await db.query(
+      `SELECT sr.id, sr.name
+       FROM Workout_Session ws
+       JOIN Saved_Routine sr ON sr.id = ws.routine_id
+       WHERE ws.user_id = ? AND ws.routine_id IS NOT NULL
+       ORDER BY ws.session_date DESC LIMIT 1`,
+      [userId]
+    );
+    lastRoutine = rows[0] || null;
+
+    // Fallback: most recently created saved routine
+    if (!lastRoutine) {
+      const [fallback] = await db.query(
+        `SELECT id, name FROM Saved_Routine WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`,
+        [userId]
+      );
+      lastRoutine = fallback[0] || null;
+    }
+  } catch (e) {
+    // silently ignore
+  }
+
+  res.render('checkin/good', { user: req.session.user, lastRoutine });
+};
+
 module.exports = {
   getCheckin,
   postCheckin,
+  getGood,
   getNotGood,
   postNotGood,
   getInjury,
