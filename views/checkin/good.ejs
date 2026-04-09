@@ -1,0 +1,57 @@
+<div class="container py-5" style="max-width: 480px;">
+
+  <!-- Greeting -->
+  <div class="text-center mb-5">
+    <div style="font-size: 3rem;">💪</div>
+    <h2 class="fw-bold mt-2">Great, <%= user.fullName.split(' ')[0] %>!</h2>
+    <p class="text-muted mt-1">How do you want to train today?</p>
+  </div>
+
+  <!-- Option 1: Regular routine -->
+  <% if (lastRoutine) { %>
+  <a href="/routines/saved/<%= lastRoutine.id %>/preview" class="text-decoration-none">
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-3 d-flex flex-row align-items-center gap-3"
+         style="background:#FFF8EC; border: 2px solid #E7B04A !important; cursor:pointer;">
+      <span style="font-size:2rem; flex-shrink:0;">🏋️</span>
+      <div>
+        <div class="fw-bold" style="color:#2D1E0F;">Do my regular routine</div>
+        <div class="small text-muted"><%= lastRoutine.name %></div>
+      </div>
+      <span style="margin-left:auto; font-size:1.2rem; color:#E7B04A;">›</span>
+    </div>
+  </a>
+  <% } %>
+
+  <!-- Option 2: Choose another routine -->
+  <a href="/routines/saved" class="text-decoration-none">
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-3 d-flex flex-row align-items-center gap-3"
+         style="background:#fff; cursor:pointer;">
+      <span style="font-size:2rem; flex-shrink:0;">📋</span>
+      <div>
+        <div class="fw-bold" style="color:#2D1E0F;">Choose another routine</div>
+        <div class="small text-muted">Browse your saved routines</div>
+      </div>
+      <span style="margin-left:auto; font-size:1.2rem; color:#aaa;">›</span>
+    </div>
+  </a>
+
+  <!-- Option 3: Build my own -->
+  <a href="/routines" class="text-decoration-none">
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-3 d-flex flex-row align-items-center gap-3"
+         style="background:#fff; cursor:pointer;">
+      <span style="font-size:2rem; flex-shrink:0;">✏️</span>
+      <div>
+        <div class="fw-bold" style="color:#2D1E0F;">Build my own</div>
+        <div class="small text-muted">Create a custom routine from scratch</div>
+      </div>
+      <span style="margin-left:auto; font-size:1.2rem; color:#aaa;">›</span>
+    </div>
+  </a>
+
+  <div class="text-center mt-3">
+    <a href="/dashboard" class="text-muted small">Skip for now</a>
+  </div>
+
+</div>
+
+<%- include('../partials/bottomNav') %>
