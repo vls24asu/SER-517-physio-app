@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS Exercise (
 
   -- Workout parameters
   tempo VARCHAR(100),
-  sets DECIMAL(3,1),
+  `sets` DECIMAL(3,1),
   reps VARCHAR(50),
   duration_seconds INT,
 
