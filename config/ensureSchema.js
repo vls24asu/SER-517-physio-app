@@ -407,6 +407,23 @@ async function ensureCheckinFlowSchema() {
   await addColumnIfMissing('User_Profile', 'workout_environment', 'workout_environment VARCHAR(20) NULL');
 }
 
+async function ensurePhysioSchema() {
+  await addColumnIfMissing('User', 'role', "role ENUM('patient','physio','admin') NOT NULL DEFAULT 'patient'");
+
+  await db.query(
+    `CREATE TABLE IF NOT EXISTS \`Physio_Assignment\` (
+      id         INT PRIMARY KEY AUTO_INCREMENT,
+      physio_id  INT NOT NULL,
+      patient_id INT NOT NULL,
+      is_active  TINYINT(1) NOT NULL DEFAULT 1,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE KEY unique_assignment (physio_id, patient_id),
+      FOREIGN KEY (physio_id)  REFERENCES User(id) ON DELETE CASCADE,
+      FOREIGN KEY (patient_id) REFERENCES User(id) ON DELETE CASCADE
+    )`
+  );
+}
+
 async function ensureSchema() {
   await ensureLowercaseExerciseTables();
   await ensureUserAuthSchema();
@@ -418,6 +435,7 @@ async function ensureSchema() {
   await ensureInjuryTable();
   await ensureBodyCheckinSchema();
   await ensureCheckinFlowSchema();
+  await ensurePhysioSchema();
 }
 
 module.exports = ensureSchema;

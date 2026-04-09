@@ -23,7 +23,7 @@ const exerciseRoutes = require('./exerciseRoutes');
 const routineRoutes = require('./routineRoutes');
 // const favouritesRoutes = require('./favouritesRoutes');
 const profileRoutes = require('./profileRoutes');
-// const physioRoutes = require('./physioRoutes');
+const physioRoutes = require('./physioRoutes');
 const userRoutes = require('./userRoutes');
 const settingsRoutes = require('./settingsRoutes');
 const achievementsRoutes = require('./achievementsRoutes');
@@ -48,6 +48,6 @@ router.use('/progress', progressRoutes);
 router.use('/help', helpRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/checkin', checkinRoutes);
-// router.use('/physio', physioRoutes);
+router.use('/physio', physioRoutes);
 
 module.exports = router;
