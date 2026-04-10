@@ -2348,6 +2348,152 @@ main {
 }
 
 /* =============================================
+   Sprint 6 — Responsive styles
+   Covers: session player, feedback overlay,
+   session complete overlay, check-in flow,
+   physio panel, schedule modal (session)
+   ============================================= */
+
+/* ── Feedback overlay (post-workout) ── */
+.feedback-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #FCF7EE;
+  z-index: 9999;
+  flex-direction: column;
+  padding: 40px 24px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* ── Session complete overlay ── */
+.session-complete-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #FCF7EE;
+  z-index: 9999;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* ── Schedule modal card (session.ejs) ── */
+.schedule-modal-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 380px;
+}
+
+/* ── Check-in flow container ── */
+.checkin-container {
+  max-width: 480px;
+}
+
+/* ── Physio panel container ── */
+.physio-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* ── Small phones ≤ 480px
+       iPhone SE (375px), iPhone 16 (390px), Pro (393px),
+       Plus / Pro Max (430px), Samsung Note (~412px)       ── */
+@media (max-width: 480px) {
+  /* Session player */
+  .ex-session-overlay { padding: 16px 14px; gap: 10px; }
+  .ex-name { font-size: 1.4rem; }
+  .ex-set-label { font-size: 0.85rem; }
+  .ex-timer-ring { width: 120px; height: 120px; }
+  .ex-timer-ring svg { width: 120px; height: 120px; }
+  .ex-rest-timer-ring { width: 140px; height: 140px; }
+  .ex-rest-timer-ring svg { width: 140px; height: 140px; }
+  #timerDisplay { font-size: 1.7rem; }
+  #restTimerDisplay { font-size: 2.2rem; }
+  .ex-rest-title { font-size: 1.4rem; }
+  .ex-complete-btn { padding: 13px; font-size: 0.9rem; }
+  .ex-skip-btn { padding: 10px; font-size: 0.85rem; }
+  .ex-tracking-input { padding: 7px 8px; font-size: 0.9rem; }
+  .ex-tips-card { padding: 12px 14px; }
+  .ex-tips-card p { font-size: 0.82rem; }
+
+  /* Feedback overlay */
+  .feedback-overlay { padding: 20px 14px; }
+
+  /* Session complete overlay */
+  .session-complete-overlay { padding: 20px 14px; }
+
+  /* Schedule modal */
+  .schedule-modal-card { padding: 20px 16px; border-radius: 16px; }
+
+  /* Check-in flow */
+  .checkin-container { max-width: 100%; }
+
+  /* Physio panel */
+  .physio-container { padding: 16px 12px; }
+}
+
+/* ── iPhone SE and very small (≤ 375px) ── */
+@media (max-width: 375px) {
+  .ex-name { font-size: 1.25rem; }
+  .ex-timer-ring { width: 110px; height: 110px; }
+  .ex-timer-ring svg { width: 110px; height: 110px; }
+  .ex-rest-timer-ring { width: 125px; height: 125px; }
+  .ex-rest-timer-ring svg { width: 125px; height: 125px; }
+  #timerDisplay { font-size: 1.5rem; }
+  .feedback-overlay { padding: 16px 12px; }
+  .session-complete-overlay { padding: 16px 12px; }
+}
+
+/* ── Tablets — iPad Mini (768px), iPad (810px), iPad Pro portrait (1024px) ── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Session, feedback, and complete overlays: center on wide screen */
+  .ex-session-overlay { max-width: 600px; }
+  .feedback-overlay {
+    max-width: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .session-complete-overlay {
+    max-width: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Check-in flow wider on tablet */
+  .checkin-container { max-width: 600px; }
+
+  /* Physio panel */
+  .physio-container { max-width: 900px; padding: 28px 32px; }
+}
+
+/* ── iPad Pro landscape, laptops & PCs (1025px+) ── */
+@media (min-width: 1025px) {
+  .ex-session-overlay { max-width: 640px; }
+  .feedback-overlay {
+    max-width: 640px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .session-complete-overlay {
+    max-width: 640px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  /* Check-in flow */
+  .checkin-container { max-width: 680px; }
+
+  /* Physio panel */
+  .physio-container { max-width: 1100px; padding: 32px 40px; }
+}
+
+/* =============================================
    Routines Page Styles
    ============================================= */
 

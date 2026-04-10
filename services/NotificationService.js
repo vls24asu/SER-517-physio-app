@@ -18,6 +18,7 @@ const TYPE_PREF = {
   progress_milestone:   'type_progress_milestone',
   pain_checkin:         'type_pain_checkin',
   workout_reminder:     'type_workout_reminder',
+  session_reminder:     'type_session_reminder',
 };
 
 class NotificationService {
@@ -106,6 +107,37 @@ class NotificationService {
             'You haven\'t trained today. Start a session to keep your streak going.'
           );
         }
+      }
+    }
+
+    // Session reminder — fires every 30 minutes from the scheduled time until 2 hours after
+    if (prefs.type_session_reminder) {
+      const upcoming = await dao.getUpcomingSessions(userId);
+      for (const session of upcoming) {
+        const title = `Session reminder: ${session.routine_name}`;
+        const alreadySent = await dao.sessionReminderSentRecently(userId, title);
+        if (alreadySent) continue;
+
+        const scheduledAt = new Date(session.scheduled_at);
+        const now = new Date();
+        const diffMin = Math.round((now - scheduledAt) / 60000);
+
+        let message;
+        if (diffMin < 0) {
+          message = `Your session "${session.routine_name}" starts in ${Math.abs(diffMin)} minute${Math.abs(diffMin) !== 1 ? 's' : ''}. Get ready!`;
+        } else if (diffMin === 0) {
+          message = `Your session "${session.routine_name}" starts now. Time to move!`;
+        } else {
+          message = `Your session "${session.routine_name}" was scheduled ${diffMin} minute${diffMin !== 1 ? 's' : ''} ago. Still time to start!`;
+        }
+
+        await this.create(
+          userId,
+          'session_reminder',
+          title,
+          message,
+          { dedupe: false }
+        );
       }
     }
 

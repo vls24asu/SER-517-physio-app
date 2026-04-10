@@ -39,6 +39,94 @@
     <a href="/routines/saved/<%= routine.id %>/edit" class="btn-edit-exercises">Edit Exercises</a>
     <a href="/routines/saved/<%= routine.id %>/session" class="btn-start-session session-start-btn">Start Session</a>
   </div>
+
+  <!-- Add Injury Support button -->
+  <div style="text-align:center; margin-top:12px;">
+    <button type="button" onclick="document.getElementById('injurySupportModal').style.display='flex'"
+      style="background:none; border:1.5px solid #E7B04A; border-radius:999px; padding:9px 20px; font-size:0.85rem; font-weight:700; color:#c68f00; cursor:pointer; font-family:inherit;">
+      + Add Injury Support
+    </button>
+  </div>
 </div>
+
+<!-- Injury Support Modal -->
+<div id="injurySupportModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:99999; align-items:flex-end; justify-content:center; padding:0;">
+  <div style="background:#fff; border-radius:24px 24px 0 0; padding:28px 24px 36px; width:100%; max-width:480px; max-height:90vh; overflow-y:auto;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h2 style="font-size:1.1rem; font-weight:700; margin:0;">Add Injury Support</h2>
+      <button type="button" onclick="document.getElementById('injurySupportModal').style.display='none'"
+        style="background:none; border:none; font-size:1.4rem; color:#aaa; cursor:pointer; line-height:1;">×</button>
+    </div>
+
+    <form method="POST" action="/routines/injury-support" id="injurySupportForm">
+      <input type="hidden" name="from_routine" value="<%= routine.id %>">
+
+      <label style="font-size:0.82rem; font-weight:700; color:#555; display:block; margin-bottom:8px;">Which area needs support?</label>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;">
+        <% ['Ankle','Knee','Hip','Back','Shoulder','Neck','Other'].forEach(function(area) { %>
+          <button type="button" class="inj-area-btn" data-val="<%= area.toLowerCase() %>"
+            style="padding:8px 14px; border:1.5px solid #e8e8e8; border-radius:999px; background:#fff; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit;">
+            <%= area %>
+          </button>
+        <% }) %>
+      </div>
+      <input type="hidden" name="body_area" id="injAreaHidden" required>
+
+      <label style="font-size:0.82rem; font-weight:700; color:#555; display:block; margin-bottom:8px;">What do you want help with?</label>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;">
+        <% [['strengthen','Strengthen'],['stretch','Stretch'],['eliminate_pain','Eliminate pain'],['mobility','Mobility']].forEach(function(opt) { %>
+          <button type="button" class="inj-goal-btn" data-val="<%= opt[0] %>"
+            style="padding:8px 14px; border:1.5px solid #e8e8e8; border-radius:999px; background:#fff; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit;">
+            <%= opt[1] %>
+          </button>
+        <% }) %>
+      </div>
+      <input type="hidden" name="goal" id="injGoalHidden" required>
+
+      <label style="font-size:0.82rem; font-weight:700; color:#555; display:block; margin-bottom:8px;">Where are you working out?</label>
+      <div style="display:flex; gap:8px; margin-bottom:24px;">
+        <% [['at_home','At home'],['condo_gym','Condo gym'],['full_gym','Full gym']].forEach(function(opt) { %>
+          <button type="button" class="inj-env-btn" data-val="<%= opt[0] %>"
+            style="flex:1; padding:9px 6px; border:1.5px solid #e8e8e8; border-radius:12px; background:#fff; font-size:0.78rem; font-weight:600; cursor:pointer; font-family:inherit;">
+            <%= opt[1] %>
+          </button>
+        <% }) %>
+      </div>
+      <input type="hidden" name="environment" id="injEnvHidden" required>
+
+      <button type="submit" id="injSubmitBtn"
+        style="width:100%; background:#E7B04A; border:none; border-radius:999px; padding:13px; font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit; opacity:0.5;" disabled>
+        Add Exercises to Routine
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function injPicker(cls, hiddenId) {
+    document.querySelectorAll('.' + cls).forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.' + cls).forEach(function(b) {
+          b.style.background = '#fff'; b.style.color = '#333'; b.style.borderColor = '#e8e8e8';
+        });
+        btn.style.background = '#E7B04A'; btn.style.color = '#000'; btn.style.borderColor = '#E7B04A';
+        document.getElementById(hiddenId).value = btn.dataset.val;
+        checkInjFormReady();
+      });
+    });
+  }
+  injPicker('inj-area-btn', 'injAreaHidden');
+  injPicker('inj-goal-btn', 'injGoalHidden');
+  injPicker('inj-env-btn',  'injEnvHidden');
+
+  function checkInjFormReady() {
+    var ready = document.getElementById('injAreaHidden').value &&
+                document.getElementById('injGoalHidden').value &&
+                document.getElementById('injEnvHidden').value;
+    var btn = document.getElementById('injSubmitBtn');
+    btn.disabled = !ready;
+    btn.style.opacity = ready ? '1' : '0.5';
+  }
+</script>
 
 <%- include('../partials/bottomNav') %>

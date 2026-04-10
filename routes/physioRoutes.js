@@ -6,9 +6,10 @@ const physioCtrl = require('../controllers/physioController');
 
 const isPhysio = [isAuthenticated, requireRole('physio')];
 
-router.get('/dashboard',          ...isPhysio, physioCtrl.getDashboard);
-router.get('/patients',           ...isPhysio, physioCtrl.getPatients);
-router.get('/patients/:id',       ...isPhysio, physioCtrl.getPatientProfile);
-router.post('/patients/:id/assign', ...isPhysio, physioCtrl.assignPatient);
+router.get('/dashboard',              ...isPhysio, physioCtrl.getDashboard);
+router.get('/patients',               ...isPhysio, physioCtrl.getPatients);
+router.get('/patients/:id',           ...isPhysio, physioCtrl.getPatientProfile);
+router.post('/patients/:id/assign',   ...isPhysio, physioCtrl.assignPatient);
+router.post('/patients/:id/unassign', ...isPhysio, physioCtrl.unassignPatient);
 
 module.exports = router;

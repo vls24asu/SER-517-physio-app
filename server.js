@@ -88,6 +88,13 @@ const start = async () => {
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
+
+    // Start background jobs
+    const sessionReminderJob = require('./jobs/sessionReminderJob');
+    sessionReminderJob.start();
+
+    const dailyNotificationsJob = require('./jobs/dailyNotificationsJob');
+    dailyNotificationsJob.start();
   } catch (err) {
     console.error('Database connection failed. Check DB_* values in .env and ensure MySQL is running.');
     console.error(err.message);
