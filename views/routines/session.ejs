@@ -34,6 +34,7 @@
 
   <!-- Per-exercise tracking inputs -->
   <div class="ex-tracking-card" id="trackingCard">
+    <p id="trackingExName" style="font-size:0.82rem; font-weight:700; color:#555; margin:0 0 12px; text-transform:uppercase; letter-spacing:0.04em;"></p>
     <div class="ex-tracking-row">
       <div class="ex-tracking-field">
         <label class="ex-tracking-label">Sets done</label>
@@ -85,7 +86,7 @@
 </div>
 
 <!-- Step 1: Feedback questions overlay -->
-<div id="feedbackOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#FCF7EE; z-index:9999; flex-direction:column; padding:40px 24px; overflow-y:auto;">
+<div id="feedbackOverlay" class="feedback-overlay" style="display:none;">
   <h1 style="font-size:22px; font-weight:700; margin-bottom:4px;">How did that feel?</h1>
   <p style="color:#888; font-size:14px; margin-bottom:28px;">Takes 10 seconds — helps us personalise your next session.</p>
 
@@ -134,8 +135,8 @@
 </div>
 
 <!-- Schedule modal -->
-<div id="sessionScheduleModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:99999; align-items:center; justify-content:center; padding:24px;">
-  <div style="background:#fff; border-radius:20px; padding:28px 24px; width:100%; max-width:380px;">
+<div id="sessionScheduleModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:99999; align-items:center; justify-content:center; padding:16px;">
+  <div class="schedule-modal-card" style="background:#fff; border-radius:20px; padding:28px 24px; width:100%; max-width:380px;">
     <h2 style="font-size:20px; font-weight:700; margin:0 0 4px;">Schedule next session</h2>
     <p style="color:#888; font-size:14px; margin:0 0 20px;"><%= routineName %></p>
     <form method="POST" action="/routines/saved/<%= routineId %>/schedule" onsubmit="buildScheduledAt('sessSchedDate','sessSchedHour','sessSchedMin','sessSchedAmpm','sessSchedHidden'); return true;">
@@ -162,14 +163,37 @@
 </div>
 
 <!-- Step 2: Session summary overlay -->
-<div id="sessionCompleteOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:#FCF7EE; z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center;">
-  <div style="width:72px;height:72px;background:#F5A623;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:28px;">
+<div id="sessionCompleteOverlay" class="session-complete-overlay" style="display:none;">
+  <div style="width:72px;height:72px;background:#F5A623;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:20px;">
     <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#000" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
   </div>
-  <h1 style="font-size:28px;font-weight:700;margin-bottom:8px;">Nice work, <span><%= currentUser ? currentUser.fullName.split(' ')[0] : 'User' %></span>.</h1>
-  <p style="color:#7A7A7A;font-size:15px;margin-bottom:8px;">You trained for <span id="completeMinutes">0</span> minutes today.</p>
-  <p id="completeUnsafeMsg" style="display:none; color:#e53935; font-size:13px; font-weight:600; margin-bottom:16px;">We've flagged this session for your physiotherapist to review.</p>
-  <button id="doneBtn" style="width:100%;max-width:400px;background:#F5A623;border:none;border-radius:999px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:16px;">Done</button>
+  <h1 style="font-size:26px;font-weight:700;margin-bottom:6px;">Nice work, <span><%= currentUser ? currentUser.fullName.split(' ')[0] : 'User' %></span>.</h1>
+  <p style="color:#7A7A7A;font-size:15px;margin-bottom:16px;">You trained for <span id="completeMinutes">0</span> minutes today.</p>
+
+  <!-- Summary stats row -->
+  <div style="display:flex; gap:10px; width:100%; max-width:400px; margin-bottom:16px;">
+    <div style="flex:1; background:#fff; border-radius:14px; padding:12px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+      <div id="summaryExCount" style="font-size:1.6rem; font-weight:700; color:#E7B04A;">—</div>
+      <div style="font-size:0.72rem; color:#888; margin-top:2px;">exercises</div>
+    </div>
+    <div style="flex:1; background:#fff; border-radius:14px; padding:12px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+      <div id="summaryPain" style="font-size:1.6rem; font-weight:700; color:#E7B04A;">—</div>
+      <div style="font-size:0.72rem; color:#888; margin-top:2px;">avg pain</div>
+    </div>
+    <div style="flex:1; background:#fff; border-radius:14px; padding:12px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+      <div id="summaryWeight" style="font-size:1.6rem; font-weight:700; color:#E7B04A;">—</div>
+      <div style="font-size:0.72rem; color:#888; margin-top:2px;">max kg</div>
+    </div>
+  </div>
+
+  <!-- Per-exercise breakdown -->
+  <div id="summaryExList" style="width:100%; max-width:400px; margin-bottom:16px; display:flex; flex-direction:column; gap:8px;"></div>
+
+  <!-- Next recommendation -->
+  <div id="summaryRec" style="width:100%; max-width:400px; background:#fff8ee; border-radius:14px; padding:12px 16px; margin-bottom:16px; text-align:left; box-shadow:0 2px 8px rgba(0,0,0,0.05);"></div>
+
+  <p id="completeUnsafeMsg" style="display:none; color:#e53935; font-size:13px; font-weight:600; margin-bottom:12px;">We've flagged this session for your physiotherapist to review.</p>
+  <button id="doneBtn" style="width:100%;max-width:400px;background:#F5A623;border:none;border-radius:999px;padding:14px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:12px;">Done</button>
   <button type="button" onclick="openSessionScheduleModal()" style="background:none;border:none;color:#F5A623;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">Schedule this session</button>
 </div>
 
@@ -261,6 +285,64 @@
     document.getElementById('completeMinutes').textContent = elapsedMin;
     if (unsafe) document.getElementById('completeUnsafeMsg').style.display = 'block';
     document.getElementById('feedbackOverlay').style.display = 'none';
+
+    // Build summary stats
+    var doneSteps = exerciseLog.filter(function(e) { return !e.skipped; });
+    var skippedSteps = exerciseLog.filter(function(e) { return e.skipped; });
+    var completedExIds = new Set();
+    doneSteps.forEach(function(_, i) { completedExIds.add(steps[i] ? steps[i].exerciseNum : i); });
+    var completedCount = completedExIds.size;
+    document.getElementById('summaryExCount').textContent = completedCount + '/' + (steps[steps.length-1] ? steps[steps.length-1].totalExercises : steps.length);
+
+    var painVals = doneSteps.map(function(e) { return e.painDuring || 0; });
+    var avgPain = painVals.length ? (painVals.reduce(function(a,b){return a+b;},0) / painVals.length).toFixed(1) : '0';
+    document.getElementById('summaryPain').textContent = avgPain + '/10';
+
+    var weights = doneSteps.map(function(e) { return e.weightUsed || 0; }).filter(function(w) { return w > 0; });
+    var maxWeight = weights.length ? Math.max.apply(null, weights) : null;
+    document.getElementById('summaryWeight').textContent = maxWeight !== null ? maxWeight + 'kg' : '—';
+
+    // Per-exercise breakdown list — one row per unique exercise
+    var seen = {};
+    var listEl = document.getElementById('summaryExList');
+    listEl.innerHTML = '';
+    exerciseLog.forEach(function(entry, i) {
+      var step = steps[i];
+      if (!step) return;
+      if (seen[step.exerciseNum]) return;
+      seen[step.exerciseNum] = true;
+      var skipped = entry.skipped;
+      var row = document.createElement('div');
+      row.style.cssText = 'background:#fff; border-radius:12px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 1px 4px rgba(0,0,0,0.06);';
+      var left = '<span style="font-size:0.88rem; font-weight:600; color:' + (skipped ? '#bbb' : '#222') + ';">' + step.name + (skipped ? ' <span style="font-size:0.7rem;color:#bbb;">(skipped)</span>' : '') + '</span>';
+      var right = '';
+      if (!skipped) {
+        var parts = [];
+        if (entry.repsCompleted) parts.push(entry.repsCompleted + ' reps');
+        if (entry.weightUsed) parts.push(entry.weightUsed + 'kg');
+        if (entry.painDuring) parts.push('pain ' + entry.painDuring + '/10');
+        right = '<span style="font-size:0.78rem; color:#888;">' + (parts.join(' · ') || '✓') + '</span>';
+      }
+      row.innerHTML = left + right;
+      listEl.appendChild(row);
+    });
+
+    // Next recommendation
+    var recEl = document.getElementById('summaryRec');
+    var avgPainNum = parseFloat(avgPain);
+    var rec, recColor;
+    if (avgPainNum >= 7) {
+      rec = '🛑 Next session: Take a rest day or try a gentle recovery routine.';
+      recColor = '#e53935';
+    } else if (avgPainNum >= 4) {
+      rec = '⚠️ Next session: Repeat this routine at the same intensity.';
+      recColor = '#ff9800';
+    } else {
+      rec = '💪 Next session: You\'re ready to progress — try adding a set or more reps.';
+      recColor = '#4caf50';
+    }
+    recEl.innerHTML = '<span style="font-size:0.82rem; font-weight:700; color:' + recColor + ';">' + rec + '</span>';
+
     var overlay = document.getElementById('sessionCompleteOverlay');
     overlay.style.setProperty('display', 'flex', 'important');
   }
@@ -291,12 +373,6 @@
     showCompleteScreen(false);
   });
 
-  function logAndRedirect() {
-    fetch('/routines/saved/<%= routineId %>/log-session', { method: 'POST' })
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data && data.sessionId) completedSessionId = data.sessionId;
-      })
   function saveCurrentInputs(skipped) {
     exerciseLog[currentStep].setsCompleted = parseInt(document.getElementById('trackSets').value) || null;
     exerciseLog[currentStep].repsCompleted = parseInt(document.getElementById('trackReps').value) || null;
@@ -326,10 +402,6 @@
         document.getElementById('feedbackOverlay').style.setProperty('display', 'flex', 'important');
       });
   }
-
-  document.getElementById('doneBtn').addEventListener('click', function() {
-    window.location.href = '/routines/saved';
-  });
 
   function endRest(nextIdx) {
     document.getElementById('restOverlay').style.display = 'none';
@@ -372,10 +444,6 @@
       endRest(nextIdx);
     };
   }
-
-  document.getElementById('doneBtn').addEventListener('click', function() {
-    window.location.href = '/routines/saved';
-  });
 
   function advance() {
     const prevStep = currentStep;
@@ -430,8 +498,29 @@
       tipsCard.style.display = 'none';
     }
 
+    // Update tracking card title
+    document.getElementById('trackingExName').textContent = 'Log: ' + step.name;
+
     renderProgressBars(idx);
     resetTrackingInputs();
+
+    // Auto-fill values from first set of same exercise for subsequent sets
+    if (step.setNum > 1) {
+      var firstSetIdx = steps.findIndex(function(s) {
+        return s.exerciseNum === step.exerciseNum && s.setNum === 1;
+      });
+      if (firstSetIdx >= 0 && exerciseLog[firstSetIdx]) {
+        var first = exerciseLog[firstSetIdx];
+        if (first.setsCompleted != null) document.getElementById('trackSets').value = first.setsCompleted;
+        if (first.repsCompleted != null) document.getElementById('trackReps').value = first.repsCompleted;
+        if (first.weightUsed != null) document.getElementById('trackWeight').value = first.weightUsed;
+        if (first.painDuring) {
+          document.getElementById('trackPain').value = first.painDuring;
+          document.getElementById('painVal').textContent = first.painDuring;
+        }
+      }
+    }
+
     startTimer(step.timerSec);
   }
 
@@ -452,6 +541,10 @@
     clearInterval(timerInterval);
     clearInterval(restInterval);
     logAndRedirect();
+  });
+
+  document.getElementById('doneBtn').addEventListener('click', function() {
+    window.location.href = '/routines/saved';
   });
 
   renderStep(0);

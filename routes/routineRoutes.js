@@ -673,4 +673,70 @@ router.post('/schedule/:id/cancel', isAuthenticated, async (req, res) => {
   res.redirect('/dashboard');
 });
 
+// POST /routines/injury-support — from "Add Injury Support" on routine preview
+// Fetches matching injury exercises and appends them to the current routine
+router.post('/injury-support', isAuthenticated, async (req, res) => {
+  const userId = req.session.user.id;
+  const { body_area, goal, environment, from_routine } = req.body;
+  const routineId = Number(from_routine);
+
+  if (!routineId) return res.redirect('/routines/saved');
+
+  // Verify the user owns this routine
+  const [[routine]] = await db.query(
+    `SELECT id FROM Saved_Routine WHERE id = ? AND user_id = ?`,
+    [routineId, userId]
+  );
+  if (!routine) return res.redirect('/routines/saved');
+
+  const isGymOnly = environment === 'condo_gym' || environment === 'full_gym';
+
+  const CheckinDAO = require('../dao/CheckinDAO');
+  const dao = new CheckinDAO();
+
+  let exercises = [];
+  try {
+    exercises = await dao.getInjuryExercises({
+      bodyArea: body_area,
+      goal: goal,
+      isGymOnly,
+      equipment: []
+    });
+    // Cap at 5 exercises so the routine doesn't bloat
+    exercises = exercises.slice(0, 5);
+  } catch (err) {
+    console.error('injury-support exercise fetch error:', err);
+  }
+
+  if (exercises.length === 0) {
+    req.flash('error', 'No matching exercises found for that combination. Try different options.');
+    return res.redirect(`/routines/saved/${routineId}/preview`);
+  }
+
+  // Get current max sort_order in the routine
+  const [[sortRow]] = await db.query(
+    `SELECT COALESCE(MAX(sort_order), 0) AS maxSort FROM Saved_Routine_Entry WHERE routine_id = ?`,
+    [routineId]
+  );
+  let nextSort = (sortRow?.maxSort || 0) + 1;
+
+  // Append each injury exercise (skip if already in routine)
+  const [existing] = await db.query(
+    `SELECT exercise_id FROM Saved_Routine_Entry WHERE routine_id = ?`,
+    [routineId]
+  );
+  const existingIds = new Set(existing.map(r => r.exercise_id));
+
+  for (const ex of exercises) {
+    if (existingIds.has(ex.id)) continue;
+    await db.query(
+      `INSERT INTO Saved_Routine_Entry (routine_id, exercise_id, sort_order) VALUES (?, ?, ?)`,
+      [routineId, ex.id, nextSort++]
+    );
+  }
+
+  req.flash('success', `Added ${exercises.filter(e => !existingIds.has(e.id)).length} injury support exercise(s) to your routine.`);
+  res.redirect(`/routines/saved/${routineId}/preview`);
+});
+
 module.exports = router;

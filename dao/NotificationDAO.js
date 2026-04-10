@@ -164,6 +164,7 @@ class NotificationDAO {
     type_progress_milestone: true,
     type_pain_checkin: true,
     type_workout_reminder: true,
+    type_session_reminder: true,
     reminder_time: '09:00',
     timezone: 'UTC'
   };
@@ -189,8 +190,8 @@ class NotificationDAO {
            (user_id, in_app_enabled, push_enabled,
             type_session_completed, type_achievement_unlocked, type_streak_active,
             type_streak_broken, type_progress_milestone, type_pain_checkin,
-            type_workout_reminder, reminder_time, timezone)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            type_workout_reminder, type_session_reminder, reminder_time, timezone)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
            in_app_enabled = VALUES(in_app_enabled),
            push_enabled = VALUES(push_enabled),
@@ -201,6 +202,7 @@ class NotificationDAO {
            type_progress_milestone = VALUES(type_progress_milestone),
            type_pain_checkin = VALUES(type_pain_checkin),
            type_workout_reminder = VALUES(type_workout_reminder),
+           type_session_reminder = VALUES(type_session_reminder),
            reminder_time = VALUES(reminder_time),
            timezone = VALUES(timezone)`,
         [
@@ -214,6 +216,7 @@ class NotificationDAO {
           prefs.type_progress_milestone,
           prefs.type_pain_checkin,
           prefs.type_workout_reminder,
+          prefs.type_session_reminder ?? true,
           prefs.reminder_time,
           prefs.timezone || 'UTC'
         ]
@@ -259,6 +262,39 @@ class NotificationDAO {
         [userId]
       );
       return rows[0] || null;
+    } finally {
+      conn.release();
+    }
+  }
+
+  // Returns scheduled sessions that are upcoming (within 30 min) or overdue (within 2 hours past)
+  async getUpcomingSessions(userId) {
+    const conn = await this.#connectionManager.getConnection();
+    try {
+      const [rows] = await conn.execute(
+        `SELECT id, routine_name, scheduled_at FROM Scheduled_Session
+         WHERE user_id = ?
+           AND scheduled_at >= DATE_SUB(NOW(), INTERVAL 2 HOUR)
+           AND scheduled_at <= DATE_ADD(NOW(), INTERVAL 30 MINUTE)`,
+        [userId]
+      );
+      return rows;
+    } finally {
+      conn.release();
+    }
+  }
+
+  // Returns true if a session_reminder with the given title was sent in the last 30 minutes
+  async sessionReminderSentRecently(userId, title) {
+    const conn = await this.#connectionManager.getConnection();
+    try {
+      const [rows] = await conn.execute(
+        `SELECT COUNT(*) AS cnt FROM Notification
+         WHERE user_id = ? AND type = 'session_reminder' AND title = ?
+           AND created_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE)`,
+        [userId, title]
+      );
+      return Number(rows[0].cnt) > 0;
     } finally {
       conn.release();
     }

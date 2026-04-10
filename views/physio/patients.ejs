@@ -1,13 +1,30 @@
-<div style="max-width:900px; margin:0 auto; padding:24px 16px;">
+<%
+  const statusLabel = { red: 'Worsening', yellow: 'Stable', green: 'Improving' };
+  const statusColor = { red: '#e53935', yellow: '#ff9800', green: '#4caf50' };
+%>
 
-  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
-    <h1 style="font-size:1.4rem; font-weight:700; margin:0;">Patients</h1>
-    <form method="GET" action="/physio/patients" style="display:flex; gap:8px;">
+<!-- Sticky top nav -->
+<nav style="position:sticky; top:0; z-index:100; background:#fff; border-bottom:1.5px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between; padding:12px 20px; margin:-16px -16px 24px;">
+  <div style="display:flex; align-items:center; gap:20px;">
+    <a href="/physio/dashboard"><img src="/images/logo.png" alt="PhysioApp" style="height:32px; width:auto; display:block;"></a>
+    <div style="display:flex; gap:4px;">
+      <a href="/physio/dashboard" style="font-size:0.88rem; font-weight:600; color:#888; border-radius:999px; padding:6px 14px; text-decoration:none;">Dashboard</a>
+      <a href="/physio/patients" style="font-size:0.88rem; font-weight:700; color:#222; background:#f5f5f5; border-radius:999px; padding:6px 14px; text-decoration:none;">Patients</a>
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+    <form method="GET" action="/physio/patients" style="display:flex; gap:8px; margin:0;">
       <input type="text" name="search" value="<%= search %>" placeholder="Search by name or email…"
-             style="border:1.5px solid #e8e8e8; border-radius:999px; padding:8px 16px; font-size:0.88rem; font-family:inherit; outline:none; width:220px;">
-      <button type="submit" style="background:#E7B04A; border:none; border-radius:999px; padding:8px 16px; font-size:0.88rem; font-weight:600; cursor:pointer; font-family:inherit;">Search</button>
+             style="border:1.5px solid #e8e8e8; border-radius:999px; padding:7px 16px; font-size:0.85rem; font-family:inherit; outline:none; width:200px;">
+      <button type="submit" style="background:#E7B04A; border:none; border-radius:999px; padding:7px 16px; font-size:0.85rem; font-weight:600; cursor:pointer; font-family:inherit;">Search</button>
+    </form>
+    <form method="POST" action="/logout" style="margin:0;">
+      <button type="submit" style="background:none; border:1.5px solid #e8e8e8; border-radius:999px; padding:7px 14px; font-size:0.82rem; font-weight:600; color:#555; cursor:pointer; font-family:inherit;">Log out</button>
     </form>
   </div>
+</nav>
+
+<div class="physio-container">
 
   <% if (patients.length === 0) { %>
     <div style="text-align:center; padding:60px 20px; color:#aaa;">
@@ -19,30 +36,50 @@
       <% patients.forEach(function(p) { %>
         <%
           const initials = p.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
-          const statusColor = p.pain_status === 'red' ? '#e53935' : p.pain_status === 'yellow' ? '#ff9800' : '#4caf50';
+          const sc = statusColor[p.pain_status] || '#888';
+          const sl = statusLabel[p.pain_status];
         %>
-        <a href="/physio/patients/<%= p.id %>" style="text-decoration:none;">
-          <div style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); display:flex; align-items:center; gap:14px;">
-            <!-- Avatar -->
-            <div style="width:44px; height:44px; border-radius:50%; background:#E7B04A; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; color:#fff; flex-shrink:0;">
-              <%= initials %>
-            </div>
-            <div style="flex:1;">
-              <div style="font-size:0.95rem; font-weight:600; color:#222;"><%= p.full_name %></div>
-              <div style="font-size:0.78rem; color:#888; margin-top:2px;"><%= p.email %></div>
-            </div>
-            <% if (p.last_checkin_date) { %>
-              <span style="font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:999px; background:<%= statusColor %>20; color:<%= statusColor %>; flex-shrink:0;">
-                <%= p.pain_status ? p.pain_status.toUpperCase() : 'OK' %>
-              </span>
-            <% } else { %>
-              <span style="font-size:0.72rem; color:#bbb; flex-shrink:0;">No check-in</span>
-            <% } %>
-            <span style="color:#aaa; font-size:1.1rem;">›</span>
+        <div class="physio-patient-card" style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); display:flex; align-items:center; gap:14px; transition:box-shadow 0.18s;">
+          <!-- Avatar -->
+          <div style="width:44px; height:44px; border-radius:50%; background:<%= p.is_assigned ? '#E7B04A' : '#e0e0e0' %>; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; color:#fff; flex-shrink:0;">
+            <%= initials %>
           </div>
-        </a>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:0.95rem; font-weight:600; color:#222; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+              <%= p.full_name %>
+              <% if (p.is_assigned) { %>
+                <span style="font-size:0.65rem; background:#E7B04A20; color:#c68f00; border-radius:999px; padding:2px 8px; font-weight:700;">MY PATIENT</span>
+              <% } %>
+            </div>
+            <div style="font-size:0.78rem; color:#888; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:200px;"><%= p.email %></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+            <% if (p.last_checkin_date && sl) { %>
+              <span style="font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:999px; background:<%= sc %>20; color:<%= sc %>;">
+                <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:<%= sc %>; margin-right:4px; vertical-align:middle;"></span><%= sl %>
+              </span>
+            <% } else if (!p.last_checkin_date) { %>
+              <span style="font-size:0.72rem; color:#bbb;">No check-in</span>
+            <% } %>
+            <% if (p.is_assigned) { %>
+              <a href="/physio/patients/<%= p.id %>" style="font-size:0.8rem; background:#E7B04A; color:#000; font-weight:600; border-radius:999px; padding:6px 12px; text-decoration:none;">View →</a>
+              <form method="POST" action="/physio/patients/<%= p.id %>/unassign" style="margin:0;">
+                <input type="hidden" name="from" value="patients">
+                <button type="submit" style="font-size:0.78rem; background:none; border:1.5px solid #f0f0f0; border-radius:999px; padding:5px 10px; color:#aaa; cursor:pointer; font-family:inherit;">Remove</button>
+              </form>
+            <% } else { %>
+              <form method="POST" action="/physio/patients/<%= p.id %>/assign" style="margin:0;">
+                <button type="submit" style="font-size:0.8rem; background:#E7B04A20; color:#c68f00; font-weight:700; border:1.5px solid #E7B04A50; border-radius:999px; padding:6px 12px; cursor:pointer; font-family:inherit;">+ Add to My Patients</button>
+              </form>
+            <% } %>
+          </div>
+        </div>
       <% }) %>
     </div>
   <% } %>
 
 </div>
+
+<style>
+.physio-patient-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.13) !important; }
+</style>

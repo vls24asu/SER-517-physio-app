@@ -55,6 +55,10 @@ router.get('/auth/google/callback', (req, res, next) => {
         role: user.role || 'patient'
       };
 
+      if (user.role === 'physio') {
+        return res.redirect('/physio/dashboard');
+      }
+
       if (!user.onboarding_completed) {
         return res.redirect('/onboarding');
       }

@@ -338,6 +338,21 @@ async function ensureNotificationSchema() {
   );
 
   await addColumnIfMissing('Notification_Preferences', 'timezone', "timezone VARCHAR(50) NOT NULL DEFAULT 'UTC'");
+
+  // Add session_reminder to Notification ENUM if not present
+  const [[enumRow]] = await db.query(
+    `SELECT COLUMN_TYPE FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Notification' AND COLUMN_NAME = 'type'`
+  );
+  if (enumRow && !enumRow.COLUMN_TYPE.includes('session_reminder')) {
+    await db.query(
+      `ALTER TABLE \`Notification\` MODIFY COLUMN \`type\`
+       ENUM('session_completed','achievement_unlocked','streak_active','streak_broken',
+            'progress_milestone','pain_checkin','workout_reminder','session_reminder') NOT NULL`
+    );
+  }
+
+  await addColumnIfMissing('Notification_Preferences', 'type_session_reminder', 'type_session_reminder BOOLEAN NOT NULL DEFAULT TRUE');
 }
 
 async function ensureScheduledSessionSchema() {
@@ -422,6 +437,13 @@ async function ensureWorkoutFeedbackSchema() {
     )`
   );
   await addColumnIfMissing('Workout_Session', 'unsafe_flag', 'unsafe_flag TINYINT(1) NOT NULL DEFAULT 0');
+  await addColumnIfMissing('Workout_Feedback', 'felt_after', "felt_after ENUM('great','good','okay','tired','pain') NOT NULL DEFAULT 'okay'");
+  await addColumnIfMissing('Workout_Feedback', 'overall_pain', 'overall_pain TINYINT NOT NULL DEFAULT 0');
+  await addColumnIfMissing('Workout_Feedback', 'difficulty', 'difficulty TINYINT NOT NULL DEFAULT 3');
+  await addColumnIfMissing('Workout_Feedback', 'unsafe_flag', 'unsafe_flag TINYINT(1) NOT NULL DEFAULT 0');
+  await addColumnIfMissing('Workout_Feedback', 'notes', 'notes TEXT NULL');
+}
+
 async function ensurePhysioSchema() {
   await addColumnIfMissing('User', 'role', "role ENUM('patient','physio','admin') NOT NULL DEFAULT 'patient'");
 

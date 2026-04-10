@@ -9,6 +9,7 @@
     progress_milestone:   { icon: 'bi-graph-up-arrow',         color: '#3b82f6' },
     pain_checkin:         { icon: 'bi-heart-pulse-fill',        color: '#a855f7' },
     workout_reminder:     { icon: 'bi-alarm-fill',              color: '#6b7280' },
+    session_reminder:     { icon: 'bi-calendar-check-fill',    color: '#0ea5e9' },
   };
 
   function getContainer() {

@@ -3,7 +3,7 @@
   <div class="notif-page-header">
     <h2 class="notif-page-title">Notifications</h2>
     <% if (notifications.length > 0) { %>
-      <button class="notif-mark-all-btn" id="markAllBtn">Mark all read</button>
+      <button class="notif-mark-all-btn" id="markAllBtn">Clear all</button>
     <% } %>
   </div>
 
@@ -196,12 +196,13 @@
     });
   });
 
-  // Mark all as read
+  // Clear all notifications
   const markAllBtn = document.getElementById('markAllBtn');
   if (markAllBtn) {
     markAllBtn.addEventListener('click', () => {
-      document.querySelectorAll('.notif-card--unread').forEach(c => c.classList.remove('notif-card--unread'));
-      fetch('/notifications/mark-all-read', { method: 'POST' }).catch(() => {});
+      fetch('/notifications/delete-all', { method: 'POST' })
+        .catch(() => {})
+        .finally(() => { location.reload(); });
     });
   }
 </script>

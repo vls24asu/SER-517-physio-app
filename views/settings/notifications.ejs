@@ -152,6 +152,22 @@
         </label>
       </div>
 
+      <div class="settings-field">
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <i class="bi bi-calendar-check-fill" style="color:#0ea5e9;"></i>
+            <div class="settings-row-text">
+              <span class="settings-row-title">Session reminders</span>
+              <span class="settings-row-sub">Notify me 30 min before a scheduled session</span>
+            </div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" name="type_session_reminder" <%= prefs.type_session_reminder ? 'checked' : '' %>>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
       <div class="settings-field" id="reminderTimeField" style="<%= prefs.type_workout_reminder ? '' : 'display:none;' %>">
         <label class="settings-label" for="reminderTime">Remind me at</label>
         <input type="time" id="reminderTime" name="reminder_time" class="settings-input"

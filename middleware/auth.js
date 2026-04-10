@@ -16,4 +16,14 @@ const isAuthenticated = (req, res, next) => {
   res.redirect('/login');
 };
 
-module.exports = { isAuthenticated, setNoStore };
+const isPhysio = (req, res, next) => {
+  setNoStore(res);
+  if (req.session.user && req.session.user.role === 'physio') {
+    req.user = req.session.user;
+    return next();
+  }
+  req.flash('error', 'Access denied.');
+  res.redirect('/login');
+};
+
+module.exports = { isAuthenticated, isPhysio, setNoStore };

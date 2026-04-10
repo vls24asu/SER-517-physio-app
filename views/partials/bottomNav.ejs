@@ -1,4 +1,4 @@
-<% if (currentUser) { %>
+<% if (currentUser && currentUser.role !== 'physio') { %>
 <% const isLibraryPage = currentPath === '/library' || currentPath.startsWith('/library/'); %>
 <nav class="bottom-nav">
   <a href="/dashboard" class="nav-item <%= currentPath === '/dashboard' ? 'active' : '' %>">
