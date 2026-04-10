@@ -422,6 +422,8 @@ async function ensureWorkoutFeedbackSchema() {
     )`
   );
   await addColumnIfMissing('Workout_Session', 'unsafe_flag', 'unsafe_flag TINYINT(1) NOT NULL DEFAULT 0');
+}
+
 async function ensurePhysioSchema() {
   await addColumnIfMissing('User', 'role', "role ENUM('patient','physio','admin') NOT NULL DEFAULT 'patient'");
 
