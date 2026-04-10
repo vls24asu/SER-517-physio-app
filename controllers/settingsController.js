@@ -253,6 +253,7 @@ const postNotifications = async (req, res) => {
       type_progress_milestone:  b.type_progress_milestone  === 'on',
       type_pain_checkin:        b.type_pain_checkin        === 'on',
       type_workout_reminder:    b.type_workout_reminder    === 'on',
+      type_session_reminder:    b.type_session_reminder    === 'on',
       reminder_time:            b.reminder_time            || '09:00',
       timezone:                 b.timezone                 || 'UTC',
     });

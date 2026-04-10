@@ -1,77 +1,146 @@
 <%
   const initials = patient.full_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
   const feelingEmoji = { great:'😄', good:'😊', okay:'😐', tired:'😓', pain:'😣' };
-  const painStatusColor = { red:'#e53935', yellow:'#ff9800', green:'#4caf50' };
+  const statusLabel = { red: 'Worsening', yellow: 'Stable', green: 'Improving' };
+  const statusColor = { red: '#e53935', yellow: '#ff9800', green: '#4caf50' };
+
+  // Build last 30 days date array (newest first)
+  const days30 = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    d.setDate(d.getDate() - i);
+    days30.push(d.toISOString().split('T')[0]);
+  }
+
+  function painColor(score) {
+    if (score == null) return '#888';
+    if (score >= 7) return '#e53935';
+    if (score >= 4) return '#ff9800';
+    return '#4caf50';
+  }
 %>
 
-<div style="max-width:900px; margin:0 auto; padding:24px 16px;">
-
-  <!-- Header -->
-  <div style="display:flex; align-items:center; gap:4px; margin-bottom:20px;">
-    <a href="/physio/patients" style="color:#888; text-decoration:none; font-size:1.1rem;">‹</a>
-    <span style="color:#ccc; margin:0 8px;">|</span>
-    <h1 style="font-size:1.3rem; font-weight:700; margin:0;"><%= patient.full_name %></h1>
-  </div>
-
-  <!-- Vitals + stats row -->
-  <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
-    <div style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); flex:1; min-width:160px;">
-      <div style="font-size:0.75rem; color:#888; font-weight:600; text-transform:uppercase; margin-bottom:8px;">Vitals</div>
-      <div style="font-size:0.88rem; color:#333;"><% if(patient.age) { %>Age: <strong><%= patient.age %></strong><br><% } %><% if(patient.weight_kg) { %>Weight: <strong><%= patient.weight_kg %> kg</strong><br><% } %><% if(patient.height_cm) { %>Height: <strong><%= patient.height_cm %> cm</strong><% } %></div>
-    </div>
-    <div style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); text-align:center; min-width:100px;">
-      <div style="font-size:1.6rem; font-weight:700; color:#E7B04A;"><%= actStats.total_sessions %></div>
-      <div style="font-size:0.75rem; color:#888;">Total sessions</div>
-    </div>
-    <div style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); text-align:center; min-width:100px;">
-      <div style="font-size:1.6rem; font-weight:700; color:#E7B04A;"><%= Math.round(actStats.total_minutes / 60 * 10) / 10 %></div>
-      <div style="font-size:0.75rem; color:#888;">Total hours</div>
-    </div>
-    <div style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); text-align:center; min-width:100px;">
-      <div style="font-size:1.6rem; font-weight:700; color:#E7B04A;"><%= actStats.sessions_this_week %></div>
-      <div style="font-size:0.75rem; color:#888;">This week</div>
+<!-- Sticky top nav -->
+<nav style="position:sticky; top:0; z-index:100; background:#fff; border-bottom:1.5px solid #f0f0f0; display:flex; align-items:center; justify-content:space-between; padding:10px 20px; margin:-16px -16px 0;">
+  <div style="display:flex; align-items:center; gap:20px;">
+    <a href="/physio/dashboard"><img src="/images/logo.png" alt="PhysioApp" style="height:32px; width:auto; display:block;"></a>
+    <div style="display:flex; gap:4px;">
+      <a href="/physio/dashboard" style="font-size:0.88rem; font-weight:600; color:#888; border-radius:999px; padding:6px 14px; text-decoration:none;">Dashboard</a>
+      <a href="/physio/patients" style="font-size:0.88rem; font-weight:600; color:#888; border-radius:999px; padding:6px 14px; text-decoration:none;">Patients</a>
     </div>
   </div>
+  <form method="POST" action="/logout" style="margin:0;">
+    <button type="submit" style="background:none; border:1.5px solid #e8e8e8; border-radius:999px; padding:6px 14px; font-size:0.82rem; font-weight:600; color:#555; cursor:pointer; font-family:inherit;">Log out</button>
+  </form>
+</nav>
 
-  <!-- Pain area chips -->
-  <% if (painAreas.length > 0) { %>
-  <div style="margin-bottom:20px;">
-    <div style="font-size:0.78rem; font-weight:600; color:#888; text-transform:uppercase; margin-bottom:8px;">Pain areas (onboarding)</div>
+<div class="physio-container" style="padding-top:20px;">
+
+  <!-- Back link -->
+  <a href="/physio/patients" style="display:inline-flex; align-items:center; gap:6px; font-size:0.88rem; font-weight:600; color:#888; text-decoration:none; margin-bottom:18px;">
+    <span style="font-size:1.1rem; line-height:1;">‹</span> All patients
+  </a>
+
+  <!-- Patient header card -->
+  <div style="background:#fff; border-radius:16px; padding:20px 24px; box-shadow:0 2px 10px rgba(0,0,0,0.08); margin-bottom:20px; display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">
+    <div style="width:56px; height:56px; border-radius:50%; background:#E7B04A; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.3rem; color:#fff; flex-shrink:0;">
+      <%= initials %>
+    </div>
+    <div style="flex:1; min-width:200px;">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:4px;">
+        <h1 style="font-size:1.25rem; font-weight:700; margin:0;"><%= patient.full_name %></h1>
+        <% if (patient.onboarding_pain_status === 'yes') { %>
+          <span style="font-size:0.72rem; font-weight:700; background:#ffebee; color:#e53935; border-radius:999px; padding:3px 10px;">⚠ Reports pain</span>
+        <% } %>
+      </div>
+      <div style="font-size:0.82rem; color:#888; margin-bottom:12px;"><%= patient.email %></div>
+      <!-- Profile chips -->
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        <% if (patient.age) { %>
+          <span style="background:#f5f5f5; color:#555; font-size:0.78rem; font-weight:600; padding:4px 12px; border-radius:999px;">Age: <%= patient.age %></span>
+        <% } %>
+        <% if (patient.height_cm) { %>
+          <span style="background:#f5f5f5; color:#555; font-size:0.78rem; font-weight:600; padding:4px 12px; border-radius:999px;"><%= patient.height_cm %> cm</span>
+        <% } %>
+        <% if (patient.weight_kg) { %>
+          <span style="background:#f5f5f5; color:#555; font-size:0.78rem; font-weight:600; padding:4px 12px; border-radius:999px;"><%= patient.weight_kg %> kg</span>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Injuries section -->
+  <% if (injuries && injuries.length > 0) { %>
+  <div style="margin-bottom:16px;">
+    <div style="font-size:0.75rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Injuries</div>
     <div style="display:flex; flex-wrap:wrap; gap:8px;">
-      <% painAreas.forEach(function(area) { %>
-        <span style="background:#ffebee; color:#e53935; font-size:0.8rem; font-weight:600; padding:4px 12px; border-radius:999px;"><%= area %></span>
+      <% injuries.forEach(function(inj) { %>
+        <span style="background:#ffebee; color:#e53935; font-size:0.8rem; font-weight:600; padding:4px 14px; border-radius:999px;"><%= inj %></span>
       <% }) %>
     </div>
   </div>
   <% } %>
 
-  <!-- Recent workouts -->
+  <!-- Pain areas section -->
+  <% if (painAreas.length > 0) { %>
+  <div style="margin-bottom:20px;">
+    <div style="font-size:0.75rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Pain Areas</div>
+    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      <% painAreas.forEach(function(area) { %>
+        <span style="background:#fff8e1; color:#f57c00; font-size:0.8rem; font-weight:600; padding:4px 14px; border-radius:999px; border:1px solid #ffe08240;"><%= area %></span>
+      <% }) %>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- Activity Overview -->
+  <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
+    <div style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); text-align:center; flex:1; min-width:90px;">
+      <div style="font-size:1.6rem; font-weight:700; color:#E7B04A;"><%= actStats.total_sessions %></div>
+      <div style="font-size:0.75rem; color:#888;">Total sessions</div>
+    </div>
+    <div style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); text-align:center; flex:1; min-width:90px;">
+      <div style="font-size:1.6rem; font-weight:700; color:#E7B04A;"><%= actStats.streak %></div>
+      <div style="font-size:0.75rem; color:#888;">Day streak</div>
+    </div>
+    <div style="background:#fff; border-radius:14px; padding:16px 20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); text-align:center; flex:1; min-width:90px;">
+      <div style="font-size:1.6rem; font-weight:700; color:#E7B04A;"><%= actStats.sessions_this_week %></div>
+      <div style="font-size:0.75rem; color:#888;">This week</div>
+    </div>
+  </div>
+
+  <!-- Recent Workouts -->
   <div style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); margin-bottom:16px;">
     <h2 style="font-size:1rem; font-weight:700; margin:0 0 14px;">Recent Workouts</h2>
     <% if (recentWorkouts.length === 0) { %>
       <p style="color:#aaa; font-size:0.88rem;">No workouts yet.</p>
     <% } else { %>
-      <% recentWorkouts.forEach(function(w) { %>
-        <div style="padding:10px 0; border-bottom:1px solid #f5f5f5;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-            <div>
+      <% recentWorkouts.forEach(function(w, wi) { %>
+        <div style="padding:12px 0; border-bottom:<%= wi < recentWorkouts.length - 1 ? '1px solid #f5f5f5' : 'none' %>;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+            <div style="flex:1; min-width:0;">
               <div style="font-size:0.92rem; font-weight:600; color:#222;">
                 <%= w.title %>
                 <% if (w.unsafe_flag) { %><span style="font-size:0.7rem; color:#e53935; font-weight:700; margin-left:6px;">⚠ FLAGGED</span><% } %>
               </div>
-              <div style="font-size:0.78rem; color:#888; margin-top:2px;">
+              <div style="font-size:0.78rem; color:#888; margin-top:3px;">
                 <%= new Date(w.session_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) %>
                 &nbsp;•&nbsp; <%= w.duration_min %> min &nbsp;•&nbsp; <%= w.exercise_count %> exercises
               </div>
-              <% if (w.overall_pain != null) { %>
-              <div style="font-size:0.78rem; color:#888; margin-top:2px;">
-                Pain: <strong><%= w.overall_pain %>/10</strong>
-                <% if (w.difficulty) { %>&nbsp;•&nbsp; Difficulty: <strong><%= w.difficulty %>/5</strong><% } %>
-                <% if (w.felt_after) { %>&nbsp;•&nbsp; <%= feelingEmoji[w.felt_after] || '' %> <%= w.felt_after %><% } %>
+              <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:5px; align-items:center;">
+                <% if (w.overall_pain != null) { %>
+                  <span style="font-size:0.78rem; font-weight:600; color:<%= painColor(w.overall_pain) %>;">Pain: <%= w.overall_pain %>/10</span>
+                <% } %>
+                <% if (w.difficulty) { %>
+                  <span style="font-size:0.78rem; background:#f5f5f5; color:#555; padding:2px 8px; border-radius:999px; font-weight:600;">Difficulty: <%= w.difficulty %>/5</span>
+                <% } %>
+                <% if (w.felt_after) { %>
+                  <span style="font-size:0.78rem; color:#555;"><%= feelingEmoji[w.felt_after] || '' %> <%= w.felt_after %></span>
+                <% } %>
               </div>
-              <% } %>
               <% if (w.notes) { %>
-              <div style="font-size:0.8rem; color:#555; margin-top:4px; background:#f9f5ee; border-radius:8px; padding:6px 10px;"><%= w.notes %></div>
+              <div style="font-size:0.8rem; color:#555; margin-top:6px; background:#f9f5ee; border-radius:8px; padding:6px 10px;"><%= w.notes %></div>
               <% } %>
             </div>
           </div>
@@ -80,44 +149,123 @@
     <% } %>
   </div>
 
-  <!-- Daily check-in log -->
+  <!-- Daily Check-in Log -->
   <div style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.07); margin-bottom:16px;">
-    <h2 style="font-size:1rem; font-weight:700; margin:0 0 14px;">Daily Check-in Log</h2>
+    <h2 style="font-size:1rem; font-weight:700; margin:0 0 14px;">Daily Check-in Log <span style="font-size:0.78rem; font-weight:400; color:#aaa;">(last 30 days)</span></h2>
     <% if (checkinLog.length === 0) { %>
       <p style="color:#aaa; font-size:0.88rem;">No check-ins recorded.</p>
     <% } else { %>
       <% checkinLog.forEach(function(c) { %>
         <%
-          const sc = painStatusColor[c.pain_status] || '#888';
-          const fe = c.feeling === 'good' ? '😊' : c.pain_status === 'red' ? '😣' : '😔';
+          const sc = statusColor[c.pain_status] || '#888';
+          const sl = statusLabel[c.pain_status] || 'OK';
         %>
         <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #f5f5f5;">
-          <span><%= fe %></span>
+          <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:<%= sc %>; flex-shrink:0;"></span>
           <div style="flex:1; font-size:0.85rem; color:#333;">
             <%= new Date(c.log_date).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'}) %>
             <% if (c.area_name) { %>&nbsp;— <%= c.area_name %><% } %>
           </div>
-          <% if (c.pain_scale) { %><span style="font-size:0.78rem; color:#888;">Pain: <%= c.pain_scale %>/10</span><% } %>
-          <span style="font-size:0.72rem; font-weight:700; padding:2px 8px; border-radius:999px; background:<%= sc %>20; color:<%= sc %>;">
-            <%= c.pain_status ? c.pain_status.toUpperCase() : 'OK' %>
-          </span>
+          <% if (c.pain_scale != null) { %>
+            <span style="font-size:0.78rem; color:#888;">Pain: <%= c.pain_scale %>/10</span>
+          <% } %>
+          <span style="font-size:0.72rem; font-weight:700; padding:2px 8px; border-radius:999px; background:<%= sc %>20; color:<%= sc %>; white-space:nowrap;"><%= sl %></span>
         </div>
       <% }) %>
     <% } %>
   </div>
 
-  <!-- Body check-in focus areas -->
+  <!-- Body Check-in Journal -->
   <% if (focusAreas.length > 0) { %>
-  <div style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
-    <h2 style="font-size:1rem; font-weight:700; margin:0 0 14px;">Body Check-in Focus Areas</h2>
-    <div style="display:flex; flex-wrap:wrap; gap:10px;">
+  <div style="margin-bottom:24px;">
+    <h2 style="font-size:1rem; font-weight:700; margin:0 0 14px;">Body Check-in Journal</h2>
+
+    <div style="display:flex; flex-direction:column; gap:16px;">
       <% focusAreas.forEach(function(fa) { %>
-        <span style="background:#FCF7EE; border:1.5px solid #E7B04A; border-radius:999px; padding:6px 16px; font-size:0.85rem; font-weight:600;">
-          <%= fa.emoji %> <%= fa.area_name %>
-        </span>
+        <%
+          const logs = areaLogs[fa.area_name] || [];
+          // Build date → entry map
+          const logByDate = {};
+          logs.forEach(function(l) {
+            const dk = new Date(l.log_date).toISOString().split('T')[0];
+            logByDate[dk] = l;
+          });
+          const preview = logs.slice(0, 5);
+          const moreCount = Math.max(0, logs.length - 5);
+        %>
+        <div style="background:#fff; border-radius:14px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+          <!-- Area header -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <div style="font-size:1rem; font-weight:700;"><%= fa.emoji %> <%= fa.area_name %></div>
+            <span style="font-size:0.75rem; background:#f5f5f5; color:#888; border-radius:999px; padding:3px 10px; font-weight:600;"><%= logs.length %> entries</span>
+          </div>
+
+          <!-- 30-day heatmap -->
+          <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;">
+            <% days30.forEach(function(dateStr) { %>
+              <%
+                const entry = logByDate[dateStr];
+                const dotColor = entry ? (statusColor[entry.pain_status] || '#888') : '#f0f0f0';
+                const label = entry ? (statusLabel[entry.pain_status] || 'OK') : 'No data';
+                const painTip = entry && entry.pain_scale != null ? ' • Pain: ' + entry.pain_scale + '/10' : '';
+                const displayDate = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'});
+                const tip = displayDate + ' — ' + label + painTip;
+              %>
+              <div
+                title="<%= tip %>"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                style="width:16px; height:16px; border-radius:3px; background:<%= dotColor %>; cursor:<%= entry ? 'default' : 'default' %>;"
+              ></div>
+            <% }) %>
+          </div>
+
+          <!-- Legend -->
+          <div style="display:flex; gap:14px; margin-bottom:14px; flex-wrap:wrap;">
+            <span style="font-size:0.72rem; color:#4caf50; font-weight:600; display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:#4caf50;"></span>Improving</span>
+            <span style="font-size:0.72rem; color:#ff9800; font-weight:600; display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:#ff9800;"></span>Stable</span>
+            <span style="font-size:0.72rem; color:#e53935; font-weight:600; display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:#e53935;"></span>Worsening</span>
+            <span style="font-size:0.72rem; color:#bbb; font-weight:600; display:flex; align-items:center; gap:4px;"><span style="display:inline-block; width:10px; height:10px; border-radius:2px; background:#f0f0f0; border:1px solid #e0e0e0;"></span>No data</span>
+          </div>
+
+          <!-- Latest 5 entries -->
+          <% if (preview.length === 0) { %>
+            <p style="font-size:0.85rem; color:#bbb;">No check-ins yet for this area.</p>
+          <% } else { %>
+            <% preview.forEach(function(l, li) { %>
+              <%
+                const sc = statusColor[l.pain_status] || '#888';
+                const sl = statusLabel[l.pain_status] || 'OK';
+              %>
+              <div style="display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:<%= li < preview.length - 1 ? '1px solid #f5f5f5' : 'none' %>;">
+                <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:<%= sc %>; flex-shrink:0;"></span>
+                <div style="flex:1; font-size:0.83rem; color:#333;">
+                  <%= new Date(l.log_date).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'}) %>
+                </div>
+                <% if (l.pain_scale != null) { %>
+                  <span style="font-size:0.78rem; color:#888;">Pain: <%= l.pain_scale %>/10</span>
+                <% } %>
+                <span style="font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:999px; background:<%= sc %>20; color:<%= sc %>;"><%= sl %></span>
+              </div>
+            <% }) %>
+            <% if (moreCount > 0) { %>
+              <div style="font-size:0.78rem; color:#aaa; text-align:center; margin-top:10px;"><%= moreCount %> more entr<%= moreCount === 1 ? 'y' : 'ies' %></div>
+            <% } %>
+          <% } %>
+        </div>
       <% }) %>
     </div>
   </div>
   <% } %>
 
 </div>
+
+<script>
+  // Init Bootstrap tooltips for heatmap dots
+  document.addEventListener('DOMContentLoaded', function () {
+    const tooltipEls = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipEls.forEach(function (el) {
+      new bootstrap.Tooltip(el, { trigger: 'hover' });
+    });
+  });
+</script>

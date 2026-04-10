@@ -10,6 +10,7 @@ const TYPE_META = {
   progress_milestone: { icon: 'bi-graph-up-arrow',     color: '#3b82f6' },
   pain_checkin:       { icon: 'bi-heart-pulse-fill',   color: '#a855f7' },
   workout_reminder:   { icon: 'bi-alarm-fill',         color: '#6b7280' },
+  session_reminder:   { icon: 'bi-calendar-check-fill', color: '#0ea5e9' },
 };
 
 const getNotifications = async (req, res) => {
@@ -49,6 +50,15 @@ const markAsRead = async (req, res) => {
 const markAllAsRead = async (req, res) => {
   try {
     await notifService.markAllAsRead(req.session.user.id);
+    res.json({ ok: true });
+  } catch {
+    res.json({ ok: false });
+  }
+};
+
+const deleteAll = async (req, res) => {
+  try {
+    await notifService.deleteAll(req.session.user.id);
     res.json({ ok: true });
   } catch {
     res.json({ ok: false });
@@ -96,5 +106,6 @@ module.exports = {
   markAsRead,
   markAllAsRead,
   deleteOne,
+  deleteAll,
   subscribePush,
 };
