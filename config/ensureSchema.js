@@ -437,11 +437,6 @@ async function ensureWorkoutFeedbackSchema() {
     )`
   );
   await addColumnIfMissing('Workout_Session', 'unsafe_flag', 'unsafe_flag TINYINT(1) NOT NULL DEFAULT 0');
-  await addColumnIfMissing('Workout_Feedback', 'felt_after', "felt_after ENUM('great','good','okay','tired','pain') NOT NULL DEFAULT 'okay'");
-  await addColumnIfMissing('Workout_Feedback', 'overall_pain', 'overall_pain TINYINT NOT NULL DEFAULT 0');
-  await addColumnIfMissing('Workout_Feedback', 'difficulty', 'difficulty TINYINT NOT NULL DEFAULT 3');
-  await addColumnIfMissing('Workout_Feedback', 'unsafe_flag', 'unsafe_flag TINYINT(1) NOT NULL DEFAULT 0');
-  await addColumnIfMissing('Workout_Feedback', 'notes', 'notes TEXT NULL');
 }
 
 async function ensurePhysioSchema() {
