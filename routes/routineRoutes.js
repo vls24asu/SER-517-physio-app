@@ -167,8 +167,51 @@ router.get('/saved', isAuthenticated, requireOnboardingComplete, async (req, res
   const validTypes = ['custom', 'injury', 'fitness', 'lifestyle', 'activity'];
   const activeTab = validTypes.includes(req.query.type) ? req.query.type : 'all';
 
+  // ── Parse smart-filter query params (not saved anywhere) ──
+  // Fetch body parts dynamically from DB (same source as onboarding)
+  const [bodyPartRows] = await db.query(
+    `SELECT DISTINCT body_part FROM exercise WHERE body_part IS NOT NULL ORDER BY body_part ASC`
+  );
+  const allBodyParts = bodyPartRows.map(r => r.body_part);
+  const VALID_AREAS = allBodyParts.map(b => b.toLowerCase());
+  const VALID_GOALS      = ['strengthen','stretch','both','eliminate_pain','mobility'];
+  const VALID_DURATIONS  = ['15','20','30','45'];
+  const VALID_LOCATIONS  = ['home','gym'];
+  const VALID_EQUIPMENT  = ['none','bands','dumbbells','yoga_mat','foam_roller','exercise_ball'];
+
+  const filtersApplied  = req.query.filtersApplied === '1';
+  const rawAreas        = req.query.bodyAreas
+    ? (Array.isArray(req.query.bodyAreas) ? req.query.bodyAreas : [req.query.bodyAreas])
+    : null;
+  // If filter was explicitly submitted, use the selection (even if empty = user deselected all)
+  // If filter was never opened, null = fall back to profile defaults in the view
+  const filterBodyAreas = filtersApplied ? (rawAreas ? rawAreas.filter(a => VALID_AREAS.includes(a)) : []) : null;
+  const filterGoal      = VALID_GOALS.includes(req.query.goal)          ? req.query.goal             : null;
+  const filterDuration  = VALID_DURATIONS.includes(req.query.duration)  ? Number(req.query.duration) : null;
+  const filterLocation  = VALID_LOCATIONS.includes(req.query.location)  ? req.query.location         : null;
+  const rawEquipment    = req.query.equipment
+    ? (Array.isArray(req.query.equipment) ? req.query.equipment : [req.query.equipment])
+    : null;
+  const filterEquipment = rawEquipment ? rawEquipment.filter(e => VALID_EQUIPMENT.includes(e)) : null;
+
+  const checkinContext = {};
+  // Pass bodyAreas whenever filters were explicitly submitted (even empty = user cleared all areas)
+  if (filtersApplied)  checkinContext.bodyAreas        = filterBodyAreas || [];
+  if (filterGoal)      checkinContext.goal             = filterGoal;
+  if (filterDuration)  checkinContext.durationOverride = filterDuration;
+  if (filterLocation)  checkinContext.locationFilter   = filterLocation;
+  if (filterEquipment) checkinContext.equipmentOverride = filterEquipment;
+
+  const activeFilters = { filterBodyAreas, filterGoal, filterDuration, filterLocation, filterEquipment, filtersApplied };
+
+  // Fetch profile defaults for pre-populating filter UI
+  const [[userProfile]] = await db.query(
+    `SELECT up.pain_areas, up.available_equipment, up.workout_duration_min, up.exercise_preference
+     FROM User_Profile up WHERE up.user_id = ?`, [userId]
+  );
+
   // Run routine fetch and AI recommendation in parallel for speed
-  const recommendationPromise = generateRecommendedRoutine(userId).catch(() => null);
+  const recommendationPromise = generateRecommendedRoutine(userId, checkinContext).catch(() => null);
 
   const whereClause = activeTab === 'all'
     ? 'WHERE sr.user_id = ?'
@@ -205,7 +248,7 @@ router.get('/saved', isAuthenticated, requireOnboardingComplete, async (req, res
 
   const recommendation = await recommendationPromise;
 
-  res.render('routines/saved', { routines: formatted, recommendation, activeTab });
+  res.render('routines/saved', { routines: formatted, recommendation, activeTab, userProfile: userProfile || {}, activeFilters, allBodyParts });
 });
 
 // ── Preview & Edit Saved Routine ───────────────────────────────────────────
