@@ -203,15 +203,29 @@ async function generateRecommendedRoutine(userId, checkinContext = {}) {
   }
 
   const fitnessLevel     = profile.fitness_level        || 'beginner';
-  const userEquipment    = parseCSV(profile.available_equipment);
+  const userEquipment    = checkinContext.equipmentOverride
+    ? (Array.isArray(checkinContext.equipmentOverride)
+        ? checkinContext.equipmentOverride.map(s => s.toLowerCase().trim())
+        : parseCSV(checkinContext.equipmentOverride))
+    : parseCSV(profile.available_equipment);
   const profilePainAreas = parseCSV(profile.pain_areas);
   const injuryAreas      = injuries.map(i => i.body_part.toLowerCase().trim());
 
-  // Merge check-in body area with stored pain areas so scoring targets today's complaint
-  const checkinAreas = checkinContext.bodyArea && checkinContext.bodyArea !== 'other'
-    ? [checkinContext.bodyArea.toLowerCase()]
-    : [];
-  const allPainAreas = [...new Set([...checkinAreas, ...profilePainAreas, ...injuryAreas])];
+  // Determine pain areas for scoring.
+  // If user explicitly set body area filters, use only those (+ injuries) — do not merge with profile.
+  // If no filter set, fall back to profile pain areas.
+  let checkinAreas = [];
+  let useProfilePainAreas = true;
+  if (Array.isArray(checkinContext.bodyAreas)) {
+    // bodyAreas array was explicitly provided (even if empty = user cleared all selections)
+    checkinAreas = checkinContext.bodyAreas.map(s => s.toLowerCase()).filter(s => s !== 'other');
+    useProfilePainAreas = false; // user's explicit selection overrides profile
+  } else if (checkinContext.bodyArea && checkinContext.bodyArea !== 'other') {
+    checkinAreas = [checkinContext.bodyArea.toLowerCase()];
+    useProfilePainAreas = false;
+  }
+  const basePainAreas = useProfilePainAreas ? profilePainAreas : [];
+  const allPainAreas = [...new Set([...checkinAreas, ...basePainAreas, ...injuryAreas])];
 
   // Determine effective category preference from check-in context or user profile
   const contextGoal = checkinContext.goal || checkinContext.recoveryType;
@@ -219,11 +233,14 @@ async function generateRecommendedRoutine(userId, checkinContext = {}) {
     ? (GOAL_TO_CATEGORY[contextGoal] || profile.exercise_preference || 'both')
     : (profile.exercise_preference || 'both');
 
-  const targetSec = (profile.workout_duration_min || 30) * 60;
+  const targetSec = ((checkinContext.durationOverride || profile.workout_duration_min) || 30) * 60;
 
   // ── Score every exercise ──
   const scored = exercises
     .map(ex => {
+      // Hard-block gym-only exercises if user chose home location filter
+      if (checkinContext.locationFilter === 'home' && ex.is_gym_only) return null;
+
       const eqScore = equipmentScore(ex, userEquipment);
       if (eqScore === 0) return null; // hard block — user cannot do this
 
@@ -239,6 +256,15 @@ async function generateRecommendedRoutine(userId, checkinContext = {}) {
     .filter(Boolean)
     .sort((a, b) => b._score - a._score);
 
+  // Deduplicate by name — keep highest-scored entry only (DB may have duplicate exercise records)
+  const seenNames = new Set();
+  const deduped = scored.filter(ex => {
+    const key = (ex.name || '').toLowerCase().trim();
+    if (seenNames.has(key)) return false;
+    seenNames.add(key);
+    return true;
+  });
+
   // ── Greedily assemble routine to fit target duration ──
   const selected  = [];
   let totalSec    = 0;
@@ -246,7 +272,7 @@ async function generateRecommendedRoutine(userId, checkinContext = {}) {
   let strengthCnt = 0;
   const MAX_EXERCISES = 12;
 
-  for (const ex of scored) {
+  for (const ex of deduped) {
     if (totalSec >= targetSec || selected.length >= MAX_EXERCISES) break;
 
     // Balance categories when preference is 'both'
@@ -265,7 +291,7 @@ async function generateRecommendedRoutine(userId, checkinContext = {}) {
 
   // Ensure a minimum of 4 exercises even if duration target already filled
   if (selected.length < 4) {
-    for (const ex of scored) {
+    for (const ex of deduped) {
       if (selected.find(s => s.id === ex.id)) continue;
       selected.push(ex);
       if (selected.length >= 4) break;
