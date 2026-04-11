@@ -12,31 +12,193 @@
     <h1 class="settings-title">Saved Routines</h1>
   </div>
 
-  <p class="settings-section-label" style="margin-bottom:12px;">Quick access to your favourite workout combinations</p>
 
-  <!-- Filter tabs -->
-  <div class="routine-filter-tabs mb-3">
-    <% ['all','injury','fitness','lifestyle','activity','custom'].forEach(function(tab) { %>
-      <a href="/routines/saved<%= tab === 'all' ? '' : '?type=' + tab %>"
-         class="routine-filter-tab <%= activeTab === tab ? 'active' : '' %>">
-        <%= tab === 'all' ? 'All' : typeLabel[tab] %>
-      </a>
-    <% }) %>
-  </div>
 
   <%
     /* ── AI Recommended Routine Section ── */
     const rec = recommendation;
     const hasRec = rec && rec.exercises && rec.exercises.length > 0;
+
+    // Parse onboarding defaults for filter pre-selection
+    const profilePainAreas = userProfile.pain_areas
+      ? userProfile.pain_areas.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+      : [];
+    const profileEquipment = userProfile.available_equipment
+      ? userProfile.available_equipment.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+      : [];
+    // filterBodyAreas is [] (not null) when filter was submitted with nothing selected
+    const selBodyAreas = activeFilters.filterBodyAreas !== null
+      ? (activeFilters.filterBodyAreas || [])
+      : profilePainAreas;
+    const selEquipment = activeFilters.filterEquipment || profileEquipment;
+    const selDuration  = activeFilters.filterDuration  || userProfile.workout_duration_min || 30;
+    const selGoal      = activeFilters.filterGoal      || null;
+    const selLocation  = activeFilters.filterLocation  || null;
+    const hasActiveFilters = activeFilters.filtersApplied
+      || activeFilters.filterGoal || activeFilters.filterDuration
+      || activeFilters.filterLocation || activeFilters.filterEquipment;
+
+    const areaOptions = allBodyParts.map(b => ({ value: b.toLowerCase(), label: b }));
+    const goalOptions = [
+      { value: 'strengthen',     label: '💪 Strengthen' },
+      { value: 'stretch',        label: '🧘 Stretch' },
+      { value: 'both',           label: '⚖️ Balanced' },
+      { value: 'eliminate_pain', label: '🩹 Eliminate Pain' },
+      { value: 'mobility',       label: '🏃 Mobility' },
+    ];
+    const equipOptions = [
+      { value: 'none',          label: '❌ None' },
+      { value: 'bands',         label: '🔗 Bands' },
+      { value: 'dumbbells',     label: '🏋️ Dumbbells' },
+      { value: 'yoga_mat',      label: '🧘 Yoga Mat' },
+      { value: 'foam_roller',   label: '🟢 Foam Roller' },
+      { value: 'exercise_ball', label: '⚽ Exercise Ball' },
+    ];
   %>
+
+  <!-- ── Section header with filter button ── -->
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+    <p class="settings-section-label" style="margin:0;">✨ Recommended for You</p>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <% if (hasActiveFilters) { %>
+        <a href="/routines/saved<%= activeTab !== 'all' ? '?type=' + activeTab : '' %>"
+          style="font-size:0.75rem; color:#aaa; text-decoration:none; padding:4px 10px; border:1px solid #e0e0e0; border-radius:999px;">
+          ↩ Reset
+        </a>
+      <% } %>
+      <button type="button" onclick="openFilterModal()"
+        style="display:flex; align-items:center; gap:5px; padding:6px 14px; border-radius:999px; border:1.5px solid <%= hasActiveFilters ? '#F5A623' : '#e0e0e0' %>; background:<%= hasActiveFilters ? '#FFF3E0' : '#fff' %>; color:<%= hasActiveFilters ? '#E65100' : '#555' %>; font-size:0.8rem; font-weight:600; cursor:pointer; font-family:inherit;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+        Filters<% if (hasActiveFilters) { %> •<% } %>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Filter Modal (bottom sheet) ── -->
+  <div id="filterModalOverlay" onclick="closeFilterModal()"
+    style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9000;"></div>
+
+  <div id="filterModal"
+    style="display:none; position:fixed; bottom:0; left:0; right:0; z-index:9001; background:#fff; border-radius:24px 24px 0 0; padding:24px 20px 36px; max-height:85vh; overflow-y:auto; box-shadow:0 -4px 32px rgba(0,0,0,0.15);">
+
+    <div style="width:40px; height:4px; background:#e0e0e0; border-radius:2px; margin:0 auto 20px;"></div>
+    <h2 style="font-size:1.1rem; font-weight:700; margin:0 0 20px;">Customize Routine</h2>
+
+    <form method="GET" action="/routines/saved" id="smartFilterForm" autocomplete="off">
+      <input type="hidden" name="filtersApplied" value="1">
+      <% if (activeTab !== 'all') { %>
+        <input type="hidden" name="type" value="<%= activeTab %>">
+      <% } %>
+
+      <!-- Body Focus (multi-select) -->
+      <div style="margin-bottom:20px;">
+        <p style="font-size:0.75rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.5px; margin:0 0 10px;">Body Focus <span style="font-weight:400; text-transform:none; color:#bbb;">(select all that apply)</span></p>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <% areaOptions.forEach(opt => { %>
+            <% const isSel = selBodyAreas.some(s => s.toLowerCase() === opt.value.toLowerCase()); %>
+            <label class="area-pill<%= isSel ? ' area-pill--sel' : '' %>"
+              style="display:inline-flex; align-items:center; padding:7px 14px; border-radius:999px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit;
+                border:1.5px solid <%= isSel ? '#F5A623' : '#e0e0e0' %>;
+                background:<%= isSel ? '#FFF3E0' : '#fff' %>;
+                color:<%= isSel ? '#E65100' : '#555' %>;">
+              <input type="checkbox" name="bodyAreas" value="<%= opt.value %>" <%= isSel ? 'checked' : '' %>
+                onchange="var l=this.closest('label'); var on=this.checked; l.style.borderColor=on?'#F5A623':'#e0e0e0'; l.style.background=on?'#FFF3E0':'#fff'; l.style.color=on?'#E65100':'#555';"
+                style="position:absolute; opacity:0; width:0; height:0; pointer-events:none;">
+              <%= opt.label %>
+            </label>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- Goal -->
+      <div style="margin-bottom:20px;">
+        <p style="font-size:0.75rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.5px; margin:0 0 10px;">Goal</p>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <% goalOptions.forEach(opt => { %>
+            <% const isSel = opt.value === selGoal; %>
+            <button type="button" onclick="togglePill('goalInput', '<%= opt.value %>', this)"
+              style="padding:7px 14px; border-radius:999px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit;
+                border:1.5px solid <%= isSel ? '#F5A623' : '#e0e0e0' %>;
+                background:<%= isSel ? '#FFF3E0' : '#fff' %>;
+                color:<%= isSel ? '#E65100' : '#555' %>;">
+              <%= opt.label %>
+            </button>
+          <% }); %>
+          <input type="hidden" name="goal" id="goalInput" value="<%= selGoal || '' %>">
+        </div>
+      </div>
+
+      <!-- Duration -->
+      <div style="margin-bottom:20px;">
+        <p style="font-size:0.75rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.5px; margin:0 0 10px;">Duration</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <% [15, 20, 30, 45].forEach(d => { %>
+            <% const isSel = d === selDuration; %>
+            <button type="button" onclick="togglePill('durationInput', '<%= d %>', this)"
+              style="padding:7px 18px; border-radius:999px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit;
+                border:1.5px solid <%= isSel ? '#F5A623' : '#e0e0e0' %>;
+                background:<%= isSel ? '#FFF3E0' : '#fff' %>;
+                color:<%= isSel ? '#E65100' : '#555' %>;">
+              <%= d %> min
+            </button>
+          <% }); %>
+          <input type="hidden" name="duration" id="durationInput" value="<%= selDuration %>">
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div style="margin-bottom:20px;">
+        <p style="font-size:0.75rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.5px; margin:0 0 10px;">Location</p>
+        <div style="display:flex; gap:8px;">
+          <% [{ value:'home', label:'🏠 Home' }, { value:'gym', label:'🏋️ Gym' }].forEach(opt => { %>
+            <% const isSel = opt.value === selLocation; %>
+            <button type="button" onclick="togglePill('locationInput', '<%= opt.value %>', this)"
+              style="padding:7px 18px; border-radius:999px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit;
+                border:1.5px solid <%= isSel ? '#F5A623' : '#e0e0e0' %>;
+                background:<%= isSel ? '#FFF3E0' : '#fff' %>;
+                color:<%= isSel ? '#E65100' : '#555' %>;">
+              <%= opt.label %>
+            </button>
+          <% }); %>
+          <input type="hidden" name="location" id="locationInput" value="<%= selLocation || '' %>">
+        </div>
+      </div>
+
+      <!-- Equipment -->
+      <div style="margin-bottom:24px;">
+        <p style="font-size:0.75rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.5px; margin:0 0 10px;">Equipment</p>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <% equipOptions.forEach(opt => { %>
+            <% const isSel = selEquipment.includes(opt.value); %>
+            <button type="button" onclick="toggleEquip('<%= opt.value %>', this)"
+              data-equip="<%= opt.value %>"
+              style="padding:7px 14px; border-radius:999px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit;
+                border:1.5px solid <%= isSel ? '#F5A623' : '#e0e0e0' %>;
+                background:<%= isSel ? '#FFF3E0' : '#fff' %>;
+                color:<%= isSel ? '#E65100' : '#555' %>;">
+              <%= opt.label %>
+            </button>
+          <% }); %>
+        </div>
+        <div id="equipInputs">
+          <% selEquipment.forEach(eq => { %>
+            <input type="hidden" name="equipment" value="<%= eq %>">
+          <% }); %>
+        </div>
+      </div>
+
+      <button type="submit"
+        style="width:100%; background:#F5A623; color:#fff; border:none; border-radius:999px; padding:14px; font-size:0.95rem; font-weight:700; cursor:pointer; font-family:inherit;">
+        🔄 Generate Routine
+      </button>
+    </form>
+  </div>
 
   <% if (hasRec) { %>
     <%
       const recCats = [...new Set(rec.exercises.map(e => e.category))];
       const recEmoji = recCats.includes('strengthen') ? '💪' : '🧘';
     %>
-
-    <p class="settings-section-label" style="margin-bottom:10px;">✨ Recommended for You</p>
 
     <div class="saved-routine-card" style="margin-bottom:20px;">
       <div class="saved-routine-card-top">
@@ -177,6 +339,62 @@
 </div>
 
 <script>
+  // ── Filter modal helpers ───────────────────────────────────────────────────
+
+  function openFilterModal() {
+    document.getElementById('filterModalOverlay').style.display = 'block';
+    document.getElementById('filterModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFilterModal() {
+    document.getElementById('filterModalOverlay').style.display = 'none';
+    document.getElementById('filterModal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  // Single-select pill (toggle off if same value clicked)
+  function togglePill(inputId, value, btn) {
+    var input   = document.getElementById(inputId);
+    var isSame  = input.value === value;
+    // Reset all sibling buttons in same group
+    var siblings = btn.parentElement.querySelectorAll('button[type="button"]');
+    siblings.forEach(function(b) {
+      b.style.borderColor = '#e0e0e0';
+      b.style.background  = '#fff';
+      b.style.color       = '#555';
+    });
+    if (isSame) {
+      input.value = '';
+    } else {
+      input.value = value;
+      btn.style.borderColor = '#F5A623';
+      btn.style.background  = '#FFF3E0';
+      btn.style.color       = '#E65100';
+    }
+  }
+
+  // Multi-select equipment
+  function toggleEquip(value, btn) {
+    var container = document.getElementById('equipInputs');
+    var existing  = container.querySelector('input[value="' + value + '"]');
+    if (existing) {
+      existing.remove();
+      btn.style.borderColor = '#e0e0e0';
+      btn.style.background  = '#fff';
+      btn.style.color       = '#555';
+    } else {
+      var inp = document.createElement('input');
+      inp.type  = 'hidden';
+      inp.name  = 'equipment';
+      inp.value = value;
+      container.appendChild(inp);
+      btn.style.borderColor = '#F5A623';
+      btn.style.background  = '#FFF3E0';
+      btn.style.color       = '#E65100';
+    }
+  }
+
   function buildScheduledAt(dateId, hourId, minId, ampmId, hiddenId) {
     var date = document.getElementById(dateId).value;
     var hour = parseInt(document.getElementById(hourId).value);
