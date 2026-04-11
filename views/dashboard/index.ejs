@@ -8,40 +8,6 @@
     <% } %>
   </div>
 
-  <%# Today's check-in status banner %>
-  <% if (todayCheckin) { %>
-    <% const isGood = todayCheckin.feeling === 'good' || !todayCheckin.feeling; %>
-    <div class="mb-4 rounded-4 px-4 py-3 d-flex align-items-center justify-content-between"
-         style="background:<%= isGood ? '#e8f5e9' : todayCheckin.pain_status === 'red' ? '#ffebee' : '#fff3e0' %>;
-                border-left: 4px solid <%= isGood ? '#4caf50' : todayCheckin.pain_status === 'red' ? '#f44336' : '#ff9800' %>;">
-      <div class="d-flex align-items-center gap-3">
-        <span style="font-size:1.6rem;"><%= isGood ? '😊' : todayCheckin.pain_status === 'red' ? '😣' : '😔' %></span>
-        <div>
-          <div class="fw-semibold" style="font-size:0.95rem;">
-            Today: <%= isGood ? 'Feeling good' : 'Recovery mode — ' + (todayCheckin.area_name || 'General') %>
-          </div>
-          <% if (!isGood && todayCheckin.pain_scale) { %>
-          <div class="small text-muted">Pain level: <%= todayCheckin.pain_scale %>/10</div>
-          <% } %>
-        </div>
-      </div>
-      <a href="/checkin/recommend" class="btn btn-sm rounded-3 fw-semibold"
-         style="background:<%= isGood ? '#4caf50' : '#ff9800' %>; color:#fff; font-size:0.8rem;">
-        <%= isGood ? 'View plan' : 'See routine' %>
-      </a>
-    </div>
-  <% } else { %>
-    <%# No check-in yet today — nudge the user %>
-    <div class="mb-4 rounded-4 px-4 py-3 d-flex align-items-center justify-content-between"
-         style="background:#f3f4f6; border-left: 4px solid #9e9e9e;">
-      <div class="d-flex align-items-center gap-3">
-        <span style="font-size:1.6rem;">👋</span>
-        <div class="fw-semibold" style="font-size:0.95rem;">How are you feeling today?</div>
-      </div>
-      <a href="/checkin" class="btn btn-sm rounded-3 fw-semibold"
-         style="background:#1976d2; color:#fff; font-size:0.8rem;">Check in</a>
-    </div>
-  <% } %>
 
   <% if (scheduledSessions.length > 0) { %>
   <% scheduledSessions.forEach(function(s) { %>
