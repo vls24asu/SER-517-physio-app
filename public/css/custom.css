@@ -2392,6 +2392,7 @@ main {
 /* ── Check-in flow container ── */
 .checkin-container {
   max-width: 480px;
+  padding-bottom: 90px;
 }
 
 /* ── Physio panel container ── */
