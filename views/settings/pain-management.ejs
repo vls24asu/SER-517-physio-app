@@ -115,12 +115,9 @@
         </div>
         <div id="pmSelectedInjuryPills" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
 
-        <p class="pm-field-label" style="margin-top:20px;">
-          Pain level: <span id="pmPainLevelValue"><%= savedIntensity %>/10</span>
-        </p>
-        <input type="range" class="pm-pain-slider" name="pain_intensity" min="0" max="10" step="1"
-          value="<%= savedIntensity %>" id="pmPainIntensityRange">
-        <div class="pm-range-labels"><span>Mild</span><span>Moderate</span><span>Severe</span></div>
+        <!-- Per-area pain sliders — built dynamically by JS -->
+        <div id="pmSlidersContainer" style="margin-top:20px;"></div>
+        <input type="hidden" name="pain_intensity" id="pmPainIntensityHidden" value="<%= savedIntensity %>">
 
       </div>
 
@@ -243,13 +240,60 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ── Body part checkbox clicks ──
+  // ── Body part checkbox clicks — rebuild sliders on change ──
   document.querySelectorAll('.pain-area-cb').forEach(function (cb) {
-    cb.addEventListener('change', syncHiddenFields);
+    cb.addEventListener('change', function () {
+      buildSliders();
+      syncHiddenFields();
+    });
   });
+
+  // ── Per-area pain sliders ──
+  var savedIntensityVal = <%= savedIntensity %>;
+
+  function buildSliders() {
+    var container = document.getElementById('pmSlidersContainer');
+    container.innerHTML = '';
+
+    var checked = Array.from(document.querySelectorAll('.pain-area-cb:checked')).map(function (cb) { return cb.value; });
+    var areas = checked.length > 0 ? checked : [];
+    if (areas.length === 0) return;
+
+    areas.forEach(function (area) {
+      var safeId = area.replace(/\s+/g, '_');
+      var valueId = 'pmPainVal_' + safeId;
+      var sliderId = 'pmPainSlider_' + safeId;
+
+      var wrapper = document.createElement('div');
+      wrapper.style.cssText = 'margin-bottom:20px;';
+      wrapper.innerHTML =
+        '<p class="pm-field-label"><strong>' + area + '</strong> — Pain level: <span id="' + valueId + '">' + savedIntensityVal + '/10</span></p>' +
+        '<input type="range" class="pm-pain-slider" id="' + sliderId + '" min="0" max="10" step="1" value="' + savedIntensityVal + '" data-area="' + area + '">' +
+        '<div class="pm-range-labels"><span>Mild</span><span>Moderate</span><span>Severe</span></div>';
+      container.appendChild(wrapper);
+
+      document.getElementById(sliderId).addEventListener('input', function () {
+        document.getElementById(valueId).textContent = this.value + '/10';
+        syncSliderHidden();
+      });
+    });
+
+    syncSliderHidden();
+  }
+
+  function syncSliderHidden() {
+    var sliders = document.querySelectorAll('#pmSlidersContainer .pm-pain-slider');
+    if (sliders.length === 0) {
+      document.getElementById('pmPainIntensityHidden').value = savedIntensityVal;
+      return;
+    }
+    var vals = Array.from(sliders).map(function (s) { return parseInt(s.value); });
+    document.getElementById('pmPainIntensityHidden').value = Math.max.apply(null, vals);
+  }
 
   // ── Init ──
   renderInjuryPills();
+  buildSliders();
   syncHiddenFields();
 });
 </script>
