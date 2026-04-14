@@ -173,12 +173,12 @@ const getPainManagement = async (req, res) => {
     const db = require('../config/db');
     const [profile, [bodyPartRows], [injuryRows]] = await Promise.all([
       profileService.getProfile(req.session.user.id),
-      db.query(`SELECT DISTINCT body_part FROM exercise WHERE body_part IS NOT NULL ORDER BY body_part ASC`),
+      db.query(`SELECT name FROM Focus_Area_Option ORDER BY sort_order ASC`),
       db.query(`SELECT name FROM Injury_Reference ORDER BY name ASC`)
     ]);
     res.render('settings/pain-management', {
       profile,
-      bodyParts: bodyPartRows.map(r => r.body_part),
+      bodyParts: bodyPartRows.map(r => r.name),
       injuries: injuryRows.map(r => r.name)
     });
   } catch (err) {

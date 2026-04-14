@@ -1,30 +1,15 @@
 <!-- STEP 3: Pain intensity -->
 <div class="step" data-required="true">
   <h4 class="step-title">How intense is it?</h4>
-  <p class="subtitle">Rate your pain level</p>
+  <p class="subtitle">Rate your pain level for each affected area</p>
 
-  <p class="field-label">
-    Pain level:
-    <span id="painLevelValue">5/10</span>
-  </p>
+  <!-- Dynamic sliders injected here by JS -->
+  <div id="painSlidersContainer"></div>
 
-  <input
-    type="range"
-    class="form-range pain-slider"
-    name="pain_intensity"
-    min="0"
-    max="10"
-    step="1"
-    value="5"
-    id="painIntensityRange"
-  >
-  <div class="range-labels">
-    <span>Mild</span>
-    <span>Moderate</span>
-    <span>Severe</span>
-  </div>
+  <!-- Hidden input — filled by JS before submit -->
+  <input type="hidden" name="pain_intensity" id="painIntensityHidden" value="5">
 
-  <div class="info-box">
+  <div class="info-box" style="margin-top:20px;">
     <strong>Note:</strong> If you experience numbness, weakness, or severe pain, please consult a healthcare professional before starting any exercise program.
   </div>
 
@@ -34,3 +19,62 @@
   </div>
 </div>
 
+<script>
+(function () {
+  function buildSliders() {
+    const container = document.getElementById('painSlidersContainer');
+    container.innerHTML = '';
+
+    const checked = Array.from(document.querySelectorAll('.pain-area-cb:checked')).map(cb => cb.value);
+    const areas = checked.length > 0 ? checked : ['General'];
+
+    areas.forEach(function (area) {
+      const valueId = 'painVal_' + area.replace(/\s+/g, '_');
+      const sliderId = 'painSlider_' + area.replace(/\s+/g, '_');
+
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = 'margin-bottom:24px;';
+      wrapper.innerHTML =
+        '<p class="field-label" style="margin-bottom:6px;">' +
+          '<strong>' + area + '</strong> — Pain level: <span id="' + valueId + '">5/10</span>' +
+        '</p>' +
+        '<input type="range" class="form-range pain-slider" id="' + sliderId + '" ' +
+          'min="0" max="10" step="1" value="5" data-area="' + area + '">' +
+        '<div class="range-labels"><span>Mild</span><span>Moderate</span><span>Severe</span></div>';
+
+      container.appendChild(wrapper);
+
+      const slider = document.getElementById(sliderId);
+      slider.addEventListener('input', function () {
+        document.getElementById(valueId).textContent = this.value + '/10';
+        syncHidden();
+      });
+    });
+
+    syncHidden();
+  }
+
+  function syncHidden() {
+    const sliders = document.querySelectorAll('#painSlidersContainer .pain-slider');
+    if (sliders.length === 1 && sliders[0].dataset.area === 'General') {
+      document.getElementById('painIntensityHidden').value = sliders[0].value;
+    } else {
+      const map = {};
+      sliders.forEach(function (s) { map[s.dataset.area] = parseInt(s.value); });
+      document.getElementById('painIntensityHidden').value = JSON.stringify(map);
+    }
+  }
+
+  // Rebuild whenever this step becomes visible
+  const observer = new MutationObserver(function () {
+    const step = document.getElementById('painSlidersContainer').closest('.step');
+    if (step && step.style.display !== 'none') buildSliders();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const step = document.getElementById('painSlidersContainer').closest('.step');
+    if (step) observer.observe(step, { attributes: true, attributeFilter: ['style'] });
+    buildSliders();
+  });
+})();
+</script>
