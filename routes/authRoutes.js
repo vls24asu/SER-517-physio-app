@@ -96,11 +96,11 @@ router.post('/logout', isAuthenticated, authController.logout);
 router.get('/onboarding', isAuthenticated, async (req, res) => {
   const db = require('../config/db');
   const [[bodyPartRows], [injuryRows]] = await Promise.all([
-    db.query(`SELECT DISTINCT body_part FROM exercise WHERE body_part IS NOT NULL ORDER BY body_part ASC`),
+    db.query(`SELECT name FROM Focus_Area_Option ORDER BY sort_order ASC`),
     db.query(`SELECT name FROM Injury_Reference ORDER BY name ASC`)
   ]);
   res.render('onboarding/index', {
-    bodyParts: bodyPartRows.map(r => r.body_part),
+    bodyParts: bodyPartRows.map(r => r.name),
     injuries: injuryRows.map(r => r.name)
   });
 });
