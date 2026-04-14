@@ -229,7 +229,22 @@ const completeOnboarding = async (req, res) => {
     // Pain status & intensity
     const painStatus = body.pain_status === 'yes' || body.pain_status === 'no'
       ? body.pain_status : null;
-    const painIntensity = body.pain_intensity !== undefined ? parseInt(body.pain_intensity) : null;
+    let painIntensity = null;
+    if (body.pain_intensity !== undefined && body.pain_intensity !== '') {
+      const raw = body.pain_intensity;
+      try {
+        const parsed = JSON.parse(raw);
+        // Multiple areas — store the max value as the overall intensity
+        if (typeof parsed === 'object') {
+          const vals = Object.values(parsed).map(Number).filter(n => !isNaN(n));
+          painIntensity = vals.length ? Math.max(...vals) : null;
+        } else {
+          painIntensity = parseInt(raw);
+        }
+      } catch (e) {
+        painIntensity = parseInt(raw);
+      }
+    }
 
     await profileService.updateBodyMetrics(userId, { heightCm, weightKg });
     await profileService.updatePersonalInfo(userId, { age, gender });
