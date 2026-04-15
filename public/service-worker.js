@@ -3,8 +3,8 @@ self.addEventListener('push', event => {
   const title = data.title || 'PhysioApp';
   const options = {
     body: data.body || '',
-    icon: '/images/logo.png',
-    badge: '/images/logo.png',
+    icon: '/images/physioapp_logo.jpeg',
+    badge: '/images/physioapp_logo.jpeg',
     data: { url: '/notifications' }
   };
   event.waitUntil(self.registration.showNotification(title, options));
