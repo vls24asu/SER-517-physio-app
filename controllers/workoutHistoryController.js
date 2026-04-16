@@ -30,4 +30,17 @@ const getWorkoutHistoryDetail = async (req, res) => {
   }
 };
 
-module.exports = { getWorkoutHistory, getWorkoutHistoryDetail };
+const getSessionExercises = async (req, res) => {
+  try {
+    const sessionId = Number(req.params.id);
+    const userId = req.session.user.id;
+    const session = await sessionService.getSessionDetail(sessionId, userId);
+    if (!session) return res.status(404).json({ error: 'Not found' });
+    res.json({ exercises: session.exercises });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load exercises' });
+  }
+};
+
+module.exports = { getWorkoutHistory, getWorkoutHistoryDetail, getSessionExercises };

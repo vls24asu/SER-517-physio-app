@@ -19,21 +19,36 @@
     <div class="checkin-cal-grid" id="calGrid"></div>
   </div>
 
-  <!-- Log form (shown after a day is selected) -->
-  <div class="checkin-form-card" id="checkinForm" style="display:none;">
-    <h2 class="checkin-form-date-label" id="formDateLabel"></h2>
+  <!-- Pain Progress Chart -->
+  <% if (logs && logs.length > 0) { %>
+  <div class="checkin-calendar-card" style="margin-top:14px;">
+    <p style="font-size:0.75rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.05em; margin:0 0 4px;">Pain Progress</p>
+    <p style="font-size:0.75rem; color:#aaa; margin:0 0 12px;">Pain scale over time (0–10)</p>
+    <div style="position:relative; height:140px;">
+      <canvas id="painProgressChart"></canvas>
+    </div>
+  </div>
+  <% } %>
+
+</div>
+
+<!-- Pain Status Popup Modal -->
+<div id="checkinPopupOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:#fff; border-radius:20px; padding:28px 24px; width:100%; max-width:400px; box-shadow:0 8px 40px rgba(0,0,0,0.18);">
+
+    <h2 id="popupDateLabel" style="font-size:1.1rem; font-weight:700; color:#222; margin:0 0 20px;"></h2>
 
     <!-- Pain Status -->
     <div class="checkin-section">
       <p class="checkin-section-title">Pain Status</p>
       <div class="checkin-status-row">
-        <button class="checkin-status-btn" data-status="green"  title="Improving">
+        <button class="checkin-status-btn" data-status="green">
           <span class="checkin-status-dot checkin-status-dot--green"></span> Improving
         </button>
-        <button class="checkin-status-btn" data-status="yellow" title="Stable">
+        <button class="checkin-status-btn" data-status="yellow">
           <span class="checkin-status-dot checkin-status-dot--yellow"></span> Stable
         </button>
-        <button class="checkin-status-btn" data-status="red"    title="Worsening">
+        <button class="checkin-status-btn" data-status="red">
           <span class="checkin-status-dot checkin-status-dot--red"></span> Worsening
         </button>
       </div>
@@ -55,30 +70,67 @@
       <textarea class="checkin-notes" id="checkinNotes" rows="3" placeholder="How are you feeling today?"></textarea>
     </div>
 
-    <!-- Action buttons -->
+    <!-- Buttons -->
     <div class="checkin-actions">
-      <a href="/progress" class="checkin-btn checkin-btn--secondary">Back</a>
+      <button class="checkin-btn checkin-btn--secondary" id="cancelCheckinBtn">Cancel</button>
       <button class="checkin-btn checkin-btn--primary" id="saveCheckinBtn">Save</button>
     </div>
 
     <p class="checkin-save-msg" id="saveMsg" style="display:none;"></p>
   </div>
-
 </div>
 
 <%- include('../partials/bottomNav') %>
 
+<% if (logs && logs.length > 0) { %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <script>
 (function () {
-  // ── Data from server ─────────────────────────────────────────────────────
+  var logsRaw = <%- JSON.stringify(logs.map(function(l){ return { date: l.log_date, scale: l.pain_scale }; }).reverse()) %>;
+  var ctx = document.getElementById('painProgressChart');
+  if (!ctx || logsRaw.length === 0) return;
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: logsRaw.map(function(l) { return l.date; }),
+      datasets: [{
+        data: logsRaw.map(function(l) { return l.scale; }),
+        borderColor: '#E8A838',
+        backgroundColor: 'rgba(232,168,56,0.12)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#E8A838',
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        fill: true,
+        tension: 0.35
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: function(c) { return c.parsed.y + '/10'; } } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#888', maxTicksLimit: 7 } },
+        y: { min: 0, max: 10, ticks: { stepSize: 2, font: { size: 10 }, color: '#888' }, grid: { color: 'rgba(0,0,0,0.05)' } }
+      }
+    }
+  });
+})();
+</script>
+<% } %>
+
+<script>
+(function () {
   const LOG_MAP   = <%- JSON.stringify(logMap) %>;
   const AREA_NAME = '<%= areaName.replace(/'/g, "\\'") %>';
 
-  // ── Calendar state ───────────────────────────────────────────────────────
   const today = new Date();
   let viewYear  = today.getFullYear();
-  let viewMonth = today.getMonth(); // 0-based
-  let selectedDate = null; // 'YYYY-MM-DD'
+  let viewMonth = today.getMonth();
+  let selectedDate = null;
 
   const MONTH_NAMES = ['January','February','March','April','May','June',
                        'July','August','September','October','November','December'];
@@ -86,168 +138,116 @@
   function toYMD(year, month, day) {
     return `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
   }
-
   function statusColor(status) {
-    if (status === 'green')  return '#4caf50';
-    if (status === 'yellow') return '#ffc107';
-    if (status === 'red')    return '#f44336';
-    return null;
+    return status === 'green' ? '#4caf50' : status === 'yellow' ? '#ffc107' : status === 'red' ? '#f44336' : null;
   }
 
   function renderCalendar() {
-    document.getElementById('calMonthLabel').textContent =
-      `${MONTH_NAMES[viewMonth]} ${viewYear}`;
-
+    document.getElementById('calMonthLabel').textContent = `${MONTH_NAMES[viewMonth]} ${viewYear}`;
     const grid = document.getElementById('calGrid');
     grid.innerHTML = '';
-
-    // First day of month (Monday-based: Mon=0 … Sun=6)
     const firstDay = new Date(viewYear, viewMonth, 1).getDay();
     const offset   = (firstDay === 0) ? 6 : firstDay - 1;
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-
     for (let i = 0; i < offset; i++) {
       const blank = document.createElement('div');
       blank.className = 'cal-cell cal-cell--blank';
       grid.appendChild(blank);
     }
-
     for (let d = 1; d <= daysInMonth; d++) {
       const ymd  = toYMD(viewYear, viewMonth, d);
       const log  = LOG_MAP[ymd];
       const cell = document.createElement('div');
       cell.className = 'cal-cell';
       cell.dataset.ymd = ymd;
-
-      if (log) {
-        cell.style.background = statusColor(log.pain_status);
-        cell.style.color = '#fff';
-        cell.classList.add('cal-cell--logged');
-      }
-
-      const isToday = (d === today.getDate() &&
-                       viewMonth === today.getMonth() &&
-                       viewYear  === today.getFullYear());
-      if (isToday) cell.classList.add('cal-cell--today');
+      if (log) { cell.style.background = statusColor(log.pain_status); cell.style.color = '#fff'; cell.classList.add('cal-cell--logged'); }
+      if (d === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear()) cell.classList.add('cal-cell--today');
       if (ymd === selectedDate) cell.classList.add('cal-cell--selected');
-
       cell.textContent = d;
       const isFuture = ymd > toYMD(today.getFullYear(), today.getMonth(), today.getDate());
-      if (isFuture) {
-        cell.style.opacity = '0.35';
-        cell.style.cursor = 'not-allowed';
-      } else {
-        cell.addEventListener('click', () => selectDate(cell.dataset.ymd, log));
-      }
+      if (isFuture) { cell.style.opacity = '0.35'; cell.style.cursor = 'not-allowed'; }
+      else { cell.addEventListener('click', () => openPopup(ymd, log)); }
       grid.appendChild(cell);
     }
   }
 
-  // ── Form state ───────────────────────────────────────────────────────────
+  document.getElementById('calPrev').addEventListener('click', () => { viewMonth--; if (viewMonth < 0) { viewMonth = 11; viewYear--; } renderCalendar(); });
+  document.getElementById('calNext').addEventListener('click', () => { viewMonth++; if (viewMonth > 11) { viewMonth = 0; viewYear++; } renderCalendar(); });
+
+  // ── Popup ────────────────────────────────────────────────────────────────
   let chosenStatus = null;
+  const overlay = document.getElementById('checkinPopupOverlay');
 
-  function selectDate(ymd, existingLog) {
+  function openPopup(ymd, existingLog) {
     selectedDate = ymd;
-    renderCalendar(); // re-render to highlight
+    renderCalendar();
 
-    const form = document.getElementById('checkinForm');
-    form.style.display = 'block';
-
-    // Date label  e.g. "Tuesday, April 1 2026"
     const d = new Date(ymd + 'T00:00:00');
-    document.getElementById('formDateLabel').textContent =
+    document.getElementById('popupDateLabel').textContent =
       d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
 
-    // Reset / pre-fill
     chosenStatus = existingLog ? existingLog.pain_status : null;
-    updateStatusButtons(chosenStatus);
+    updateStatusBtns(chosenStatus);
 
     const scale = existingLog ? existingLog.pain_scale : 0;
     document.getElementById('painScaleSlider').value = scale;
     document.getElementById('scaleDisplay').textContent = scale;
-
     document.getElementById('checkinNotes').value = existingLog ? (existingLog.notes || '') : '';
     document.getElementById('saveMsg').style.display = 'none';
 
-    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
   }
 
-  function updateStatusButtons(active) {
+  function closePopup() {
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+
+  function updateStatusBtns(active) {
     document.querySelectorAll('.checkin-status-btn').forEach(btn => {
       btn.classList.toggle('checkin-status-btn--active', btn.dataset.status === active);
     });
   }
 
   document.querySelectorAll('.checkin-status-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      chosenStatus = btn.dataset.status;
-      updateStatusButtons(chosenStatus);
-    });
+    btn.addEventListener('click', () => { chosenStatus = btn.dataset.status; updateStatusBtns(chosenStatus); });
   });
 
   const slider = document.getElementById('painScaleSlider');
-  slider.addEventListener('input', () => {
-    document.getElementById('scaleDisplay').textContent = slider.value;
-  });
+  slider.addEventListener('input', () => { document.getElementById('scaleDisplay').textContent = slider.value; });
 
-  document.getElementById('calPrev').addEventListener('click', () => {
-    viewMonth--;
-    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
-    renderCalendar();
-  });
+  document.getElementById('cancelCheckinBtn').addEventListener('click', closePopup);
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) closePopup(); });
 
-  document.getElementById('calNext').addEventListener('click', () => {
-    viewMonth++;
-    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
-    renderCalendar();
-  });
-
-  // ── Save ─────────────────────────────────────────────────────────────────
   document.getElementById('saveCheckinBtn').addEventListener('click', async () => {
-    if (!selectedDate)  return alert('Please select a date first.');
-    if (!chosenStatus)  return alert('Please select a pain status.');
-
-    const payload = {
-      date:        selectedDate,
-      painStatus:  chosenStatus,
-      painScale:   parseInt(slider.value, 10),
-      notes:       document.getElementById('checkinNotes').value.trim()
-    };
-
+    if (!selectedDate) return alert('Please select a date first.');
+    if (!chosenStatus) return alert('Please select a pain status.');
+    const payload = { date: selectedDate, painStatus: chosenStatus, painScale: parseInt(slider.value, 10), notes: document.getElementById('checkinNotes').value.trim() };
     try {
       const res = await fetch(`/progress/checkin/${encodeURIComponent(AREA_NAME)}`, {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(payload)
+        body: JSON.stringify(payload)
       });
-
       if (res.ok) {
-        // Update local map so calendar re-renders immediately
-        LOG_MAP[selectedDate] = {
-          pain_status: payload.painStatus,
-          pain_scale:  payload.painScale,
-          notes:       payload.notes
-        };
+        LOG_MAP[selectedDate] = { pain_status: payload.painStatus, pain_scale: payload.painScale, notes: payload.notes };
         renderCalendar();
-
         const msg = document.getElementById('saveMsg');
         msg.textContent = 'Saved!';
-        msg.style.display = 'block';
         msg.style.color = '#4caf50';
+        msg.style.display = 'block';
+        setTimeout(closePopup, 800);
       } else {
         alert('Failed to save. Please try again.');
       }
-    } catch (e) {
-      console.error(e);
+    } catch(e) {
       alert('Network error. Please try again.');
     }
   });
 
-  // ── Init ─────────────────────────────────────────────────────────────────
   renderCalendar();
-
-  // Auto-select today if a log exists
   const todayYMD = toYMD(today.getFullYear(), today.getMonth(), today.getDate());
-  if (LOG_MAP[todayYMD]) selectDate(todayYMD, LOG_MAP[todayYMD]);
+  if (LOG_MAP[todayYMD]) openPopup(todayYMD, LOG_MAP[todayYMD]);
 })();
 </script>
