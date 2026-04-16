@@ -41,22 +41,85 @@
   <% } else { %>
     <div class="history-list">
       <% sessions.forEach(s => { %>
-        <a href="/workout-history/<%= s.id %>" class="history-card history-card--link">
-          <div class="history-card-content">
+        <div class="history-card" style="cursor:default;">
+          <!-- Top row: tapping navigates to detail -->
+          <a href="/workout-history/<%= s.id %>" class="history-card-content" style="text-decoration:none; color:inherit; display:block; flex:1;">
             <p class="history-card-title"><%= s.title %></p>
-            <p class="history-card-meta"><%= s.durationMin %> minutes&bull; <%= s.exerciseCount %> exercises</p>
+            <p class="history-card-meta"><%= s.durationMin %> minutes &bull; <%= s.exerciseCount %> exercises</p>
             <div class="history-tags">
               <% s.tags.forEach((tag, i) => { %>
                 <span class="history-tag <%= i % 2 === 1 ? 'history-tag--yellow' : '' %>"><%= tag %></span>
               <% }) %>
             </div>
             <p class="history-card-date" data-date-short="<%= s.sessionDate.toISOString() %>"></p>
-          </div>
+          </a>
           <div class="history-card-emoji"><%= s.emoji %></div>
-        </a>
+
+          <!-- Expand toggle -->
+          <button class="expand-summary-btn" data-id="<%= s.id %>"
+            onclick="toggleSummary(<%= s.id %>, this)"
+            style="width:100%; background:none; border:none; border-top:1px solid #f2f2f2; margin-top:10px; padding:8px 0 0; font-size:0.8rem; color:#E8A838; font-weight:600; cursor:pointer; text-align:left; font-family:inherit; display:flex; align-items:center; gap:4px;">
+            <span class="expand-label">▸ Show workout summary</span>
+          </button>
+
+          <!-- Summary panel (hidden by default) -->
+          <div class="summary-panel" id="summary-<%= s.id %>" style="display:none; margin-top:8px;">
+            <div class="summary-loading" style="font-size:0.82rem; color:#aaa; padding:6px 0;">Loading...</div>
+          </div>
+        </div>
       <% }) %>
     </div>
   <% } %>
 </div>
 
 <%- include('../partials/bottomNav') %>
+
+<script>
+const catEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' };
+const loadedSessions = {};
+
+async function toggleSummary(id, btn) {
+  const panel = document.getElementById('summary-' + id);
+  const label = btn.querySelector('.expand-label');
+  const isOpen = panel.style.display !== 'none';
+
+  if (isOpen) {
+    panel.style.display = 'none';
+    label.textContent = '▸ Show workout summary';
+    return;
+  }
+
+  panel.style.display = 'block';
+  label.textContent = '▾ Hide workout summary';
+
+  if (loadedSessions[id]) return; // already fetched
+
+  try {
+    const res = await fetch('/workout-history/' + id + '/exercises');
+    const data = await res.json();
+    loadedSessions[id] = true;
+
+    const loading = panel.querySelector('.summary-loading');
+    if (data.exercises && data.exercises.length > 0) {
+      loading.outerHTML = data.exercises.map(function(ex) {
+        return '<div style="display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid #f8f8f8;">' +
+          '<span style="font-size:1rem;">' + (catEmoji[ex.category] || '🏋️') + '</span>' +
+          '<div style="flex:1;">' +
+            '<span style="font-size:0.85rem; font-weight:600; color:#222;">' + ex.name + '</span>' +
+            '<span style="font-size:0.75rem; color:#888; margin-left:6px;">' +
+              (ex.sets ? ex.sets + ' sets' : '') +
+              (ex.reps ? (ex.sets ? ' · ' : '') + ex.reps + ' reps' : '') +
+              (ex.hold_time_sec && !ex.reps ? ' · ' + ex.hold_time_sec + 's hold' : '') +
+            '</span>' +
+          '</div>' +
+          '<span style="font-size:0.7rem; font-weight:600; color:#aaa; text-transform:capitalize;">' + ex.category + '</span>' +
+        '</div>';
+      }).join('');
+    } else {
+      loading.textContent = 'No exercise details recorded.';
+    }
+  } catch(e) {
+    panel.querySelector('.summary-loading').textContent = 'Failed to load.';
+  }
+}
+</script>
