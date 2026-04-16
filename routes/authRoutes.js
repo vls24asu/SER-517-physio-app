@@ -27,7 +27,7 @@ router.get('/auth/google', (req, res, next) => {
     return res.redirect('/login');
   }
 
-  return passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+  return passport.authenticate('google', { scope: ['profile', 'email'], prompt: 'select_account' })(req, res, next);
 });
 
 router.get('/auth/google/callback', (req, res, next) => {
@@ -55,21 +55,25 @@ router.get('/auth/google/callback', (req, res, next) => {
         role: user.role || 'patient'
       };
 
+      let destination;
+
       if (user.role === 'physio') {
-        return res.redirect('/physio/dashboard');
+        destination = '/physio/dashboard';
+      } else if (user.onboarding_completed === 0) {
+        destination = '/onboarding';
+      } else {
+        const today = new Date().toISOString().split('T')[0];
+        destination = user.last_checkin_date !== today ? '/checkin' : '/dashboard';
       }
 
-      if (!user.onboarding_completed) {
-        return res.redirect('/onboarding');
-      }
-
-      // Route returning users through daily check-in if they haven't done it today
-      const today = new Date().toISOString().split('T')[0];
-      if (user.last_checkin_date !== today) {
-        return res.redirect('/checkin');
-      }
-
-      return res.redirect('/dashboard');
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          req.flash('error', 'Sign-in failed. Please try again.');
+          return res.redirect('/login');
+        }
+        return res.redirect(destination);
+      });
     };
 
     if (typeof req.logout === 'function') {
