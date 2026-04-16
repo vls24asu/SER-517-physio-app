@@ -64,11 +64,15 @@
 
     <div id="focusAreaList">
       <% focusAreas.forEach(function(fa) { %>
-        <a href="/progress/checkin/<%= encodeURIComponent(fa.area_name) %>" class="body-checkin-item body-checkin-item--link">
-          <span class="body-checkin-emoji"><%= fa.emoji %></span>
-          <span class="body-checkin-name"><%= fa.area_name %></span>
-          <span class="body-checkin-arrow">›</span>
-        </a>
+        <div class="body-checkin-item body-checkin-item--link" style="display:flex; align-items:center;">
+          <a href="/progress/checkin/<%= encodeURIComponent(fa.area_name) %>" style="flex:1; display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit;">
+            <span class="body-checkin-emoji"><%= fa.emoji %></span>
+            <span class="body-checkin-name"><%= fa.area_name %></span>
+          </a>
+          <button class="remove-focus-area-btn" data-area="<%= fa.area_name %>"
+            style="background:none; border:none; cursor:pointer; color:#bbb; font-size:1.1rem; padding:4px 8px; line-height:1; flex-shrink:0;"
+            title="Remove">&times;</button>
+        </div>
       <% }); %>
       <% if (focusAreas.length === 0) { %>
         <p class="body-checkin-empty">No focus areas yet. Tap "+ Add Focus Area" to get started.</p>
@@ -141,14 +145,18 @@
             var empty = list.querySelector('.body-checkin-empty');
             if (empty) empty.remove();
 
-            var item = document.createElement('a');
+            var item = document.createElement('div');
             item.className = 'body-checkin-item body-checkin-item--link';
-            item.href = '/progress/checkin/' + encodeURIComponent(area);
-            item.innerHTML = '<span class="body-checkin-emoji">' + emoji + '</span>' +
-                             '<span class="body-checkin-name">' + area + '</span>' +
-                             '<span class="body-checkin-arrow">›</span>';
+            item.style.cssText = 'display:flex; align-items:center;';
+            item.innerHTML =
+              '<a href="/progress/checkin/' + encodeURIComponent(area) + '" style="flex:1; display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit;">' +
+                '<span class="body-checkin-emoji">' + emoji + '</span>' +
+                '<span class="body-checkin-name">' + area + '</span>' +
+              '</a>' +
+              '<button class="remove-focus-area-btn" data-area="' + area + '" style="background:none; border:none; cursor:pointer; color:#bbb; font-size:1.1rem; padding:4px 8px; line-height:1; flex-shrink:0;" title="Remove">&times;</button>';
             list.appendChild(item);
             savedAreas.push(area);
+            attachRemoveListener(item.querySelector('.remove-focus-area-btn'));
           }
         } catch(err) {
           console.error('Focus area save error:', err);
@@ -157,5 +165,35 @@
         hideOverlay();
       });
     });
+
+    // ── Remove focus area ──
+    function attachRemoveListener(btn) {
+      btn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        var area = btn.getAttribute('data-area');
+        try {
+          var res = await fetch('/progress/focus-area', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ areaName: area })
+          });
+          if (res.ok) {
+            var idx = savedAreas.indexOf(area);
+            if (idx !== -1) savedAreas.splice(idx, 1);
+            btn.closest('.body-checkin-item').remove();
+            if (list.querySelectorAll('.body-checkin-item').length === 0) {
+              var empty = document.createElement('p');
+              empty.className = 'body-checkin-empty';
+              empty.textContent = 'No focus areas yet. Tap "+ Add Focus Area" to get started.';
+              list.appendChild(empty);
+            }
+          }
+        } catch(err) {
+          console.error('Focus area remove error:', err);
+        }
+      });
+    }
+
+    document.querySelectorAll('.remove-focus-area-btn').forEach(attachRemoveListener);
   })();
 </script>

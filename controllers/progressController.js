@@ -1,10 +1,24 @@
 const StatsService = require('../services/StatsService');
 const WorkoutSessionService = require('../services/WorkoutSessionService');
 const BodyCheckinDAO = require('../dao/BodyCheckinDAO');
+const db = require('../config/db');
 
 const statsService = new StatsService();
 const sessionService = new WorkoutSessionService();
 const checkinDAO = new BodyCheckinDAO();
+
+async function syncPainAreasFromFocusAreas(userId) {
+  const [rows] = await db.query(
+    `SELECT area_name FROM User_Focus_Area WHERE user_id = ? ORDER BY created_at ASC`,
+    [userId]
+  );
+  const areas = rows.map(r => r.area_name);
+  const painAreas = areas.length > 0 ? areas.join(',') : null;
+  await db.query(
+    `UPDATE User_Profile SET pain_areas = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`,
+    [painAreas, userId]
+  );
+}
 
 const getProgress = async (req, res) => {
   try {
@@ -60,10 +74,29 @@ const addFocusArea = async (req, res) => {
     const { areaName, emoji } = req.body;
     if (!areaName) return res.status(400).json({ error: 'areaName required' });
     await checkinDAO.addFocusArea(userId, areaName, emoji || '🩹');
+    await syncPainAreasFromFocusAreas(userId);
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to save focus area' });
+  }
+};
+
+// DELETE /progress/focus-area  — remove a focus area
+const removeFocusArea = async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const { areaName } = req.body;
+    if (!areaName) return res.status(400).json({ error: 'areaName required' });
+    await db.query(
+      `DELETE FROM User_Focus_Area WHERE user_id = ? AND area_name = ?`,
+      [userId, areaName]
+    );
+    await syncPainAreasFromFocusAreas(userId);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to remove focus area' });
   }
 };
 
@@ -95,7 +128,41 @@ const saveCheckin = async (req, res) => {
 
     if (!date || !painStatus) return res.status(400).json({ error: 'date and painStatus required' });
 
-    await checkinDAO.saveLog(userId, areaName, date, painStatus, parseInt(painScale, 10) || 0, notes);
+    // Block future dates
+    const today = new Date().toISOString().slice(0, 10);
+    if (date > today) return res.status(400).json({ error: 'Cannot log for a future date' });
+
+    const painScaleInt = parseInt(painScale, 10);
+    const finalScale = isNaN(painScaleInt) ? 0 : painScaleInt;
+    await checkinDAO.saveLog(userId, areaName, date, painStatus, finalScale, notes);
+
+    // Sync pain scale for this area to pain_intensity_map using the latest logged date's value
+    const [[latestLog]] = await db.query(
+      `SELECT pain_scale FROM Body_Checkin_Log
+       WHERE user_id = ? AND area_name = ?
+       ORDER BY log_date DESC LIMIT 1`,
+      [userId, areaName]
+    );
+    const syncedScale = latestLog ? latestLog.pain_scale : finalScale;
+    const [[profile]] = await db.query(
+      `SELECT pain_intensity_map FROM User_Profile WHERE user_id = ?`, [userId]
+    );
+    let intensityMap = {};
+    if (profile && profile.pain_intensity_map) {
+      try {
+        intensityMap = typeof profile.pain_intensity_map === 'string'
+          ? JSON.parse(profile.pain_intensity_map)
+          : profile.pain_intensity_map;
+      } catch (e) { intensityMap = {}; }
+    }
+    intensityMap[areaName] = syncedScale;
+    const allVals = Object.values(intensityMap).map(Number).filter(n => !isNaN(n));
+    const maxVal = allVals.length ? Math.max(...allVals) : syncedScale;
+    await db.query(
+      `UPDATE User_Profile SET pain_intensity_map = ?, pain_intensity = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?`,
+      [JSON.stringify(intensityMap), maxVal, userId]
+    );
+
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
@@ -103,4 +170,4 @@ const saveCheckin = async (req, res) => {
   }
 };
 
-module.exports = { getProgress, addFocusArea, getCheckin, saveCheckin };
+module.exports = { getProgress, addFocusArea, removeFocusArea, getCheckin, saveCheckin };
