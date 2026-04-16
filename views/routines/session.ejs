@@ -356,7 +356,7 @@
       unsafeFlag:  document.getElementById('fbUnsafe').checked,
       notes:       null
     };
-    fetch('/routines/saved/<%= routineId %>/feedback', {
+    fetch('<%= typeof feedbackUrl !== "undefined" ? feedbackUrl : "/routines/saved/" + routineId + "/feedback" %>', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -390,7 +390,7 @@
   }
 
   function logAndRedirect() {
-    fetch('/routines/saved/<%= routineId %>/log-session', {
+    fetch('<%= typeof logUrl !== "undefined" ? logUrl : "/routines/saved/" + routineId + "/log-session" %>', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ exerciseLog })
@@ -544,7 +544,7 @@
   });
 
   document.getElementById('doneBtn').addEventListener('click', function() {
-    window.location.href = '/routines/saved';
+    window.location.href = '<%= typeof doneUrl !== "undefined" ? doneUrl : "/routines/saved" %>';
   });
 
   renderStep(0);
