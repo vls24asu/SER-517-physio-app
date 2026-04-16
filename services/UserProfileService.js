@@ -24,8 +24,8 @@ class UserProfileService {
     await this.#dao.upsertGoalsAndPreferences(userId, { fitnessLevel, exercisePreference, workoutDurationMin, goals, availableEquipment });
   }
 
-  async updatePainAreas(userId, { painAreas, painStatus, painIntensity, selectedInjuries }) {
-    await this.#dao.upsertPainAreas(userId, { painAreas, painStatus, painIntensity, selectedInjuries });
+  async updatePainAreas(userId, { painAreas, painStatus, painIntensity, painIntensityMap, selectedInjuries }) {
+    await this.#dao.upsertPainAreas(userId, { painAreas, painStatus, painIntensity, painIntensityMap, selectedInjuries });
   }
 
   async updateNameEmail(userId, { fullName, email }) {

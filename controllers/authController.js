@@ -230,12 +230,13 @@ const completeOnboarding = async (req, res) => {
     const painStatus = body.pain_status === 'yes' || body.pain_status === 'no'
       ? body.pain_status : null;
     let painIntensity = null;
+    let painIntensityMap = null;
     if (body.pain_intensity !== undefined && body.pain_intensity !== '') {
       const raw = body.pain_intensity;
       try {
         const parsed = JSON.parse(raw);
-        // Multiple areas — store the max value as the overall intensity
-        if (typeof parsed === 'object') {
+        if (typeof parsed === 'object' && parsed !== null) {
+          painIntensityMap = parsed;
           const vals = Object.values(parsed).map(Number).filter(n => !isNaN(n));
           painIntensity = vals.length ? Math.max(...vals) : null;
         } else {
@@ -255,7 +256,7 @@ const completeOnboarding = async (req, res) => {
       goals,
       availableEquipment
     });
-    await profileService.updatePainAreas(userId, { painAreas, painStatus, painIntensity, selectedInjuries });
+    await profileService.updatePainAreas(userId, { painAreas, painStatus, painIntensity, painIntensityMap, selectedInjuries });
 
     await userService.markOnboardingComplete(userId);
     return res.redirect('/dashboard');

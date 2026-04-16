@@ -70,6 +70,7 @@
   const savedStatus = (profile && profile.pain_status) ? profile.pain_status : '';
   const savedIntensity = (profile && profile.pain_intensity !== null && profile.pain_intensity !== undefined) ? profile.pain_intensity : 5;
   const savedInjuries = (profile && profile.selected_injuries) ? profile.selected_injuries.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const intensityMap = painIntensityMap || {};
 %>
 
 <div class="settings-container">
@@ -249,31 +250,38 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // ── Per-area pain sliders ──
+  var intensityMap = <%- JSON.stringify(intensityMap) %>;
   var savedIntensityVal = <%= savedIntensity %>;
+
+  function getAreaIntensity(area) {
+    return (intensityMap[area] !== undefined) ? intensityMap[area] : savedIntensityVal;
+  }
 
   function buildSliders() {
     var container = document.getElementById('pmSlidersContainer');
     container.innerHTML = '';
 
     var checked = Array.from(document.querySelectorAll('.pain-area-cb:checked')).map(function (cb) { return cb.value; });
-    var areas = checked.length > 0 ? checked : [];
-    if (areas.length === 0) return;
+    if (checked.length === 0) return;
 
-    areas.forEach(function (area) {
+    checked.forEach(function (area) {
       var safeId = area.replace(/\s+/g, '_');
       var valueId = 'pmPainVal_' + safeId;
       var sliderId = 'pmPainSlider_' + safeId;
+      var inputName = 'pain_intensity_' + safeId;
+      var val = getAreaIntensity(area);
 
       var wrapper = document.createElement('div');
       wrapper.style.cssText = 'margin-bottom:20px;';
       wrapper.innerHTML =
-        '<p class="pm-field-label"><strong>' + area + '</strong> — Pain level: <span id="' + valueId + '">' + savedIntensityVal + '/10</span></p>' +
-        '<input type="range" class="pm-pain-slider" id="' + sliderId + '" min="0" max="10" step="1" value="' + savedIntensityVal + '" data-area="' + area + '">' +
+        '<p class="pm-field-label"><strong>' + area + '</strong> — Pain level: <span id="' + valueId + '">' + val + '/10</span></p>' +
+        '<input type="range" class="pm-pain-slider" id="' + sliderId + '" name="' + inputName + '" min="0" max="10" step="1" value="' + val + '" data-area="' + area + '">' +
         '<div class="pm-range-labels"><span>Mild</span><span>Moderate</span><span>Severe</span></div>';
       container.appendChild(wrapper);
 
       document.getElementById(sliderId).addEventListener('input', function () {
         document.getElementById(valueId).textContent = this.value + '/10';
+        intensityMap[area] = parseInt(this.value);
         syncSliderHidden();
       });
     });

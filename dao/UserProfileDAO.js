@@ -68,19 +68,27 @@ class UserProfileDAO {
     }
   }
 
-  async upsertPainAreas(userId, { painAreas, painStatus, painIntensity, selectedInjuries }) {
+  async upsertPainAreas(userId, { painAreas, painStatus, painIntensity, painIntensityMap, selectedInjuries }) {
     const conn = await this.#connectionManager.getConnection();
     try {
       await conn.execute(
-        `INSERT INTO User_Profile (user_id, pain_areas, pain_status, pain_intensity, selected_injuries)
-         VALUES (?, ?, ?, ?, ?)
+        `INSERT INTO User_Profile (user_id, pain_areas, pain_status, pain_intensity, pain_intensity_map, selected_injuries)
+         VALUES (?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
            pain_areas = VALUES(pain_areas),
            pain_status = VALUES(pain_status),
            pain_intensity = VALUES(pain_intensity),
+           pain_intensity_map = VALUES(pain_intensity_map),
            selected_injuries = VALUES(selected_injuries),
            updated_at = CURRENT_TIMESTAMP`,
-        [userId, painAreas || null, painStatus || null, painIntensity !== undefined && painIntensity !== null ? parseInt(painIntensity) : null, selectedInjuries || null]
+        [
+          userId,
+          painAreas || null,
+          painStatus || null,
+          painIntensity !== undefined && painIntensity !== null ? parseInt(painIntensity) : null,
+          painIntensityMap ? JSON.stringify(painIntensityMap) : null,
+          selectedInjuries || null
+        ]
       );
     } finally {
       conn.release();
