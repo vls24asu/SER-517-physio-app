@@ -43,32 +43,14 @@
 
   <% } %>
 
-  <!-- Session history list -->
-  <% if (sessions && sessions.length > 0) { %>
-  <div class="dash-last-workout-card mb-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h2 style="font-size:1rem; font-weight:700; margin:0;">Session History</h2>
+  <!-- Session history button -->
+  <a href="/workout-history" style="display:flex; align-items:center; justify-content:space-between; background:#fff; border-radius:16px; padding:16px 20px; margin-bottom:12px; text-decoration:none; box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <i class="bi bi-clock-history" style="font-size:1.3rem; color:#555;"></i>
+      <span style="font-size:0.95rem; font-weight:600; color:#222;">Workout History</span>
     </div>
-    <% sessions.slice(0, 10).forEach(function(s) { %>
-      <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f0f0f0;">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <span style="font-size:1.4rem;"><%= s.emoji || '🏋️' %></span>
-          <div>
-            <div style="font-size:0.9rem; font-weight:600; color:#222;"><%= s.title %></div>
-            <div style="font-size:0.78rem; color:#888; margin-top:2px;">
-              <%= new Date(s.sessionDate).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) %>
-              &nbsp;•&nbsp; <%= s.durationMin %> min
-              &nbsp;•&nbsp; <%= s.exerciseCount %> exercise<%= s.exerciseCount !== 1 ? 's' : '' %>
-            </div>
-          </div>
-        </div>
-      </div>
-    <% }) %>
-    <% if (sessions.length > 10) { %>
-      <p style="font-size:0.8rem; color:#888; margin-top:10px; text-align:center;">Showing last 10 sessions</p>
-    <% } %>
-  </div>
-  <% } %>
+    <span style="color:#bbb; font-size:1.1rem;">›</span>
+  </a>
 
   <!-- Body check-in section -->
   <div class="body-checkin-card">
