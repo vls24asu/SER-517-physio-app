@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { isAuthenticated } = require('../middleware/auth');
-const { getProgress, addFocusArea, getCheckin, saveCheckin } = require('../controllers/progressController');
+const { getProgress, addFocusArea, removeFocusArea, getCheckin, saveCheckin } = require('../controllers/progressController');
 
 router.get('/', isAuthenticated, getProgress);
 router.post('/focus-area', isAuthenticated, addFocusArea);
+router.delete('/focus-area', isAuthenticated, removeFocusArea);
 router.get('/checkin/:area', isAuthenticated, getCheckin);
 router.post('/checkin/:area', isAuthenticated, saveCheckin);
 

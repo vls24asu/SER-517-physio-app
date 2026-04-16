@@ -132,7 +132,13 @@
       if (ymd === selectedDate) cell.classList.add('cal-cell--selected');
 
       cell.textContent = d;
-      cell.addEventListener('click', () => selectDate(cell.dataset.ymd, log));
+      const isFuture = ymd > toYMD(today.getFullYear(), today.getMonth(), today.getDate());
+      if (isFuture) {
+        cell.style.opacity = '0.35';
+        cell.style.cursor = 'not-allowed';
+      } else {
+        cell.addEventListener('click', () => selectDate(cell.dataset.ymd, log));
+      }
       grid.appendChild(cell);
     }
   }

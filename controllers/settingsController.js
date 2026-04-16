@@ -1,6 +1,7 @@
 const UserService = require('../services/UserService');
 const UserProfileService = require('../services/UserProfileService');
 const NotificationService = require('../services/NotificationService');
+const db = require('../config/db');
 
 const userService = new UserService();
 const profileService = new UserProfileService();
@@ -221,13 +222,41 @@ const postPainManagement = async (req, res) => {
       ? Math.max(...Object.values(painIntensityMap))
       : (pain_intensity !== undefined ? pain_intensity : null);
 
-    await profileService.updatePainAreas(req.session.user.id, {
+    const userId = req.session.user.id;
+    await profileService.updatePainAreas(userId, {
       painAreas,
       painStatus: pain_status || null,
       painIntensity,
       painIntensityMap,
       selectedInjuries
     });
+
+    // Sync pain areas → User_Focus_Area
+    const [emojiRows] = await db.query(`SELECT name, emoji FROM Focus_Area_Option`);
+    const emojiMap = {};
+    emojiRows.forEach(r => { emojiMap[r.name.toLowerCase()] = r.emoji; });
+
+    if (areasArr.length > 0) {
+      for (const area of areasArr) {
+        const emoji = emojiMap[area.toLowerCase()] || '🩹';
+        await db.query(
+          `INSERT INTO User_Focus_Area (user_id, area_name, emoji)
+           VALUES (?, ?, ?)
+           ON DUPLICATE KEY UPDATE emoji = VALUES(emoji)`,
+          [userId, area, emoji]
+        );
+      }
+      // Remove focus areas that were deselected from pain management
+      const placeholders = areasArr.map(() => '?').join(',');
+      await db.query(
+        `DELETE FROM User_Focus_Area WHERE user_id = ? AND area_name NOT IN (${placeholders})`,
+        [userId, ...areasArr]
+      );
+    } else {
+      // User cleared all pain areas — remove all focus areas
+      await db.query(`DELETE FROM User_Focus_Area WHERE user_id = ?`, [userId]);
+    }
+
     req.flash('success', 'Pain management updated.');
     res.redirect('/settings/pain-management');
   } catch (err) {

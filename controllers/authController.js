@@ -1,6 +1,7 @@
 const UserService = require('../services/UserService');
 const UserProfileService = require('../services/UserProfileService');
 const { validationResult } = require('express-validator');
+const db = require('../config/db');
 
 const userService = new UserService();
 const profileService = new UserProfileService();
@@ -257,6 +258,23 @@ const completeOnboarding = async (req, res) => {
       availableEquipment
     });
     await profileService.updatePainAreas(userId, { painAreas, painStatus, painIntensity, painIntensityMap, selectedInjuries });
+
+    // Sync onboarding pain areas → User_Focus_Area (body check-in)
+    if (painAreas) {
+      const areasArr = painAreas.split(',').map(s => s.trim()).filter(Boolean);
+      const [emojiRows] = await db.query(`SELECT name, emoji FROM Focus_Area_Option`);
+      const emojiMap = {};
+      emojiRows.forEach(r => { emojiMap[r.name.toLowerCase()] = r.emoji; });
+      for (const area of areasArr) {
+        const emoji = emojiMap[area.toLowerCase()] || '🩹';
+        await db.query(
+          `INSERT INTO User_Focus_Area (user_id, area_name, emoji)
+           VALUES (?, ?, ?)
+           ON DUPLICATE KEY UPDATE emoji = VALUES(emoji)`,
+          [userId, area, emoji]
+        );
+      }
+    }
 
     await userService.markOnboardingComplete(userId);
     return res.redirect('/dashboard');
