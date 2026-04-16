@@ -15,6 +15,8 @@ const attachTimezone = require('./middleware/timezone');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.set('trust proxy', 1);
+
 if (!process.env.SESSION_SECRET) {
   console.error('Missing SESSION_SECRET in .env. Copy .env.example to .env and set all values.');
   process.exit(1);
