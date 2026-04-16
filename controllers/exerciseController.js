@@ -264,7 +264,7 @@ const logProgramSession = async (req, res) => {
     const programId = Number(req.params.id);
 
     const [[program]] = await db.query(
-      `SELECT id, name, duration_min FROM Program WHERE id = ?`,
+      `SELECT id, name, duration_min, emoji FROM Program WHERE id = ?`,
       [programId]
     );
     if (!program) return res.json({ ok: false });
@@ -278,9 +278,18 @@ const logProgramSession = async (req, res) => {
     const [wsResult] = await db.query(
       `INSERT INTO Workout_Session (user_id, routine_id, title, duration_min, exercise_count, tags, emoji)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [userId, null, program.name, program.duration_min || 1, exercises.length, 'program', '🗓️']
+      [userId, null, program.name, program.duration_min || 1, exercises.length, 'program', program.emoji || '🗓️']
     );
     const sessionId = wsResult.insertId;
+
+    for (const [i, ex] of exercises.entries()) {
+      await db.query(
+        `INSERT INTO Workout_Session_Exercise
+           (session_id, exercise_id, name, category, \`sets\`, reps, hold_time_sec, sort_order)
+         VALUES (?, NULL, ?, ?, ?, ?, ?, ?)`,
+        [sessionId, ex.exercise_name, ex.exercise_type || 'strengthen', ex.sets, ex.reps, ex.rest_time_sec, i]
+      );
+    }
 
     res.json({ ok: true, sessionId });
   } catch (err) {
