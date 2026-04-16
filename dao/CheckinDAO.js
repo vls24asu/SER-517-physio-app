@@ -158,6 +158,26 @@ class CheckinDAO {
         [rows] = await conn.execute(q, params);
       }
 
+      // Try 5: category only — ignore body area entirely (handles missing body_part data)
+      if (rows.length === 0) {
+        const conn2 = await this.#cm.getConnection();
+        try {
+          const [r] = await conn2.execute(
+            `SELECT id, name, category, \`sets\`, reps, hold_time_sec,
+                    duration_seconds, tips, common_mistakes, emoji,
+                    equipment_needed, body_part, skill_level
+             FROM exercise
+             WHERE category IN (${preferredCats.map(() => '?').join(',')})
+             ORDER BY FIELD(category, ${preferredCats.map(() => '?').join(',')}), skill_level ASC, name ASC
+             LIMIT 12`,
+            [...preferredCats, ...preferredCats]
+          );
+          rows = r;
+        } finally {
+          conn2.release();
+        }
+      }
+
       return rows;
     } finally {
       conn.release();

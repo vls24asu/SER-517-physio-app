@@ -750,7 +750,7 @@ router.post('/schedule/:id/cancel', isAuthenticated, async (req, res) => {
 // Fetches matching injury exercises and appends them to the current routine
 router.post('/injury-support', isAuthenticated, async (req, res) => {
   const userId = req.session.user.id;
-  const { body_area, goal, environment, from_routine } = req.body;
+  const { body_area, goal, environment, from_routine, exercise_count } = req.body;
   const routineId = Number(from_routine);
 
   if (!routineId) return res.redirect('/routines/saved');
@@ -775,8 +775,8 @@ router.post('/injury-support', isAuthenticated, async (req, res) => {
       isGymOnly,
       equipment: []
     });
-    // Cap at 5 exercises so the routine doesn't bloat
-    exercises = exercises.slice(0, 5);
+    const cap = [3, 5, 8, 10].includes(Number(exercise_count)) ? Number(exercise_count) : 5;
+    exercises = exercises.slice(0, cap);
   } catch (err) {
     console.error('injury-support exercise fetch error:', err);
   }

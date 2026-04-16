@@ -83,6 +83,17 @@
       </div>
       <input type="hidden" name="goal" id="injGoalHidden" required>
 
+      <label style="font-size:0.82rem; font-weight:700; color:#555; display:block; margin-bottom:8px;">How many exercises to add?</label>
+      <div style="display:flex; gap:8px; margin-bottom:18px;">
+        <% [3, 5, 8, 10].forEach(function(n) { %>
+          <button type="button" class="inj-count-btn" data-val="<%= n %>"
+            style="flex:1; padding:9px 6px; border:1.5px solid #e8e8e8; border-radius:12px; background:#fff; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit;">
+            <%= n %>
+          </button>
+        <% }) %>
+      </div>
+      <input type="hidden" name="exercise_count" id="injCountHidden" required>
+
       <label style="font-size:0.82rem; font-weight:700; color:#555; display:block; margin-bottom:8px;">Where are you working out?</label>
       <div style="display:flex; gap:8px; margin-bottom:24px;">
         <% [['at_home','At home'],['condo_gym','Condo gym'],['full_gym','Full gym']].forEach(function(opt) { %>
@@ -115,14 +126,16 @@
       });
     });
   }
-  injPicker('inj-area-btn', 'injAreaHidden');
-  injPicker('inj-goal-btn', 'injGoalHidden');
-  injPicker('inj-env-btn',  'injEnvHidden');
+  injPicker('inj-area-btn',  'injAreaHidden');
+  injPicker('inj-goal-btn',  'injGoalHidden');
+  injPicker('inj-env-btn',   'injEnvHidden');
+  injPicker('inj-count-btn', 'injCountHidden');
 
   function checkInjFormReady() {
     var ready = document.getElementById('injAreaHidden').value &&
                 document.getElementById('injGoalHidden').value &&
-                document.getElementById('injEnvHidden').value;
+                document.getElementById('injEnvHidden').value &&
+                document.getElementById('injCountHidden').value;
     var btn = document.getElementById('injSubmitBtn');
     btn.disabled = !ready;
     btn.style.opacity = ready ? '1' : '0.5';
