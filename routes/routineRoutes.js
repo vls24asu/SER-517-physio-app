@@ -312,31 +312,34 @@ router.get('/saved/:id/edit', isAuthenticated, requireOnboardingComplete, async 
   const userId = req.session.user.id;
   const routineId = Number(req.params.id);
 
-  const [[routine]] = await db.query(
-    `SELECT id, name FROM Saved_Routine WHERE id = ? AND user_id = ?`,
-    [routineId, userId]
-  );
+  const filterCategory = req.query.filterCategory || '';
+  const filterBodyPart = req.query.filterBodyPart || '';
+  const filterLocation = req.query.filterLocation || '';
+  const filterSearch   = req.query.filterSearch   || '';
 
+  const [[routineRows], [entries], [exercises], [bodyPartRows]] = await Promise.all([
+    db.query(`SELECT id, name FROM Saved_Routine WHERE id = ? AND user_id = ?`, [routineId, userId]),
+    db.query(
+      `SELECT sre.id, sre.sort_order, e.id AS exercise_id, e.name, e.category
+       FROM Saved_Routine_Entry sre
+       JOIN exercise e ON e.id = sre.exercise_id
+       WHERE sre.routine_id = ?
+       ORDER BY sre.sort_order ASC`,
+      [routineId]
+    ),
+    db.query(`SELECT id, name, category, body_part, injury, skill_level, is_gym_only FROM exercise ORDER BY name ASC`),
+    db.query(`SELECT DISTINCT body_part FROM exercise WHERE body_part IS NOT NULL ORDER BY body_part ASC`)
+  ]);
+
+  const routine = routineRows[0];
   if (!routine) {
     req.flash('error', 'Routine not found.');
     return res.redirect('/routines/saved');
   }
 
-  const [entries] = await db.query(
-    `SELECT sre.id, sre.sort_order,
-            e.id AS exercise_id, e.name, e.category
-     FROM Saved_Routine_Entry sre
-     JOIN exercise e ON e.id = sre.exercise_id
-     WHERE sre.routine_id = ?
-     ORDER BY sre.sort_order ASC`,
-    [routineId]
-  );
+  const bodyParts = bodyPartRows.map(r => r.body_part);
 
-  const [allExercises] = await db.query(
-    `SELECT id, name, category FROM exercise ORDER BY name ASC`
-  );
-
-  res.render('routines/edit', { routine, entries, allExercises });
+  res.render('routines/edit', { routine, entries, exercises, bodyParts, filterCategory, filterBodyPart, filterLocation, filterSearch });
 });
 
 // Add exercise to a saved routine
@@ -344,6 +347,12 @@ router.post('/saved/:id/add', isAuthenticated, requireOnboardingComplete, async 
   const userId = req.session.user.id;
   const routineId = Number(req.params.id);
   const exerciseId = Number(req.body.exercise_id);
+  const filterQs = new URLSearchParams({
+    filterCategory: req.body.filterCategory || '',
+    filterBodyPart: req.body.filterBodyPart || '',
+    filterLocation: req.body.filterLocation || '',
+    filterSearch:   req.body.filterSearch   || ''
+  }).toString();
 
   const [[routine]] = await db.query(
     `SELECT id FROM Saved_Routine WHERE id = ? AND user_id = ?`,
@@ -353,7 +362,7 @@ router.post('/saved/:id/add', isAuthenticated, requireOnboardingComplete, async 
 
   if (!exerciseId) {
     req.flash('error', 'Please select an exercise.');
-    return res.redirect(`/routines/saved/${routineId}/edit`);
+    return res.redirect(`/routines/saved/${routineId}/edit?${filterQs}`);
   }
 
   const [[row]] = await db.query(
@@ -367,7 +376,7 @@ router.post('/saved/:id/add', isAuthenticated, requireOnboardingComplete, async 
     [routineId, exerciseId, sortOrder]
   );
 
-  res.redirect(`/routines/saved/${routineId}/edit`);
+  res.redirect(`/routines/saved/${routineId}/edit?${filterQs}`);
 });
 
 // Remove exercise from a saved routine
@@ -375,6 +384,12 @@ router.post('/saved/:id/remove', isAuthenticated, requireOnboardingComplete, asy
   const userId = req.session.user.id;
   const routineId = Number(req.params.id);
   const entryId = Number(req.body.entry_id);
+  const filterQs = new URLSearchParams({
+    filterCategory: req.body.filterCategory || '',
+    filterBodyPart: req.body.filterBodyPart || '',
+    filterLocation: req.body.filterLocation || '',
+    filterSearch:   req.body.filterSearch   || ''
+  }).toString();
 
   const [[routine]] = await db.query(
     `SELECT id FROM Saved_Routine WHERE id = ? AND user_id = ?`,
@@ -387,7 +402,7 @@ router.post('/saved/:id/remove', isAuthenticated, requireOnboardingComplete, asy
     [entryId, routineId]
   );
 
-  res.redirect(`/routines/saved/${routineId}/edit`);
+  res.redirect(`/routines/saved/${routineId}/edit?${filterQs}`);
 });
 
 // Start session for a saved routine

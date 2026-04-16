@@ -176,10 +176,19 @@ const getPainManagement = async (req, res) => {
       db.query(`SELECT name FROM Focus_Area_Option ORDER BY sort_order ASC`),
       db.query(`SELECT name FROM Injury_Reference ORDER BY name ASC`)
     ]);
+    let painIntensityMap = {};
+    if (profile && profile.pain_intensity_map) {
+      try {
+        painIntensityMap = typeof profile.pain_intensity_map === 'string'
+          ? JSON.parse(profile.pain_intensity_map)
+          : profile.pain_intensity_map;
+      } catch (e) { painIntensityMap = {}; }
+    }
     res.render('settings/pain-management', {
       profile,
       bodyParts: bodyPartRows.map(r => r.name),
-      injuries: injuryRows.map(r => r.name)
+      injuries: injuryRows.map(r => r.name),
+      painIntensityMap
     });
   } catch (err) {
     console.error(err);
@@ -196,10 +205,27 @@ const postPainManagement = async (req, res) => {
     const painAreas = Array.isArray(rawAreas) ? rawAreas.join(',') : (rawAreas || null);
     const rawInjuries = req.body['selected_injuries[]'] || req.body.selected_injuries;
     const selectedInjuries = Array.isArray(rawInjuries) ? rawInjuries.join(',') : (rawInjuries || null);
+
+    // Build per-area intensity map from individual slider fields (pain_intensity_<area>)
+    let painIntensityMap = null;
+    const areasArr = Array.isArray(rawAreas) ? rawAreas : (rawAreas ? [rawAreas] : []);
+    if (areasArr.length > 0) {
+      painIntensityMap = {};
+      areasArr.forEach(area => {
+        const key = 'pain_intensity_' + area.replace(/\s+/g, '_');
+        const val = parseInt(req.body[key]);
+        painIntensityMap[area] = isNaN(val) ? (parseInt(pain_intensity) || 5) : val;
+      });
+    }
+    const painIntensity = painIntensityMap
+      ? Math.max(...Object.values(painIntensityMap))
+      : (pain_intensity !== undefined ? pain_intensity : null);
+
     await profileService.updatePainAreas(req.session.user.id, {
       painAreas,
       painStatus: pain_status || null,
-      painIntensity: pain_intensity !== undefined ? pain_intensity : null,
+      painIntensity,
+      painIntensityMap,
       selectedInjuries
     });
     req.flash('success', 'Pain management updated.');
