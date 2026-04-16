@@ -18,6 +18,15 @@
     <p class="library-subtitle">Browse all workouts and programs</p>
   </div>
 
+  <!-- Top-level Workouts / Programs tabs -->
+  <div style="display:flex; gap:8px; margin-bottom:20px;">
+    <button id="tab-workouts" onclick="switchTab('workouts')" style="flex:1; padding:10px; border-radius:12px; border:none; font-size:0.95rem; font-weight:600; background:#F7B32B; color:#000; cursor:pointer;">Workouts</button>
+    <button id="tab-programs" onclick="switchTab('programs')" style="flex:1; padding:10px; border-radius:12px; border:2px solid #E0D3BE; font-size:0.95rem; font-weight:600; background:#fff; color:#888; cursor:pointer;">Programs</button>
+  </div>
+
+  <!-- Workouts panel -->
+  <div id="panel-workouts">
+
   <form action="/library" method="GET" class="library-search-form" role="search" id="librarySearchForm">
     <div class="library-search-input-wrap" style="position: relative;">
       <i class="bi bi-search library-search-icon" aria-hidden="true"></i>
@@ -169,6 +178,31 @@
       <% }); %>
     </div>
   <% } %>
+  </div><!-- end panel-workouts -->
+
+  <!-- Programs panel (placeholder) -->
+  <div id="panel-programs" style="display:none;">
+    <div style="text-align:center; padding:60px 24px;">
+      <div style="font-size:3rem; margin-bottom:16px;">🗓️</div>
+      <h2 style="font-size:1.1rem; font-weight:700; color:#222; margin-bottom:8px;">Programs coming soon</h2>
+      <p style="font-size:0.9rem; color:#888;">Structured programs tailored to your goals will appear here.</p>
+    </div>
+  </div>
+
 </div>
+
+<script>
+  function switchTab(tab) {
+    var isWorkouts = tab === 'workouts';
+    document.getElementById('panel-workouts').style.display = isWorkouts ? 'block' : 'none';
+    document.getElementById('panel-programs').style.display = isWorkouts ? 'none' : 'block';
+    document.getElementById('tab-workouts').style.background = isWorkouts ? '#F7B32B' : '#fff';
+    document.getElementById('tab-workouts').style.color = isWorkouts ? '#000' : '#888';
+    document.getElementById('tab-workouts').style.border = isWorkouts ? 'none' : '2px solid #E0D3BE';
+    document.getElementById('tab-programs').style.background = isWorkouts ? '#fff' : '#F7B32B';
+    document.getElementById('tab-programs').style.color = isWorkouts ? '#888' : '#000';
+    document.getElementById('tab-programs').style.border = isWorkouts ? '2px solid #E0D3BE' : 'none';
+  }
+</script>
 
 <%- include('../partials/bottomNav') %>
