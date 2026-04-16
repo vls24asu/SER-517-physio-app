@@ -2374,10 +2374,15 @@ main {
   z-index: 9999;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 40px 24px;
   text-align: center;
   box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.session-complete-overlay::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Schedule modal card (session.ejs) ── */
