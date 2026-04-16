@@ -10,7 +10,11 @@ const exerciseService = new ExerciseService();
  */
 const getLibrary = async (req, res) => {
   try {
-    const { category, difficulty, search, bodyPart, injury, location, skillLevel } = req.query;
+    const { category, difficulty, search, bodyPart, injury, location, skillLevel, tab, duration } = req.query;
+
+    const activeTab = tab === 'programs' ? 'programs' : 'workouts';
+    const validDurations = [10, 15, 20, 30];
+    const activeDuration = validDurations.includes(parseInt(duration)) ? parseInt(duration) : 10;
 
     const filters = {};
     if (category && category !== 'all') filters.category = category;
@@ -23,10 +27,17 @@ const getLibrary = async (req, res) => {
     const validSkillLevels = ['Beginner', 'Intermediate', 'Advanced'];
     if (skillLevel && validSkillLevels.includes(skillLevel)) filters.difficulty = skillLevel;
 
-    const [exercises, bodyParts, injuries] = await Promise.all([
-      exerciseService.getAllExercises(filters),
-      exerciseService.getAllBodyParts(),
-      exerciseService.getAllInjuries()
+    const [[exercises, bodyParts, injuries], programs] = await Promise.all([
+      Promise.all([
+        exerciseService.getAllExercises(filters),
+        exerciseService.getAllBodyParts(),
+        exerciseService.getAllInjuries()
+      ]),
+      db.query(
+        `SELECT id, name, description, duration_min, activity, routine_type, emoji
+         FROM Program WHERE duration_min = ? ORDER BY activity ASC, routine_type ASC`,
+        [activeDuration]
+      ).then(([rows]) => rows)
     ]);
 
     res.render('library/index', {
@@ -38,7 +49,11 @@ const getLibrary = async (req, res) => {
       activeBodyPart: bodyPart || 'all',
       activeInjury: injury || 'all',
       activeLocation: location || 'all',
-      activeSkillLevel: skillLevel || 'all'
+      activeSkillLevel: skillLevel || 'all',
+      activeTab,
+      programs,
+      activeDuration,
+      validDurations
     });
   } catch (err) {
     console.error(err);
