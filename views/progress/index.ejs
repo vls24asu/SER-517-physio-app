@@ -39,6 +39,7 @@
           </div>
         <% }); %>
       </div>
+
     </div>
 
   <% } %>
@@ -65,7 +66,7 @@
     <div id="focusAreaList">
       <% focusAreas.forEach(function(fa) { %>
         <div class="body-checkin-item body-checkin-item--link" style="display:flex; align-items:center;">
-          <a href="/progress/checkin/<%= encodeURIComponent(fa.area_name) %>" style="flex:1; display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit;">
+              <a href="/progress/checkin/<%= encodeURIComponent(fa.area_name) %>" style="flex:1; display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit;">
             <span class="body-checkin-emoji"><%= fa.emoji %></span>
             <span class="body-checkin-name"><%= fa.area_name %></span>
           </a>
@@ -102,6 +103,7 @@
 </div>
 
 <%- include('../partials/bottomNav') %>
+
 
 <script type="application/json" id="savedAreasData"><%- JSON.stringify(focusAreas.map(function(f){ return f.area_name; })) %></script>
 

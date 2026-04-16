@@ -6,6 +6,34 @@
     <h1 class="history-title">Workout history</h1>
   </div>
 
+  <% if (sessions.length > 0) { %>
+  <%
+    const totalSessions = sessions.length;
+    const totalMin = sessions.reduce((sum, s) => sum + (s.durationMin || 0), 0);
+    const totalExercises = sessions.reduce((sum, s) => sum + (s.exerciseCount || 0), 0);
+    const totalHours = (totalMin / 60).toFixed(1);
+  %>
+  <div style="background:#fff; border-radius:16px; padding:20px; margin-bottom:16px; box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+    <p style="font-size:0.75rem; font-weight:600; color:#888; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:14px;">Workout Summary</p>
+    <div style="display:flex; justify-content:space-between; text-align:center;">
+      <div>
+        <p style="font-size:1.6rem; font-weight:700; color:#222; margin:0;"><%= totalSessions %></p>
+        <p style="font-size:0.75rem; color:#888; margin:0;">Sessions</p>
+      </div>
+      <div style="width:1px; background:#eee;"></div>
+      <div>
+        <p style="font-size:1.6rem; font-weight:700; color:#222; margin:0;"><%= totalMin >= 60 ? totalHours : totalMin %></p>
+        <p style="font-size:0.75rem; color:#888; margin:0;"><%= totalMin >= 60 ? 'Hours' : 'Minutes' %></p>
+      </div>
+      <div style="width:1px; background:#eee;"></div>
+      <div>
+        <p style="font-size:1.6rem; font-weight:700; color:#222; margin:0;"><%= totalExercises %></p>
+        <p style="font-size:0.75rem; color:#888; margin:0;">Exercises</p>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
   <% if (sessions.length === 0) { %>
     <div class="history-empty">
       <p>No workouts yet. Start your first session!</p>

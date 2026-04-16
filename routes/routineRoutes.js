@@ -248,6 +248,21 @@ router.get('/saved', isAuthenticated, requireOnboardingComplete, async (req, res
 
   const recommendation = await recommendationPromise;
 
+  // Fetch workout history grouped by routine for this user
+  const [sessionRows] = await db.query(
+    `SELECT id, routine_id, duration_min, exercise_count, session_date
+     FROM Workout_Session
+     WHERE user_id = ? AND routine_id IS NOT NULL
+     ORDER BY session_date DESC`,
+    [userId]
+  );
+  const sessionsByRoutine = {};
+  sessionRows.forEach(s => {
+    if (!sessionsByRoutine[s.routine_id]) sessionsByRoutine[s.routine_id] = [];
+    sessionsByRoutine[s.routine_id].push(s);
+  });
+  formatted.forEach(r => { r.history = sessionsByRoutine[r.id] || []; });
+
   res.render('routines/saved', { routines: formatted, recommendation, activeTab, userProfile: userProfile || {}, activeFilters, allBodyParts });
 });
 

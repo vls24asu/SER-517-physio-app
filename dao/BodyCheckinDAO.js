@@ -70,6 +70,26 @@ class BodyCheckinDAO {
     }
   }
 
+  // Returns all logs for a user across all areas for the last N days
+  async getAllLogsForUser(userId, days = 30) {
+    const conn = await this.#cm.getConnection();
+    try {
+      const [rows] = await conn.execute(
+        `SELECT area_name,
+                DATE_FORMAT(log_date, '%Y-%m-%d') AS log_date,
+                pain_scale
+         FROM Body_Checkin_Log
+         WHERE user_id = ?
+           AND log_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+         ORDER BY log_date ASC`,
+        [userId, days]
+      );
+      return rows;
+    } finally {
+      conn.release();
+    }
+  }
+
   // Returns a single log for a specific date (or null)
   async getLogForDate(userId, areaName, date) {
     const conn = await this.#cm.getConnection();

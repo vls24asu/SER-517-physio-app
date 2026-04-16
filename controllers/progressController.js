@@ -28,14 +28,30 @@ const getProgress = async (req, res) => {
       : 'week';
 
     const timezone = res.locals.userTimezone || 'UTC';
-    const [stats, sessions, chartData, periodStats, focusAreas, areaOptions] = await Promise.all([
+    const [stats, sessions, chartData, periodStats, focusAreas, areaOptions, painLogs] = await Promise.all([
       statsService.getUserStats(userId),
       sessionService.getHistory(userId),
       sessionService.getChartData(userId, period, timezone),
       sessionService.getSessionCountForPeriod(userId, period, timezone),
       checkinDAO.getFocusAreas(userId),
-      checkinDAO.getAreaOptions()
+      checkinDAO.getAreaOptions(),
+      checkinDAO.getAllLogsForUser(userId, 30)
     ]);
+
+    // Shape pain logs into { dates: [...], areas: [{ name, values }] }
+    const painDatesSet = [...new Set(painLogs.map(l => l.log_date))].sort();
+    const painAreaMap = {};
+    painLogs.forEach(l => {
+      if (!painAreaMap[l.area_name]) painAreaMap[l.area_name] = {};
+      painAreaMap[l.area_name][l.log_date] = l.pain_scale;
+    });
+    const painChartData = {
+      dates: painDatesSet,
+      areas: Object.keys(painAreaMap).map(name => ({
+        name,
+        values: painDatesSet.map(d => painAreaMap[name][d] != null ? painAreaMap[name][d] : null)
+      }))
+    };
 
     const now = new Date();
     const periodLabel = period === 'week'
@@ -58,7 +74,8 @@ const getProgress = async (req, res) => {
       totalTimeLabel,
       periodLabel,
       focusAreas,
-      areaOptions
+      areaOptions,
+      painChartData
     });
   } catch (err) {
     console.error(err);
@@ -119,6 +136,21 @@ const getCheckin = async (req, res) => {
   }
 };
 
+// GET /progress/checkin/:area/data  — return logs as JSON (for modal)
+const getCheckinData = async (req, res) => {
+  try {
+    const userId = req.session.user.id;
+    const areaName = decodeURIComponent(req.params.area);
+    const logs = await checkinDAO.getLogs(userId, areaName);
+    const logMap = {};
+    logs.forEach(l => { logMap[l.log_date] = l; });
+    res.json({ ok: true, areaName, logMap });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load check-in data' });
+  }
+};
+
 // POST /progress/checkin/:area  — save a log entry
 const saveCheckin = async (req, res) => {
   try {
@@ -170,4 +202,4 @@ const saveCheckin = async (req, res) => {
   }
 };
 
-module.exports = { getProgress, addFocusArea, removeFocusArea, getCheckin, saveCheckin };
+module.exports = { getProgress, addFocusArea, removeFocusArea, getCheckin, getCheckinData, saveCheckin };

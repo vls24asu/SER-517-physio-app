@@ -285,6 +285,21 @@
             <div class="saved-routine-emoji"><%= r.emoji || '🏋️' %></div>
           </div>
 
+          <% if (r.history && r.history.length > 0) { %>
+            <div style="border-top:1px solid #f0f0f0; padding-top:12px; margin-top:4px; margin-bottom:12px;">
+              <p style="font-size:0.7rem; font-weight:700; color:#aaa; text-transform:uppercase; letter-spacing:0.05em; margin:0 0 8px;">Workout History (<%= r.history.length %>)</p>
+              <% r.history.slice(0, 3).forEach(function(s) { %>
+                <a href="/workout-history/<%= s.id %>" style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f8f8f8; text-decoration:none; color:inherit;">
+                  <span style="font-size:0.82rem; color:#444;"><%= s.duration_min %> min &bull; <%= s.exercise_count %> exercises</span>
+                  <span class="history-card-date" style="font-size:0.75rem; color:#aaa;" data-date-short="<%= s.session_date instanceof Date ? s.session_date.toISOString() : new Date(s.session_date).toISOString() %>"></span>
+                </a>
+              <% }); %>
+              <% if (r.history.length > 3) { %>
+                <a href="/workout-history" style="font-size:0.78rem; color:#E8A838; text-decoration:none; display:block; margin-top:6px;">View all <%= r.history.length %> sessions →</a>
+              <% } %>
+            </div>
+          <% } %>
+
           <div class="saved-routine-btn-row">
             <a href="/routines/saved/<%= r.id %>/preview" class="btn-start-session saved-routine-start-btn">Start routine</a>
             <a href="/routines/saved/<%= r.id %>/edit" class="btn-edit-routine">Edit</a>
