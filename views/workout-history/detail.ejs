@@ -1,48 +1,62 @@
-<div class="history-container">
-  <div class="history-header">
-    <a href="/workout-history" class="back-btn">
-      <i class="bi bi-arrow-left"></i>
-    </a>
-    <h1 class="history-title"><%= session.title %></h1>
+<div class="settings-container">
+  <div class="settings-header">
+    <a href="/workout-history" class="back-btn"><i class="bi bi-arrow-left"></i></a>
+    <h1 class="settings-title">Workout Summary</h1>
   </div>
 
-  <div class="history-card" style="margin-bottom: 20px;">
-    <div class="history-card-content">
-      <p class="history-card-meta"><%= session.durationMin %> min &bull; <%= session.exerciseCount %> exercises</p>
-      <% if (session.tags.length > 0) { %>
-        <div class="history-tags">
-          <% session.tags.forEach((tag, i) => { %>
-            <span class="history-tag <%= i % 2 === 1 ? 'history-tag--yellow' : '' %>"><%= tag %></span>
-          <% }) %>
-        </div>
-      <% } %>
-      <p class="history-card-date">
-        <span data-date="<%= session.sessionDate.toISOString() %>"></span>
-      </p>
+  <!-- Hero -->
+  <div style="display:flex; flex-direction:column; align-items:center; padding:24px 0 16px;">
+    <div style="width:64px; height:64px; background:#F5A623; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:14px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#000" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
     </div>
-    <div class="history-card-emoji"><%= session.emoji %></div>
+    <h2 style="font-size:1.3rem; font-weight:700; margin:0 0 4px; text-align:center;"><%= session.title %></h2>
+    <p style="color:#888; font-size:0.85rem; margin:0;" data-date="<%= session.sessionDate.toISOString() %>"></p>
   </div>
 
+  <!-- Stats row -->
+  <div style="display:flex; gap:10px; margin-bottom:20px;">
+    <div style="flex:1; background:#fff; border-radius:14px; padding:14px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+      <div style="font-size:1.6rem; font-weight:700; color:#E7B04A;"><%= session.durationMin %></div>
+      <div style="font-size:0.72rem; color:#888; margin-top:2px;">minutes</div>
+    </div>
+    <div style="flex:1; background:#fff; border-radius:14px; padding:14px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+      <div style="font-size:1.6rem; font-weight:700; color:#E7B04A;"><%= session.exerciseCount %></div>
+      <div style="font-size:0.72rem; color:#888; margin-top:2px;">exercises</div>
+    </div>
+    <% if (session.tags && session.tags.length > 0) { %>
+    <div style="flex:1; background:#fff; border-radius:14px; padding:14px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+      <div style="font-size:1.1rem; font-weight:700; color:#E7B04A;"><%= session.emoji || '🏋️' %></div>
+      <div style="font-size:0.72rem; color:#888; margin-top:2px;"><%= session.tags[0] %></div>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- Exercise list -->
   <% if (session.exercises.length === 0) { %>
-    <div class="progress-exercises-card">
-      <p class="progress-no-exercises">No exercise details available for this session.</p>
+    <div style="background:#fff; border-radius:14px; padding:20px; text-align:center; color:#888; font-size:0.9rem; box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+      No exercise details available for this session.
     </div>
   <% } else { %>
-    <div class="progress-exercises-card">
-      <h2 class="progress-exercises-title">Exercises done</h2>
-      <% const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️' }; %>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <% const categoryEmoji = { strengthen: '💪', stretch: '🧘', avoid: '⚠️', stability: '🏃' }; %>
       <% session.exercises.forEach(function(ex) { %>
-        <div class="progress-exercise-item">
-          <span class="progress-exercise-emoji"><%= categoryEmoji[ex.category] || '🏋️' %></span>
-          <div class="progress-exercise-info">
-            <span class="progress-exercise-name"><%= ex.name %></span>
-            <span class="progress-exercise-cat">
-              <%= ex.category %>
-              <% if (ex.sets) { %>&bull; <%= ex.sets %> sets<% } %>
-              <% if (ex.reps) { %>&bull; <%= ex.reps %> reps<% } %>
-              <% if (ex.hold_time_sec && !ex.reps) { %>&bull; <%= ex.hold_time_sec %>s hold<% } %>
-            </span>
+        <div style="background:#fff; border-radius:12px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
+            <span style="font-size:1.1rem; flex-shrink:0;"><%= categoryEmoji[ex.category] || '🏋️' %></span>
+            <div style="min-width:0;">
+              <div style="font-size:0.88rem; font-weight:600; color:#222; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><%= ex.name %></div>
+              <div style="font-size:0.75rem; color:#888; margin-top:2px;">
+                <% const displaySets = ex.sets_completed || ex.sets; %>
+                <% const displayReps = ex.reps_completed || ex.reps; %>
+                <% if (displaySets) { %><%= displaySets %> sets<% } %>
+                <% if (displayReps) { %><% if (displaySets) { %> &bull; <% } %><%= displayReps %> reps<% } %>
+                <% if (ex.hold_time_sec && !displayReps) { %> &bull; <%= ex.hold_time_sec %>s hold<% } %>
+                <% if (ex.weight_used) { %> &bull; <%= ex.weight_used %>kg<% } %>
+                <% if (ex.pain_during != null && ex.pain_during !== '') { %> &bull; pain <%= ex.pain_during %>/10<% } %>
+              </div>
+            </div>
           </div>
+          <span style="font-size:0.7rem; font-weight:600; color:#C87010; background:#FFF0D9; border-radius:999px; padding:3px 8px; flex-shrink:0; text-transform:capitalize; margin-left:8px;"><%= ex.category %></span>
         </div>
       <% }); %>
     </div>
@@ -50,3 +64,12 @@
 </div>
 
 <%- include('../partials/bottomNav') %>
+
+<script>
+  // Format the date label
+  const dateEl = document.querySelector('[data-date]');
+  if (dateEl) {
+    const d = new Date(dateEl.dataset.date);
+    dateEl.textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  }
+</script>

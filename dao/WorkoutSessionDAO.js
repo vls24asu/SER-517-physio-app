@@ -56,7 +56,8 @@ class WorkoutSessionDAO {
     const conn = await this.#connectionManager.getConnection();
     try {
       const [rows] = await conn.execute(
-        `SELECT wse.name, wse.category, wse.sets, wse.reps, wse.hold_time_sec
+        `SELECT wse.name, wse.category, wse.sets, wse.reps, wse.hold_time_sec,
+                wse.sets_completed, wse.reps_completed, wse.weight_used, wse.pain_during_exercise AS pain_during
          FROM Workout_Session_Exercise wse
          WHERE wse.session_id = ?
          ORDER BY wse.sort_order ASC`,

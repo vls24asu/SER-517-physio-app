@@ -20,15 +20,13 @@
   </div>
 
   <!-- Pain Progress Chart -->
-  <% if (logs && logs.length > 0) { %>
-  <div class="checkin-calendar-card" style="margin-top:14px;">
+  <div class="checkin-calendar-card" id="chartCard" style="margin-top:14px; display:none;">
     <p style="font-size:0.75rem; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:0.05em; margin:0 0 4px;">Pain Progress</p>
     <p style="font-size:0.75rem; color:#aaa; margin:0 0 12px;">Pain scale over time (0–10)</p>
     <div style="position:relative; height:140px;">
       <canvas id="painProgressChart"></canvas>
     </div>
   </div>
-  <% } %>
 
 </div>
 
@@ -82,45 +80,7 @@
 
 <%- include('../partials/bottomNav') %>
 
-<% if (logs && logs.length > 0) { %>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-<script>
-(function () {
-  var logsRaw = <%- JSON.stringify(logs.map(function(l){ return { date: l.log_date, scale: l.pain_scale }; }).reverse()) %>;
-  var ctx = document.getElementById('painProgressChart');
-  if (!ctx || logsRaw.length === 0) return;
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: logsRaw.map(function(l) { return l.date; }),
-      datasets: [{
-        data: logsRaw.map(function(l) { return l.scale; }),
-        borderColor: '#E8A838',
-        backgroundColor: 'rgba(232,168,56,0.12)',
-        borderWidth: 2.5,
-        pointBackgroundColor: '#E8A838',
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        fill: true,
-        tension: 0.35
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: function(c) { return c.parsed.y + '/10'; } } }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#888', maxTicksLimit: 7 } },
-        y: { min: 0, max: 10, ticks: { stepSize: 2, font: { size: 10 }, color: '#888' }, grid: { color: 'rgba(0,0,0,0.05)' } }
-      }
-    }
-  });
-})();
-</script>
-<% } %>
 
 <script>
 (function () {
@@ -233,6 +193,7 @@
       if (res.ok) {
         LOG_MAP[selectedDate] = { pain_status: payload.painStatus, pain_scale: payload.painScale, notes: payload.notes };
         renderCalendar();
+        renderChart();
         const msg = document.getElementById('saveMsg');
         msg.textContent = 'Saved!';
         msg.style.color = '#4caf50';
@@ -246,8 +207,52 @@
     }
   });
 
+  // ── Chart ────────────────────────────────────────────────────────────────
+  let painChart = null;
+
+  function renderChart() {
+    const entries = Object.entries(LOG_MAP)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([date, log]) => ({ date, scale: log.pain_scale }));
+
+    const chartCard = document.getElementById('chartCard');
+    if (entries.length === 0) { chartCard.style.display = 'none'; return; }
+    chartCard.style.display = 'block';
+
+    const ctx = document.getElementById('painProgressChart');
+    if (painChart) { painChart.destroy(); }
+    painChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: entries.map(e => e.date),
+        datasets: [{
+          data: entries.map(e => e.scale),
+          borderColor: '#E8A838',
+          backgroundColor: 'rgba(232,168,56,0.12)',
+          borderWidth: 2.5,
+          pointBackgroundColor: '#E8A838',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.35
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: c => c.parsed.y + '/10' } }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#888', maxTicksLimit: 7 } },
+          y: { min: 0, max: 10, ticks: { stepSize: 2, font: { size: 10 }, color: '#888' }, grid: { color: 'rgba(0,0,0,0.05)' } }
+        }
+      }
+    });
+  }
+
   renderCalendar();
-  const todayYMD = toYMD(today.getFullYear(), today.getMonth(), today.getDate());
-  if (LOG_MAP[todayYMD]) openPopup(todayYMD, LOG_MAP[todayYMD]);
+  renderChart();
 })();
 </script>
